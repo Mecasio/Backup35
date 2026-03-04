@@ -16,12 +16,24 @@ import {
   Box,
   IconButton,
   Snackbar,
-  Alert
+  Alert,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Paper,
+  Select,
+  MenuItem,
+  TableContainer,
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 import API_BASE_URL from "../apiConfig";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+
 
 const DepartmentRegistration = () => {
 
@@ -278,72 +290,134 @@ const DepartmentRegistration = () => {
       <br />
 
 
-      <Box display="flex" mb={2}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
+        <Box>
+
+
+          <Typography
+            variant="body1"
+            sx={{ color: subtitleColor }}
+          >
+            Create and manage academic departments
+          </Typography>
+        </Box>
+
         <Button
           variant="contained"
-          sx={{ backgroundColor: "#1967d2", "&:hover": { backgroundColor: "#000000" } }}
-          onClick={() => setOpenModal(true)}
+          sx={{
+
+            textTransform: "none",
+            fontWeight: 600,
+            px: 3,
+            borderRadius: 2,
+            "&:hover": { opacity: 0.9 },
+          }}
+          onClick={() => {
+            setEditMode(false);
+            setDepartment({ dep_name: "", dep_code: "" });
+            setOpenModal(true);
+          }}
         >
-          Add Department
+          + Add Department
         </Button>
       </Box>
+      <br />
+      <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, }}>
+        <Table>
+          <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
+            <TableRow>
+              <TableCell sx={{ color: 'white', textAlign: "Center" }}>Department Management</TableCell>
+            </TableRow>
+          </TableHead>
+        </Table>
+      </TableContainer>
+      <br />
+      <br />
 
       <Grid container spacing={2}>
         {departmentList.map((department) => (
           <Grid item xs={12} sm={6} md={3} key={department.dprtmnt_id}>
             <Card
-              variant="outlined"
+              elevation={0}
               sx={{
-                borderColor: `${borderColor}`,
-                borderWidth: "2px",
-                height: "100%", // allow card to fill the grid height
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                minHeight: 160, // set a consistent card height
+                border: `1px solid ${borderColor}`,
+                borderRadius: 3,
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  boxShadow: 4,
+                  transform: "translateY(-4px)",
+                },
+                height: "100%",
               }}
             >
               <CardContent
                 sx={{
-                  width: "100%",
-                  height: "100%",
                   display: "flex",
                   flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  textAlign: "center",
+                  justifyContent: "space-between",
+                  height: "100%",
                 }}
               >
+                <Box>
+                  <Typography variant="h6" fontWeight={600}>
+                    {department.dprtmnt_name}
+                  </Typography>
 
+                  <Typography variant="subtitle" sx={{ color: subtitleColor }}>
+                    Code: {department.dprtmnt_code}
+                  </Typography>
+                </Box>
 
-                <Typography variant="h6" fontWeight="bold" color="text.primary">
-                  {department.dprtmnt_name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Code: {department.dprtmnt_code}
-                </Typography>
-                <Box mt={2} display="flex" gap={1}>
+                <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
                   <Button
                     variant="contained"
                     size="small"
-                    sx={{ backgroundColor: "green", color: "white", mr: 1 }}
+                    sx={{
+                      backgroundColor: "green",
+                      color: "white",
+                      borderRadius: "5px",
+                      padding: "8px 14px",
+                      width: "100px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "5px",
+                    }}
+
                     onClick={() => handleEdit(department)}
                   >
-                    Edit
+                    <EditIcon fontSize="small" /> Edit
                   </Button>
 
                   <Button
                     variant="contained"
                     size="small"
-                    sx={{ backgroundColor: "#9E0000", color: "white" }}
-                    onClick={() => handleDelete(department.dprtmnt_id)}
+                    sx={{
+                      backgroundColor: "#9E0000",
+                      color: "white",
+                      borderRadius: "5px",
+                      padding: "8px 14px",
+                      width: "100px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "5px",
+                    }}
+                    onClick={() =>
+                      handleDelete(department.dprtmnt_id)
+                    }
                   >
-                    Delete
+                    <DeleteIcon fontSize="small" /> Delete
                   </Button>
                 </Box>
               </CardContent>
-
             </Card>
           </Grid>
         ))}

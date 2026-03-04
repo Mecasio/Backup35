@@ -949,7 +949,7 @@ const RoomRegistration = () => {
       <br />
 
 
-      <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, }}>
+      <TableContainer component={Paper} sx={{ width: '50%', border: `2px solid ${borderColor}`, }}>
         <Table>
           <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
             <TableRow>
@@ -967,7 +967,7 @@ const RoomRegistration = () => {
           sx={{
             p: 3,
             border: `2px solid ${borderColor}`,
-
+            width: "50%"
           }}
         >
 
