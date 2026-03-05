@@ -2618,7 +2618,7 @@ const SuperAdminApplicantDashboard1 = () => {
                                 <Typography mb={1} fontWeight="medium">Present Zip Code</Typography>
                                 <TextField
                                     fullWidth
-
+type="number"
                                     size="small"
                                     name="presentZipCode"
                                     placeholder="Enter your Zip Code"
@@ -3014,6 +3014,7 @@ const SuperAdminApplicantDashboard1 = () => {
                                 <TextField
                                     fullWidth
                                     size="small"
+                                    type="number"
                                     name="permanentZipCode"
                                     placeholder="Enter your Permanent Zip Code"
                                     value={person.permanentZipCode || ""}

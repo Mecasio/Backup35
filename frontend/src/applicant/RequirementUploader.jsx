@@ -384,7 +384,7 @@ const RequirementUploader = () => {
             variant="contained"
             onClick={() => setOpenModal(false)}
             sx={{
-              backgroundColor: mainButtonColor,
+          
               fontWeight: "bold",
               textTransform: "none",
               minWidth: "120px",

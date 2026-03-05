@@ -838,9 +838,9 @@ const StudentDashboard1 = () => {
 
 
             </Box>
-        <hr style={{ border: "1px solid #ccc", width: "100%" }} />
-      <br />
-      <br />
+            <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+            <br />
+            <br />
 
 
 
@@ -1081,11 +1081,11 @@ const StudentDashboard1 = () => {
                             {index < steps.length - 1 && (
                                 <Box
                                     sx={{
-                                         height: "2px",
-                    backgroundColor: mainButtonColor,
-                    flex: 1,
-                    alignSelf: "center",
-                    mx: 2,
+                                        height: "2px",
+                                        backgroundColor: mainButtonColor,
+                                        flex: 1,
+                                        alignSelf: "center",
+                                        mx: 2,
                                     }}
                                 />
                             )}
@@ -1131,7 +1131,7 @@ const StudentDashboard1 = () => {
                                 error={!!errors.campus}
                                 className="mb-4"
                             >
-                                
+
 
                                 <Select
                                     id="campus-select"
@@ -2259,7 +2259,7 @@ const StudentDashboard1 = () => {
                                 <TextField
                                     fullWidth
                                     InputProps={{ readOnly: true }}
-
+                                    type="number"
                                     size="small"
                                     name="presentZipCode"
                                     placeholder="Enter your Zip Code"
@@ -2657,6 +2657,7 @@ const StudentDashboard1 = () => {
                                 <TextField
                                     fullWidth
                                     size="small"
+                                    type="number"
                                     name="permanentZipCode"
                                     placeholder="Enter your Permanent Zip Code"
                                     value={person.permanentZipCode || ""}

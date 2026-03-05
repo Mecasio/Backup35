@@ -227,7 +227,7 @@ const Dashboard1 = (props) => {
     const savedLast = localStorage.getItem("last_name");
     const savedMiddle = localStorage.getItem("middle_name");
     const savedBirth = localStorage.getItem("birthOfDate");
-    const savedAge = localStorage.getItem("age");
+    age: savedBirth ? calculateAge(savedBirth) : savedAge || ""
 
     setPerson(prev => ({
       ...prev,
@@ -236,10 +236,18 @@ const Dashboard1 = (props) => {
       last_name: savedLast || "",
       middle_name: savedMiddle || "",
       birthOfDate: savedBirth || "",
-      age: savedAge || ""
+      age: savedBirth ? calculateAge(savedBirth) : ""
     }));
   }, []);
 
+  useEffect(() => {
+    if (person.birthOfDate) {
+      setPerson(prev => ({
+        ...prev,
+        age: calculateAge(prev.birthOfDate)
+      }));
+    }
+  }, [person.birthOfDate]);
 
   // do not alter
   useEffect(() => {
@@ -1338,6 +1346,7 @@ const Dashboard1 = (props) => {
                   Academic Program
                 </InputLabel>
                 <Select
+                  readOnly
                   labelId="academic-program-label"
                   id="academic-program-select"
                   name="academicProgram"
@@ -2697,13 +2706,12 @@ const Dashboard1 = (props) => {
                   size="small"
                   name="presentZipCode"
                   placeholder="Enter your Zip Code"
+                  type="number"
                   value={person.presentZipCode || ""}
                   onBlur={() => handleUpdate(person)}
                   onChange={handleChange}
                   error={!!errors.presentZipCode}
-                  helperText={
-                    errors.presentZipCode && "This field is required."
-                  }
+                  helperText={errors.presentZipCode && "This field is required."}
                 />
               </Box>
             </Box>
@@ -2980,6 +2988,7 @@ const Dashboard1 = (props) => {
                   fullWidth
                   size="small"
                   name="permanentZipCode"
+                  type="number"
                   placeholder="Enter your Permanent Zip Code"
                   value={person.permanentZipCode || ""}
                   onBlur={() => handleUpdate(person)}

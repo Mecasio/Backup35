@@ -1202,6 +1202,7 @@ const SuperAdminApplicantDashboard2 = () => {
                                                 <TextField
                                                     fullWidth
                                                     size="small"
+                                                     type="number"
                                                     name="father_year_graduated"
                                                     placeholder="Enter Father Year Graduated"
                                                     value={person.father_year_graduated ?? ""}
@@ -1595,6 +1596,7 @@ const SuperAdminApplicantDashboard2 = () => {
                                                 <Typography variant="subtitle2" mb={1}>Mother Year Graduated</Typography>
                                                 <TextField
                                                     fullWidth
+                                                     type="number"
                                                     size="small"
                                                     name="mother_year_graduated"
                                                     placeholder="Enter your Mother Year Graduated"

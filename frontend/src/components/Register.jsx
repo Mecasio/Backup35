@@ -10,6 +10,12 @@ import {
   Alert,
   TextField,
   Modal,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+  Button
 } from "@mui/material";
 import {
   Email as EmailIcon,
@@ -33,7 +39,7 @@ const Register = () => {
   const [subtitleColor, setSubtitleColor] = useState("#555555");
   const [borderColor, setBorderColor] = useState("#000000");
   const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
-
+  const [openReminder, setOpenReminder] = useState(true);
 
   useEffect(() => {
     if (settings) {
@@ -66,6 +72,13 @@ const Register = () => {
     setUserData(prevState => ({ ...prevState, [name]: value }));
   };
 
+  const [currentYear, setCurrentYear] = useState("");
+
+  useEffect(() => {
+    const now = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
+    setCurrentYear(new Date(now).getFullYear());
+  }, []);
+
   const handleClose = (_, reason) => {
     if (reason === 'clickaway') return;
     setSnack(prev => ({ ...prev, open: false }));
@@ -75,40 +88,17 @@ const Register = () => {
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [birthday, setBirthday] = useState("");
-  const [age, setAge] = useState("");
-
-  useEffect(() => {
-    if (birthday) {
-      const manilaNow = new Date(
-        new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" })
-      );
-
-      const birthDate = new Date(birthday);
-      let calculatedAge = manilaNow.getFullYear() - birthDate.getFullYear();
-
-      const monthDiff = manilaNow.getMonth() - birthDate.getMonth();
-
-      if (
-        monthDiff < 0 ||
-        (monthDiff === 0 && manilaNow.getDate() < birthDate.getDate())
-      ) {
-        calculatedAge--;
-      }
-
-      setAge(calculatedAge >= 0 ? calculatedAge : "");
-    } else {
-      setAge("");
-    }
-  }, [birthday]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [academicProgram, setAcademicProgram] = useState("");
 
   const handleRegister = async () => {
     if (isSubmitting) return;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!lastName || !firstName || !middleName || !birthday) {
+    if (!lastName || !firstName || !middleName || !birthday || !academicProgram) {
+
       setSnack({
         open: true,
         message: "Please complete all personal information fields!",
@@ -214,7 +204,7 @@ const Register = () => {
         firstName,
         middleName,
         birthday,
-        age,
+        academicProgram,
         otp,
       });
 
@@ -290,12 +280,13 @@ const Register = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+
           }}
           maxWidth={false}
         >
-          <AnnouncementSlider />
+          <AnnouncementSlider style={{ marginTop: "-350px" }} />
           <div
-            style={{ border: "5px solid black", marginLeft: 100, gap: "250px" }}
+            style={{ border: "5px solid black", marginLeft: -100, marginTop: "-50px" }}
             className="Container"
           >
             <div
@@ -322,7 +313,16 @@ const Register = () => {
               <div className="HeaderBody">
                 <strong style={{
                   color: "white",
-                }}>{settings?.company_name || "Company Name"}</strong>
+                }}>{(settings?.company_name || "Company Name")
+                  .split(" ")
+                  .reduce((acc, word, index) => {
+                    if (index % 4 === 0 && index !== 0) {
+                      acc.push(<br key={`br-${index}`} />);
+                    }
+                    acc.push(word + " ");
+                    return acc;
+                  }, [])}
+                </strong>
                 <p>Student Information System</p>
               </div>
             </div>
@@ -428,28 +428,25 @@ const Register = () => {
               </div>
 
               <div className="TextField" style={{ position: "relative" }}>
-                <label>Age</label>
-                <input
-                  type="text"
-                  value={age}
-                  readOnly
-                  placeholder="Auto-computed age"
+                <label>Academic Program</label>
+                <select
+                  value={academicProgram}
+                  onChange={(e) => setAcademicProgram(e.target.value)}
                   className="border"
                   style={{
-                    paddingLeft: "2.5rem",
-                    backgroundColor: "#f5f5f5",
+                    paddingLeft: "1rem",
+                    height: "45px",
                     border: `2px solid ${borderColor}`,
+                    width: "100%",
                   }}
-                />
-                <CakeIcon
-                  style={{
-                    position: "absolute",
-                    top: "2.5rem",
-                    left: "0.7rem",
-                    color: "rgba(0,0,0,0.4)",
-                  }}
-                />
+                >
+                  <option value="">Select Program</option>
+                  <option value="0">Undergraduate</option>
+                  <option value="1">Graduate</option>
+                  <option value="2">Techvoc</option>
+                </select>
               </div>
+
 
               <div className="TextField" style={{ position: "relative" }}>
                 <label htmlFor="email">Email Address</label>
@@ -514,7 +511,7 @@ const Register = () => {
                 </button>
               </div>
 
-              <div className="TextField" style={{ position: "relative",}}>
+              <div className="TextField" style={{ position: "relative", }}>
                 <label htmlFor="confirmPassword">Confirm Password</label>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -601,7 +598,9 @@ const Register = () => {
 
             <div className="Footer">
               <div className="FooterText">
-                &copy; 2025 {settings?.company_name || "EARIST"} Student Information System. All rights reserved.
+                &copy; {currentYear} {settings?.company_name || "EARIST"} <br />
+                Student Information System. <br />
+                All rights reserved.
               </div>
             </div>
           </div>
@@ -711,6 +710,59 @@ const Register = () => {
             {snack.message}
           </Alert>
         </Snackbar>
+
+        <Dialog
+          open={openReminder}
+          onClose={() => setOpenReminder(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle sx={{ fontWeight: "bold", textAlign: "center" }}>
+            ⚠️ Important Reminder for Applicants
+          </DialogTitle>
+
+          <DialogContent>
+            <Typography sx={{ mt: 1, textAlign: "justify", fontSize: "16px" }}>
+              Please make sure that all information you provide in your application is
+              correct and complete before submitting.
+            </Typography>
+
+            <Typography sx={{ mt: 2, textAlign: "justify", fontSize: "16px" }}>
+              Creating multiple accounts or submitting more than one application is
+              strictly not allowed. Each applicant should only register and apply once.
+            </Typography>
+
+            <Typography sx={{ mt: 2, textAlign: "justify", fontSize: "16px" }}>
+              If multiple accounts or duplicate applications are detected, your
+              application may be rejected or automatically disqualified from the
+              admission process.
+            </Typography>
+
+            <Typography sx={{ mt: 2, textAlign: "justify", fontSize: "16px" }}>
+              Please wait for the official announcement regarding the results of the
+              application screening.
+            </Typography>
+
+            <Typography sx={{ mt: 2, textAlign: "center", fontWeight: "bold" }}>
+              Thank you for your cooperation.
+            </Typography>
+          </DialogContent>
+
+          <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+            <Button
+              variant="contained"
+              onClick={() => setOpenReminder(false)}
+              sx={{
+              
+                fontWeight: "bold",
+                textTransform: "none",
+                minWidth: "120px",
+              }}
+            >
+              I Understand
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </>
   );

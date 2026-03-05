@@ -255,8 +255,9 @@ const ApplicantForgotPassword = () => {
           {/* Footer */}
           <div className="Footer">
             <div className="FooterText">
-              © {currentYear} {settings?.company_name || "EARIST"} Student Information System. All
-              rights reserved.
+              © {currentYear} {settings?.company_name || ""} <br/>
+              Student Information System. <br/>
+              Allrights reserved.
             </div>
           </div>
         </div>

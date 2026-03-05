@@ -333,18 +333,18 @@ const RequirementsForm = () => {
       <br />
       <br />
 
-      <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, }}>
+      <TableContainer component={Paper} sx={{ width: '50%', border: `2px solid ${borderColor}`, }}>
         <Table>
           <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
             <TableRow>
-              <TableCell sx={{ color: 'white', textAlign: "Center" }}>Insert Requirements</TableCell>
+              <TableCell sx={{ color: 'white', textAlign: "Center" }}>Create Requirements</TableCell>
             </TableRow>
           </TableHead>
         </Table>
       </TableContainer>
 
       <div
-        style={{ border: `2px solid ${borderColor}`, }}
+        style={{ border: `2px solid ${borderColor}`, width: "50%"}}
         className=" bg-gray-50 p-6 shadow-sm"
       >
         <h3 style={{ color: subtitleColor, }} className="text-xl font-semibold mb-4">

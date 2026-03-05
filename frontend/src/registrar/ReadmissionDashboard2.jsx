@@ -1273,7 +1273,7 @@ const ReadmissionDashboard2 = () => {
                                                 <Typography variant="subtitle2" mb={1}>Father Year Graduated</Typography>
                                                 <TextField
                                                     InputProps={{ readOnly: true }}
-
+ type="number"
                                                     fullWidth
                                                     size="small"
                                                     name="father_year_graduated"
@@ -1637,7 +1637,7 @@ const ReadmissionDashboard2 = () => {
                                                 <Typography variant="subtitle2" mb={1}>Mother Year Graduated</Typography>
                                                 <TextField
                                                     InputProps={{ readOnly: true }}
-
+ type="number"
                                                     fullWidth
                                                     size="small"
                                                     name="mother_year_graduated"

@@ -18,6 +18,7 @@ import {
     Alert,
     TableContainer,
     MenuItem,
+    IconButton,
     FormControl,
     Select,
     InputLabel
@@ -166,7 +167,8 @@ const AnnouncementPanel = () => {
                 setSnackbar({ open: true, message: "Announcement created!", severity: "success" });
             }
 
-            setForm({ title: "", content: "", valid_days: "", target_role: "" });
+           setForm({ title: "", content: "", valid_days: "7", target_role: "applicant" });
+
             setEditingId(null);
             setImage(null);
             fetchAnnouncements();

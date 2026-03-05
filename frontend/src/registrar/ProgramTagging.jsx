@@ -496,6 +496,45 @@ const ProgramTagging = () => {
   const [deleteId, setDeleteId] = useState(null);
   const [programToDelete, setProgramToDelete] = useState(null);
 
+  const [openDeleteAllDialog, setOpenDeleteAllDialog] = useState(false);
+
+  const [deleteAllFilter, setDeleteAllFilter] = useState(null);
+
+  const handleDeleteAllTagged = async () => {
+    if (!deleteAllFilter) return;
+
+    try {
+      await axios.delete(`${API_BASE_URL}/program_tagging/delete_all`, {
+        data: deleteAllFilter, // send filter as body
+      });
+
+      // Remove from frontend state immediately
+      setTaggedPrograms(prev =>
+        prev.filter(p =>
+          !(
+            Number(p.curriculum_id) === Number(deleteAllFilter.curriculum_id) &&
+            Number(p.year_level_id) === Number(deleteAllFilter.year_level_id) &&
+            Number(p.semester_id) === Number(deleteAllFilter.semester_id)
+          )
+        )
+      );
+
+      setSnackbar({
+        open: true,
+        message: "All matching program tags deleted successfully!",
+        severity: "success",
+      });
+
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: "Error deleting all tagged programs.",
+        severity: "error",
+      });
+    }
+  };
+
+
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/program_tagging/${id}`);
@@ -728,7 +767,12 @@ const ProgramTagging = () => {
                   <option key={curriculum.curriculum_id} value={curriculum.curriculum_id}>
                     {formatSchoolYear(curriculum.year_description)}:
                     {` (${curriculum.program_code}) ${curriculum.program_description}`}
-                    {curriculum.major ? ` (${curriculum.major})` : ""}
+                    {curriculum.major ? ` (${curriculum.major})` : ""} {`${curriculum.components} (${Number(curriculum.components) === 1
+                      ? "Manila Campus"
+                      : Number(curriculum.components) === 2
+                        ? "Cavite Campus"
+                        : "—"
+                      })`}
                   </option>
                 ))}
             </select>
@@ -1412,7 +1456,39 @@ const ProgramTagging = () => {
         </DialogActions>
       </Dialog>
 
+      <Dialog
+        open={openDeleteAllDialog}
+        onClose={() => setOpenDeleteAllDialog(false)}
+      >
+        <DialogTitle>Confirm Delete ALL Program Tags</DialogTitle>
 
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete ALL tagged courses under this:
+            <br /><br />
+            <b>Curriculum ID:</b> {deleteAllFilter?.curriculum_id} <br />
+            <b>Year Level:</b> {deleteAllFilter?.year_level_id} <br />
+            <b>Semester:</b> {deleteAllFilter?.semester_id}
+          </Typography>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenDeleteAllDialog(false)}>
+            Cancel
+          </Button>
+
+          <Button
+            color="error"
+            variant="contained"
+            onClick={() => {
+              handleDeleteAllTagged();
+              setOpenDeleteAllDialog(false);
+            }}
+          >
+            Yes, Delete All
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Snackbar */}
       <Snackbar

@@ -2852,7 +2852,7 @@ const ReadmissionDashboard1 = () => {
                 <TextField
                   fullWidth
                   InputProps={{ readOnly: true }}
-
+type="number"
                   size="small"
                   name="presentZipCode"
                   placeholder="Enter your Zip Code"
@@ -3251,6 +3251,7 @@ const ReadmissionDashboard1 = () => {
                 <TextField
                   fullWidth
                   size="small"
+                  type="number"
                   name="permanentZipCode"
                   placeholder="Enter your Permanent Zip Code"
                   value={person.permanentZipCode || ""}

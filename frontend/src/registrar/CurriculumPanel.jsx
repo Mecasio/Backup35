@@ -75,6 +75,8 @@ const CurriculumPanel = () => {
   const [hasAccess, setHasAccess] = useState(null);
   const [loading, setLoading] = useState(false);
 
+
+
   const pageId = 18;
 
   const [employeeID, setEmployeeID] = useState("");
@@ -307,6 +309,17 @@ const CurriculumPanel = () => {
   };
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1); // reset to first page when searching
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const formatAcademicYear = (year) => {
     if (!year) return "";
@@ -317,7 +330,38 @@ const CurriculumPanel = () => {
     return `${startYear}-${startYear + 1}`;
   };
 
+  const formatSchoolYear = (yearDesc) => {
+    if (!yearDesc) return "";
+    const startYear = Number(yearDesc);
+    if (isNaN(startYear)) return yearDesc; // safe fallback
+    return `${startYear} - ${startYear + 1}`;
+  };
 
+
+  const filteredProgramList = programList.filter((program) => {
+    if (!searchQuery.trim()) return true;
+
+    const search = searchQuery.toLowerCase();
+
+    const schoolYear = formatSchoolYear(program.year_description).toLowerCase();
+    const code = (program.program_code || "").toLowerCase();
+    const description = (program.program_description || "").toLowerCase();
+    const major = (program.major || "").toLowerCase();
+    const campus =
+      Number(program.components) === 1
+        ? "manila campus"
+        : Number(program.components) === 2
+          ? "cavite campus"
+          : "";
+
+    return (
+      schoolYear.includes(search) ||
+      code.includes(search) ||
+      description.includes(search) ||
+      major.includes(search) ||
+      campus.includes(search)
+    );
+  });
 
   const filteredCurriculumList = curriculumList.filter((item) => {
     const words = searchQuery.trim().toLowerCase().split(" ").filter(Boolean);
@@ -333,6 +377,8 @@ const CurriculumPanel = () => {
   });
 
 
+
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20); // adjust as needed
@@ -346,12 +392,6 @@ const CurriculumPanel = () => {
     currentPage * itemsPerPage
   );
 
-  const formatSchoolYear = (yearDesc) => {
-    if (!yearDesc) return "";
-    const startYear = Number(yearDesc);
-    if (isNaN(startYear)) return yearDesc; // safe fallback
-    return `${startYear} - ${startYear + 1}`;
-  };
 
   const buttonStyles = {
     minWidth: 70,
@@ -813,6 +853,34 @@ const CurriculumPanel = () => {
             </div>
 
             <div style={{ marginBottom: "15px" }}>
+              <label style={{ fontWeight: "bold" }}>Search Program:</label>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                  padding: "5px 8px",
+                  backgroundColor: "#fff",
+                }}
+              >
+                <span style={{ marginRight: "6px", color: "gray" }}></span>
+                <input
+                  type="text"
+                  placeholder="Search Year / Code / Description / Major / Campus"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    border: "none",
+                    outline: "none",
+                    width: "100%",
+                    fontSize: "14px",
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
               <label style={{ fontWeight: "bold" }}>Program:</label>
               <select
                 name="program_id"
@@ -825,8 +893,9 @@ const CurriculumPanel = () => {
                   borderRadius: "4px",
                 }}
               >
+
                 <option value="">Choose Program</option>
-                {programList.map((program) => (
+                {filteredProgramList.map((program) => (
                   <option key={program.program_id} value={program.program_id}>
                     {formatSchoolYear(program.year_description)}:{" "}
                     {`(${program.program_code}): ${program.program_description}${program.major ? ` (${program.major})` : ""

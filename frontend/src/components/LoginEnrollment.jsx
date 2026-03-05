@@ -316,6 +316,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            marginTop: "-100px"
           }}
           maxWidth={false}
         >
@@ -337,7 +338,16 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
               <div className="HeaderBody">
                 <strong style={{
                   color: "white",
-                }}>{settings?.company_name || "Company Name"}</strong>
+                }}>{(settings?.company_name || "Company Name")
+                  .split(" ")
+                  .reduce((acc, word, index) => {
+                    if (index % 4 === 0 && index !== 0) {
+                      acc.push(<br key={`br-${index}`} />);
+                    }
+                    acc.push(word + " ");
+                    return acc;
+                  }, [])}
+                </strong>
                 <p>Student Information System</p>
               </div>
             </div>
@@ -515,8 +525,9 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
 
             <div className="Footer">
               <div className="FooterText">
-                &copy; {currentYear} {settings?.company_name || "EARIST"} Student Information
-                System. All rights reserved.
+                &copy; {currentYear} {settings?.company_name || "EARIST"} <br/>
+                Student Information System. <br/>
+                All rights reserved.
               </div>
             </div>
           </div>

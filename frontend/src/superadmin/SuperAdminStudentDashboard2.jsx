@@ -469,7 +469,7 @@ const SuperAdminStudentDashboard2 = () => {
 
     // Put this at the very bottom before the return 
     if (loading || hasAccess === null) {
-       return <LoadingOverlay open={loading} message="Loading..." />;
+        return <LoadingOverlay open={loading} message="Loading..." />;
     }
 
     if (!hasAccess) {
@@ -484,7 +484,7 @@ const SuperAdminStudentDashboard2 = () => {
 
     // dot not alter
     return (
-           <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
+        <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
             {showPrintView && (
                 <div ref={divToPrintRef} style={{ display: "block" }}>
                     <ExamPermit personId={userID} />   {/* ✅ pass the searched person_id */}
@@ -518,8 +518,8 @@ const SuperAdminStudentDashboard2 = () => {
             </Box>
 
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
-      <br />
-      <br />
+            <br />
+            <br />
 
 
 
@@ -787,11 +787,11 @@ const SuperAdminStudentDashboard2 = () => {
                             {index < steps.length - 1 && (
                                 <Box
                                     sx={{
-                                           height: "2px",
-                    backgroundColor: mainButtonColor,
-                    flex: 1,
-                    alignSelf: "center",
-                    mx: 2,
+                                        height: "2px",
+                                        backgroundColor: mainButtonColor,
+                                        flex: 1,
+                                        alignSelf: "center",
+                                        mx: 2,
                                     }}
                                 />
                             )}
@@ -1103,6 +1103,7 @@ const SuperAdminStudentDashboard2 = () => {
                                                     fullWidth
                                                     size="small"
                                                     name="father_year_graduated"
+                                                    type="number"
                                                     placeholder="Enter Father Year Graduated"
                                                     value={person.father_year_graduated ?? ""}
                                                     onChange={handleChange}
@@ -1495,6 +1496,7 @@ const SuperAdminStudentDashboard2 = () => {
                                                 <TextField
                                                     fullWidth
                                                     size="small"
+                                                    type="number"
                                                     name="mother_year_graduated"
                                                     placeholder="Enter your Mother Year Graduated"
                                                     value={person.mother_year_graduated ?? ""}

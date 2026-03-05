@@ -1004,6 +1004,7 @@ const StudentDashboard2 = () => {
                                                 <TextField
                                                     fullWidth
                                                     size="small"
+                                                 type="number"
                                                     name="father_year_graduated"
                                                     placeholder="Enter Father Year Graduated"
                                                     value={person.father_year_graduated ?? ""}
@@ -1403,6 +1404,7 @@ const StudentDashboard2 = () => {
                                                 <TextField
                                                     fullWidth
                                                     size="small"
+                                                     type="number"
                                                     name="mother_year_graduated"
                                                     placeholder="Enter your Mother Year Graduated"
                                                     value={person.mother_year_graduated ?? ""}

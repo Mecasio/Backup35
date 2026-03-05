@@ -238,7 +238,7 @@ const DepartmentSection = () => {
 
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 50; // number of rows per page
+  const itemsPerPage = 20; // number of rows per page
 
 
   // total pages based on filteredDepartmentSections
@@ -248,6 +248,9 @@ const DepartmentSection = () => {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentDepartmentSections = filteredDepartmentSections.slice(indexOfFirstItem, indexOfLastItem);
+
+
+  const totalFilteredDepartmentSections = filteredDepartmentSections.length;
 
   // reset page when search changes
   useEffect(() => {
@@ -317,146 +320,305 @@ const DepartmentSection = () => {
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
 
       <br />
+      <br />
 
-      <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, mb: "40px" }}>
-        <Table>
-          <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
+
+
+      <TableContainer component={Paper} sx={{ width: '100%', }}>
+        <Table size="small">
+          <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
             <TableRow>
-              <TableCell sx={{ color: 'white', textAlign: "Center" }}>Department Section Panel</TableCell>
+              <TableCell colSpan={10} sx={{ border: `2px solid ${borderColor}`, py: 0.5, backgroundColor: settings?.header_color || "#1976d2", color: "white" }}>
+                <Box
+                  display="flex"
+                  justifyContent="space-between" // Left & right sides
+                  alignItems="center"
+                  flexWrap="wrap"
+                  gap={1}
+                >
+
+                  <Typography fontSize="14px" fontWeight="bold" color="white">
+                    Total Department Sections: {totalFilteredDepartmentSections}
+                  </Typography>
+                  <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
+
+                    <Button
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        minWidth: 80,
+                        color: "white",
+                        borderColor: "white",
+                        backgroundColor: "transparent",
+                        '&:hover': {
+                          borderColor: 'white',
+                          backgroundColor: 'rgba(255,255,255,0.1)',
+                        },
+                        '&.Mui-disabled': {
+                          color: "white",
+                          borderColor: "white",
+                          backgroundColor: "transparent",
+                          opacity: 1,
+                        }
+                      }}
+                    >
+                      First
+                    </Button>
+
+                    <Button
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        minWidth: 80,
+                        color: "white",
+                        borderColor: "white",
+                        backgroundColor: "transparent",
+                        '&:hover': {
+                          borderColor: 'white',
+                          backgroundColor: 'rgba(255,255,255,0.1)',
+                        },
+                        '&.Mui-disabled': {
+                          color: "white",
+                          borderColor: "white",
+                          backgroundColor: "transparent",
+                          opacity: 1,
+                        }
+                      }}
+                    >
+                      Prev
+                    </Button>
+
+
+                    {/* Page Dropdown */}
+                    <FormControl size="small" sx={{ minWidth: 80 }}>
+                      <Select
+                        value={currentPage}
+                        onChange={(e) => setCurrentPage(Number(e.target.value))}
+                        displayEmpty
+                        sx={{
+                          fontSize: '12px',
+                          height: 36,
+                          color: 'white',
+                          border: '1px solid white',
+                          backgroundColor: 'transparent',
+                          '.MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'white',
+                          },
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'white',
+                          },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'white',
+                          },
+                          '& svg': {
+                            color: 'white', // dropdown arrow icon color
+                          }
+                        }}
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              maxHeight: 200,
+                              backgroundColor: '#fff', // dropdown background
+                            }
+                          }
+                        }}
+                      >
+                        {Array.from({ length: totalPages }, (_, i) => (
+                          <MenuItem key={i + 1} value={i + 1}>
+                            Page {i + 1}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <Typography fontSize="11px" color="white">
+                      of {totalPages} page{totalPages > 1 ? 's' : ''}
+                    </Typography>
+
+
+                    {/* Next & Last */}
+                    <Button
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        minWidth: 80,
+                        color: "white",
+                        borderColor: "white",
+                        backgroundColor: "transparent",
+                        '&:hover': {
+                          borderColor: 'white',
+                          backgroundColor: 'rgba(255,255,255,0.1)',
+                        },
+                        '&.Mui-disabled': {
+                          color: "white",
+                          borderColor: "white",
+                          backgroundColor: "transparent",
+                          opacity: 1,
+                        }
+                      }}
+                    >
+                      Next
+                    </Button>
+
+                    <Button
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        minWidth: 80,
+                        color: "white",
+                        borderColor: "white",
+                        backgroundColor: "transparent",
+                        '&:hover': {
+                          borderColor: 'white',
+                          backgroundColor: 'rgba(255,255,255,0.1)',
+                        },
+                        '&.Mui-disabled': {
+                          color: "white",
+                          borderColor: "white",
+                          backgroundColor: "transparent",
+                          opacity: 1,
+                        }
+                      }}
+                    >
+                      Last
+                    </Button>
+
+
+                  </Box>
+                </Box>
+              </TableCell>
             </TableRow>
           </TableHead>
         </Table>
       </TableContainer>
 
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          gap: 4,
-          mt: 4,
-        }}
-      >
-        {/* Form Section */}
-        <Box
-          sx={{
-            flex: 1,        // <-- make it take more space
-            p: 3,
-
-            boxShadow: 2,
-            border: `2px solid ${borderColor}`,
-            bgcolor: 'white',
-            minWidth: 300,  // ensures it doesn’t shrink too much
+      <Box sx={{ overflowY: 'auto', maxHeight: 750 }}>
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            bborder: `2px solid ${borderColor}`, // outer border
           }}
         >
-          <Typography variant="h6" gutterBottom textAlign="center" style={{ color: subtitleColor, fontWeight: "bold" }} >
-            Department Section Assignment
-          </Typography>
-          <label style={{ fontWeight: 'bold', marginBottom: 4 }} htmlFor="curriculum_id">
-            Curriculum:
-          </label>
-          <FormControl fullWidth sx={{ mb: 3 }} variant="outlined">
-            <InputLabel id="curriculum-label">Curriculum</InputLabel>
-            <Select
-              labelId="curriculum-label"
-              name="curriculum_id"
-              value={dprtmntSection.curriculum_id}
-              onChange={handleChange}
-              label="Curriculum"
-            >
-              <MenuItem value="">Select Curriculum</MenuItem>
-              {curriculumList.map((curr) => (
-                <MenuItem key={`curr-${curr.curriculum_id}`} value={curr.curriculum_id}>
-                  {formatSchoolYear(curr.year_description)}:{" "}
-                  {`(${curr.program_code}): ${curr.program_description}${curr.major ? ` (${curr.major})` : ""
-                    } (${Number(curr.components) === 1
-                      ? "Manila Campus"
-                      : Number(curr.components) === 2
-                        ? "Cavite Campus"
-                        : "—"
-                    })`}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <label style={{ fontWeight: 'bold', marginBottom: 4 }} htmlFor="section_id">
-            Search:
-          </label>
+          <thead style={{ backgroundColor: "#f5f5f5" }}>
+            <tr>
+              <th
+                style={{
+                  border: `2px solid ${borderColor}`,
+                  padding: "8px",
 
-          {/* Search input for dropdown */}
-          <input
-            type="text"
-            placeholder="Search section..."
-            value={sectionSearch}
-            onChange={(e) => setSectionSearch(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "8px",
-              marginBottom: "8px",
-              borderRadius: "4px",
-              border: "1px solid #ccc",
-            }}
-          />
-          <label style={{ fontWeight: 'bold', marginBottom: 4 }} htmlFor="section_id">
-            Section:
-          </label>
+                  textAlign: "center",
+                  color: "#000",
+                }}
+              >
+                ID
+              </th>
+              <th
+                style={{
+                  border: `2px solid ${borderColor}`,
+                  padding: "8px",
 
-          <FormControl fullWidth sx={{ mb: 3 }} variant="outlined">
-            <InputLabel id="section-label">Section</InputLabel>
-            <Select
-              labelId="section-label"
-              name="section_id"
-              value={dprtmntSection.section_id}
-              onChange={handleChange}
-              label="Section"
-            >
-              <MenuItem value="">Select Section</MenuItem>
-              {filteredSectionsList.map((section) => (
-                <MenuItem key={section.id} value={section.id}>
-                  {section.description}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+                  textAlign: "center",
+                  color: "#000",
+                }}
+              >
+                Curriculum Name
+              </th>
+              <th
+                style={{
+                  border: `2px solid ${borderColor}`,
+                  padding: "8px",
 
+                  textAlign: "center",
+                  color: "#000",
+                }}
+              >
+                Section Description
+              </th>
+              <th
+                style={{
+                  border: `2px solid ${borderColor}`,
+                  padding: "8px",
 
+                  textAlign: "center",
+                  color: "#000",
+                }}
+              >
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentDepartmentSections.map((section, index) => (
 
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={handleAddDepartmentSection}
-            sx={{ bgcolor: '#1967d2', ':hover': { bgcolor: '#000000' } }}
-          >
-            Insert
-          </Button>
-        </Box>
+              <tr key={`dept-${section.ds_id || section.id || index}`}>
+                <td
+                  style={{
+                    border: `2px solid ${borderColor}`,
+                    padding: "8px",
+                    textAlign: "center"
+                  }}
+                >
+                  {index + 1}
+                </td>
+                <td
+                  style={{
+                    border: `2px solid ${borderColor}`,
+                    padding: "8px",
 
+                  }}
+                >
+                  {section.year_description} - ({section.program_code}) {section.program_description} {section.major}
 
-        {/* Display Section */}
-        <Box
-          sx={{
-            flex: 2,        // <-- smaller
-            p: 3,
+                </td>
+                <td
+                  style={{
+                    border: `2px solid ${borderColor}`,
+                    padding: "8px",
+                    textAlign: "center",
+                  }}
+                >
+                  {section.section_description}
+                </td>
+                <td
+                  style={{
+                    border: `2px solid ${borderColor}`,
+                    padding: "8px",
+                    textAlign: "center",
+                  }}
+                >
+                  {section.dsstat === 0 ? "Inactive" : "Active"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <TableContainer component={Paper} sx={{ width: '100%', }}>
+          <Table size="small">
+            <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
+              <TableRow>
+                <TableCell colSpan={10} sx={{ border: `2px solid ${borderColor}`, py: 0.5, backgroundColor: settings?.header_color || "#1976d2", color: "white" }}>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between" // Left & right sides
+                    alignItems="center"
+                    flexWrap="wrap"
+                    gap={1}
+                  >
 
-            boxShadow: 2,
-            bgcolor: 'white',
-            border: `2px solid ${borderColor}`,
-            overflowY: 'auto',
-            maxHeight: 900,
-            minWidth: 700,
-          }}
-        >
-          <TableContainer component={Paper} sx={{ width: '100%', }}>
-            <Table size="small">
-              <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
-                <TableRow>
-                  <TableCell colSpan={10} sx={{ border: `2px solid ${borderColor}`, py: 0.5, backgroundColor: settings?.header_color || "#1976d2", color: "white" }}>
-                    <Box
-                      display="flex"
-                      justifyContent="flex-end"
-                      alignItems="center"
-                      gap={1}
-                      flexWrap="wrap"
-                    >
+                    <Typography fontSize="14px" fontWeight="bold" color="white">
+                      Total Department Sections: {totalFilteredDepartmentSections}
+                    </Typography>
+                    <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
+
                       <Button
                         onClick={() => setCurrentPage(1)}
                         disabled={currentPage === 1}
@@ -606,135 +768,146 @@ const DepartmentSection = () => {
                         Last
                       </Button>
 
+
                     </Box>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-            </Table>
-          </TableContainer>
-          <Box sx={{ overflowY: 'auto', maxHeight: 750 }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                bborder: `2px solid ${borderColor}`, // outer border
-              }}
-            >
-              <thead style={{ backgroundColor: "#f5f5f5" }}>
-                <tr>
-                  <th
-                    style={{
-                      border: `2px solid ${borderColor}`,
-                      padding: "8px",
-
-                      textAlign: "center",
-                      color: "#000",
-                    }}
-                  >
-                    ID
-                  </th>
-                  <th
-                    style={{
-                      border: `2px solid ${borderColor}`,
-                      padding: "8px",
-
-                      textAlign: "center",
-                      color: "#000",
-                    }}
-                  >
-                    Curriculum Name
-                  </th>
-                  <th
-                    style={{
-                      border: `2px solid ${borderColor}`,
-                      padding: "8px",
-
-                      textAlign: "center",
-                      color: "#000",
-                    }}
-                  >
-                    Section Description
-                  </th>
-                  <th
-                    style={{
-                      border: `2px solid ${borderColor}`,
-                      padding: "8px",
-
-                      textAlign: "center",
-                      color: "#000",
-                    }}
-                  >
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentDepartmentSections.map((section, index) => (
-
-                  <tr key={`dept-${section.ds_id || section.id || index}`}>
-                    <td
-                      style={{
-                        border: `2px solid ${borderColor}`,
-                        padding: "8px",
-                        textAlign: "center"
-                      }}
-                    >
-                      {index + 1}
-                    </td>
-                    <td
-                      style={{
-                        border: `2px solid ${borderColor}`,
-                        padding: "8px",
-
-                      }}
-                    >
-                      {section.year_description} - ({section.program_code}) {section.program_description} {section.major}
-
-                    </td>
-                    <td
-                      style={{
-                        border: `2px solid ${borderColor}`,
-                        padding: "8px",
-                        textAlign: "center",
-                      }}
-                    >
-                      {section.section_description}
-                    </td>
-                    <td
-                      style={{
-                        border: `2px solid ${borderColor}`,
-                        padding: "8px",
-                        textAlign: "center",
-                      }}
-                    >
-                      {section.dsstat === 0 ? "Inactive" : "Active"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+          </Table>
+        </TableContainer>
 
 
-            <Snackbar
-              open={snackbar.open}
-              autoHideDuration={3000}
-              onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
-              anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            >
-              <Alert
-                onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
-                severity={snackbar.severity}
-                sx={{ width: "100%" }}
-              >
-                {snackbar.message}
-              </Alert>
-            </Snackbar>
 
-
-          </Box>
-        </Box>
       </Box>
+
+      <br />
+      <br />
+
+
+      <TableContainer component={Paper} sx={{ width: '50%', border: `2px solid ${borderColor}`, }}>
+        <Table>
+          <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
+            <TableRow>
+              <TableCell sx={{ color: 'white', textAlign: "Center" }}>Create Section Panel</TableCell>
+            </TableRow>
+          </TableHead>
+        </Table>
+      </TableContainer>
+
+      {/* Form Section */}
+      <Box
+        sx={{
+          flex: 1,        // <-- make it take more space
+          p: 3,
+          width: "50%",
+          boxShadow: 2,
+          border: `2px solid ${borderColor}`,
+          bgcolor: 'white',
+          minWidth: 300,  // ensures it doesn’t shrink too much
+        }}
+      >
+
+        <label style={{ fontWeight: 'bold', marginBottom: 4 }} htmlFor="curriculum_id">
+          Curriculum:
+        </label>
+        <FormControl fullWidth sx={{ mb: 3 }} variant="outlined">
+          <InputLabel id="curriculum-label">Curriculum</InputLabel>
+          <Select
+            labelId="curriculum-label"
+            name="curriculum_id"
+            value={dprtmntSection.curriculum_id}
+            onChange={handleChange}
+            label="Curriculum"
+          >
+            <MenuItem value="">Select Curriculum</MenuItem>
+            {curriculumList.map((curr) => (
+              <MenuItem key={`curr-${curr.curriculum_id}`} value={curr.curriculum_id}>
+                {formatSchoolYear(curr.year_description)}:{" "}
+                {`(${curr.program_code}): ${curr.program_description}${curr.major ? ` (${curr.major})` : ""
+                  } (${Number(curr.components) === 1
+                    ? "Manila Campus"
+                    : Number(curr.components) === 2
+                      ? "Cavite Campus"
+                      : "—"
+                  })`}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <label style={{ fontWeight: 'bold', marginBottom: 4 }} htmlFor="section_id">
+          Search:
+        </label>
+
+        {/* Search input for dropdown */}
+        <input
+          type="text"
+          placeholder="Search section..."
+          value={sectionSearch}
+          onChange={(e) => setSectionSearch(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "8px",
+            marginBottom: "8px",
+            borderRadius: "4px",
+            border: "1px solid #ccc",
+          }}
+        />
+        <label style={{ fontWeight: 'bold', marginBottom: 4 }} htmlFor="section_id">
+          Section:
+        </label>
+
+        <FormControl fullWidth sx={{ mb: 3 }} variant="outlined">
+          <InputLabel id="section-label">Section</InputLabel>
+          <Select
+            labelId="section-label"
+            name="section_id"
+            value={dprtmntSection.section_id}
+            onChange={handleChange}
+            label="Section"
+          >
+            <MenuItem value="">Select Section</MenuItem>
+            {filteredSectionsList.map((section) => (
+              <MenuItem key={section.id} value={section.id}>
+                {section.description}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+
+
+        <Button
+          variant="contained"
+          fullWidth
+          onClick={handleAddDepartmentSection}
+          sx={{ bgcolor: '#1967d2', ':hover': { bgcolor: '#000000' } }}
+        >
+          Insert
+        </Button>
+      </Box>
+
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+
+
+
     </Box>
+
   );
 };
 

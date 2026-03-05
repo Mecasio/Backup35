@@ -1603,7 +1603,7 @@ const AdminDashboard1 = () => {
                 error={!!errors.campus}
                 className="mb-4"
               >
-                
+
 
                 <Select
                   id="campus-select"
@@ -2780,7 +2780,7 @@ const AdminDashboard1 = () => {
                 <TextField
                   fullWidth
                   InputProps={{ readOnly: true }}
-
+                  type="number"
                   size="small"
                   name="presentZipCode"
                   placeholder="Enter your Zip Code"
@@ -3179,6 +3179,7 @@ const AdminDashboard1 = () => {
                 <TextField
                   fullWidth
                   size="small"
+                  type="number"
                   name="permanentZipCode"
                   placeholder="Enter your Permanent Zip Code"
                   value={person.permanentZipCode || ""}

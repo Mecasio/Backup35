@@ -241,7 +241,9 @@ const RegistrarForgotPassword = () => {
           <div className="Footer">
             <div className="FooterText">
               &copy; {currentYear}{" "}
-              {settings?.company_name || "EARIST"} Student Information System. All rights reserved.
+              {settings?.company_name || ""} <br/>
+              Student Information System. <br/>
+              All rights reserved.
             </div>
           </div>
         </div>

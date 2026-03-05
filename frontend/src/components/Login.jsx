@@ -90,8 +90,7 @@ const Login = ({ setIsAuthenticated }) => {
       localStorage.setItem("last_name", response.data.last_name || "");
       localStorage.setItem("middle_name", response.data.middle_name || "");
       localStorage.setItem("birthOfDate", response.data.birthOfDate || "");
-      localStorage.setItem("age", response.data.age || "");
-
+      localStorage.setItem("academicProgram", response.academicProgram ?? "");
       localStorage.setItem("applicantEmail", response.data.email);
 
       setIsAuthenticated(true);
@@ -146,12 +145,13 @@ const Login = ({ setIsAuthenticated }) => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+
         }}
         maxWidth={false}
       >
         <AnnouncementSlider />
         <div
-          style={{ border: "5px solid black", marginLeft: 100, gap: "250px" }}
+          style={{ border: "5px solid black", marginLeft: -100, marginTop: "-130px" }}
           className="Container"
         >
           {/* ✅ Header (same as LoginEnrollment) */}
@@ -174,7 +174,16 @@ const Login = ({ setIsAuthenticated }) => {
                   color: "white",
                 }}
               >
-                {settings?.company_name || "Company Name"}
+                {(settings?.company_name || "Company Name")
+                  .split(" ")
+                  .reduce((acc, word, index) => {
+                    if (index % 4 === 0 && index !== 0) {
+                      acc.push(<br key={`br-${index}`} />);
+                    }
+                    acc.push(word + " ");
+                    return acc;
+                  }, [])}
+
               </strong>
               <p>Student Information System</p>
             </div>
@@ -345,8 +354,9 @@ const Login = ({ setIsAuthenticated }) => {
           {/* ✅ Footer (aligned properly) */}
           <div className="Footer">
             <div className="FooterText">
-              &copy; {currentYear} {settings?.company_name || "EARIST"} Student
-              Information System. All rights reserved.
+              &copy; {currentYear} {settings?.company_name || "EARIST"} <br />
+              Student Information System. <br />
+              All rights reserved.
             </div>
           </div>
         </div>

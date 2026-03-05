@@ -48,15 +48,17 @@ const AnnouncementSlider = () => {
     return (
         <div
             style={{
-                width: "700px",
+                width: "950px",
                 height: "700px",
                 overflow: "hidden",
+                marginRight: "300px",
+                border: "2px solid black",
                 background: "#000",
                 display: "flex",
                 marginTop: "-130px",   // ✅ THIS works
                 alignItems: "center",
-                marginLeft: "-200px",
-                gap: "50px",
+                marginLeft: "125px",
+       
                 justifyContent: "center",
                 borderRadius: "30px",
     

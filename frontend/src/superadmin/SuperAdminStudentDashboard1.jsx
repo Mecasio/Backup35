@@ -2579,7 +2579,7 @@ const SuperAdminStudentDashboard1 = () => {
                                 <TextField
                                     fullWidth
 
-
+type="number"
                                     size="small"
                                     name="presentZipCode"
                                     placeholder="Enter your Zip Code"
@@ -2975,6 +2975,7 @@ const SuperAdminStudentDashboard1 = () => {
                                 <Typography mb={1} fontWeight="medium">Permanent Zip Code</Typography>
                                 <TextField
                                     fullWidth
+                                    type="number"
                                     size="small"
                                     name="permanentZipCode"
                                     placeholder="Enter your Permanent Zip Code"
