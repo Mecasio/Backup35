@@ -1600,7 +1600,7 @@ const ReadmissionDashboard1 = () => {
               {index < steps.length - 1 && (
                 <Box
                   sx={{
-                       height: "2px",
+                    height: "2px",
                     backgroundColor: mainButtonColor,
                     flex: 1,
                     alignSelf: "center",
@@ -1673,7 +1673,7 @@ const ReadmissionDashboard1 = () => {
                 error={!!errors.campus}
                 className="mb-4"
               >
-                
+
 
                 <Select
                   id="campus-select"
@@ -2224,7 +2224,9 @@ const ReadmissionDashboard1 = () => {
               />
 
 
-
+              <Typography fontWeight="medium">
+                Gender:
+              </Typography>
               {/* Gender */}
               <TextField
                 select
@@ -2850,7 +2852,7 @@ const ReadmissionDashboard1 = () => {
                 <TextField
                   fullWidth
                   InputProps={{ readOnly: true }}
-type="number"
+                  type="number"
                   size="small"
                   name="presentZipCode"
                   placeholder="Enter your Zip Code"

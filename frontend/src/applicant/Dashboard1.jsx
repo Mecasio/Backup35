@@ -2029,6 +2029,9 @@ const Dashboard1 = (props) => {
                 sx={{ mr: 2 }}
               />
 
+              <Typography fontWeight="medium">
+                Gender:
+              </Typography>
               {/* Gender */}
               <TextField
                 select

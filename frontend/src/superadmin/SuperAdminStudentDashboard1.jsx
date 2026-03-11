@@ -1390,11 +1390,11 @@ const SuperAdminStudentDashboard1 = () => {
                             {index < steps.length - 1 && (
                                 <Box
                                     sx={{
-                                         height: "2px",
-                    backgroundColor: mainButtonColor,
-                    flex: 1,
-                    alignSelf: "center",
-                    mx: 2,
+                                        height: "2px",
+                                        backgroundColor: mainButtonColor,
+                                        flex: 1,
+                                        alignSelf: "center",
+                                        mx: 2,
                                     }}
                                 />
                             )}
@@ -1440,7 +1440,7 @@ const SuperAdminStudentDashboard1 = () => {
                                 error={!!errors.campus}
                                 className="mb-4"
                             >
-                                
+
 
                                 <Select
                                     id="campus-select"
@@ -1974,7 +1974,9 @@ const SuperAdminStudentDashboard1 = () => {
                             />
 
 
-
+                            <Typography fontWeight="medium" >
+                                Gender:
+                            </Typography>
                             {/* Gender */}
                             <TextField
                                 select
@@ -2579,7 +2581,7 @@ const SuperAdminStudentDashboard1 = () => {
                                 <TextField
                                     fullWidth
 
-type="number"
+                                    type="number"
                                     size="small"
                                     name="presentZipCode"
                                     placeholder="Enter your Zip Code"

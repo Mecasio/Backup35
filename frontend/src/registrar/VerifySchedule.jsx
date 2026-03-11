@@ -106,9 +106,9 @@ const AssignScheduleToApplicants = () => {
 
     useEffect(() => {
         socket.current = io(API_BASE_URL);
-    
+
         return () => {
-          socket.current.disconnect();
+            socket.current.disconnect();
         };
     }, []);
 
@@ -384,18 +384,18 @@ const AssignScheduleToApplicants = () => {
     const handleAssignSingle = (applicantNumber) => {
         if (!selectedSchedule) {
             setSnack({
-            open: true,
-            message: "Please select a schedule first.",
-            severity: "warning",
+                open: true,
+                message: "Please select a schedule first.",
+                severity: "warning",
             });
             return;
         }
 
         if (!socket?.current) {
             setSnack({
-            open: true,
-            message: "Socket not connected yet. Try again.",
-            severity: "error",
+                open: true,
+                message: "Socket not connected yet. Try again.",
+                severity: "error",
             });
             return;
         }
@@ -407,25 +407,25 @@ const AssignScheduleToApplicants = () => {
 
         socket.current.once("update_verify_schedule_result", (res) => {
             if (res.success) {
-            setPersons((prev) =>
-                prev.map((p) =>
-                p.applicant_number === applicantNumber
-                    ? { ...p, schedule_id: selectedSchedule }
-                    : p
-                )
-            );
+                setPersons((prev) =>
+                    prev.map((p) =>
+                        p.applicant_number === applicantNumber
+                            ? { ...p, schedule_id: selectedSchedule }
+                            : p
+                    )
+                );
 
-            setSnack({
-                open: true,
-                message: `Applicant ${applicantNumber} assigned successfully.`,
-                severity: "success",
-            });
+                setSnack({
+                    open: true,
+                    message: `Applicant ${applicantNumber} assigned successfully.`,
+                    severity: "success",
+                });
             } else {
-            setSnack({
-                open: true,
-                message: res.error || "Failed to assign applicant.",
-                severity: "error",
-            });
+                setSnack({
+                    open: true,
+                    message: res.error || "Failed to assign applicant.",
+                    severity: "error",
+                });
             }
         });
     };
@@ -616,6 +616,8 @@ const AssignScheduleToApplicants = () => {
         return text.trim();
     };
 
+    const officeName = `${shortTerm} - Admission Office`;
+
     const handleSendEmails = (person) => {
         if (!selectedSchedule) {
             setSnack({
@@ -654,6 +656,8 @@ const AssignScheduleToApplicants = () => {
             });
         };
 
+
+
         setEmailMessage(
             `Hello, ${person.first_name} ${person.middle_name ? person.middle_name.charAt(0) + "." : ""} ${person.last_name}
 
@@ -675,7 +679,7 @@ ${reqText}
 
 Thank you and good luck!
 
-Admission Office`
+${officeName}`
         );
 
         setConfirmOpen(true);
@@ -1055,8 +1059,8 @@ Admission Office`
                 ))}
             </Box>
 
-      <br/>
-      <br/>
+            <br />
+            <br />
 
             <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, }}>
                 <Table>
@@ -1746,7 +1750,7 @@ Admission Office`
                                                 // ✅ Not assigned → Assign only
                                                 <Button
                                                     variant="contained"
-                                                    disabled={!socket?.current} 
+                                                    disabled={!socket?.current}
                                                     onClick={(e) => {
                                                         e.stopPropagation(); // ✅ REQUIRED
                                                         handleAssignSingle(person.applicant_number);

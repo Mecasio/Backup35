@@ -592,14 +592,14 @@ app.post(
           footer_color ?? currentSettings.footer_color ?? "#ffffff",
 
           main_button_color ??
-            currentSettings.main_button_color ??
-            "#ffffff",
+          currentSettings.main_button_color ??
+          "#ffffff",
           sub_button_color ?? currentSettings.sub_button_color ?? "#ffffff",
           border_color ?? currentSettings.border_color ?? "#000000",
           stepper_color ?? currentSettings.stepper_color ?? "#000000",
           sidebar_button_color ??
-            currentSettings.sidebar_button_color ??
-            "#000000",
+          currentSettings.sidebar_button_color ??
+          "#000000",
 
           title_color ?? currentSettings.title_color ?? "#000000",
           subtitle_color ?? currentSettings.subtitle_color ?? "#555555",
@@ -9248,7 +9248,7 @@ app.post("/student-tagging", async (req, res) => {
 
 app.post("/student-tagging/dprtmnt", async (req, res) => {
   const { studentNumber, dprtmntId } = req.body;
-  
+
   if (!studentNumber || !dprtmntId) {
     return res.status(400).json({ message: "All fields are required" });
   }
@@ -16450,6 +16450,15 @@ io.on("connection", (socket) => {
         });
       }
 
+
+      // OFFICE NAME
+      const [[office]] = await db.query(
+        "SELECT short_term FROM company_settings WHERE id = 1"
+      );
+
+      const shortTerm = office?.short_term || "EARIST";
+      const officeName = `${shortTerm} - Admission Office`;
+
       // 🔹 Fetch applicants with email
       const [rows] = await db.query(`
       SELECT
@@ -16475,6 +16484,8 @@ io.on("connection", (socket) => {
         });
       }
 
+
+
       const sent = [];
       const failed = [];
 
@@ -16494,7 +16505,7 @@ io.on("connection", (socket) => {
         try {
 
           await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+            from: `"${officeName}" <${process.env.EMAIL_USER}>`,
             to: row.emailAddress,
             subject,
             text: personalizedMsg,

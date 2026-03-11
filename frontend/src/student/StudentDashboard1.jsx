@@ -1676,7 +1676,9 @@ const StudentDashboard1 = () => {
                             />
 
 
-
+                            <Typography fontWeight="medium" >
+                                Gender:
+                            </Typography>
                             {/* Gender */}
                             <TextField
                                 select

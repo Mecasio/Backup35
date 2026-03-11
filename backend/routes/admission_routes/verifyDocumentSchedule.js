@@ -14,7 +14,8 @@ router.post("/create_verify_document_schedule", async (req, res) => {
       start_time,
       end_time,
       evaluator,
-      room_quota
+      room_quota,
+      active_school_year_id,
     } = req.body;
 
     // ✅ Validate required fields
@@ -25,7 +26,8 @@ router.post("/create_verify_document_schedule", async (req, res) => {
       !room_description ||
       !start_time ||
       !end_time ||
-      !room_quota
+      !room_quota || 
+      !active_school_year_id
     ) {
       return res.status(400).json({ error: "Missing required fields." });
     }
@@ -53,8 +55,8 @@ router.post("/create_verify_document_schedule", async (req, res) => {
     const sql = `
       INSERT INTO verify_document_schedule
       (schedule_date, branch, building_description, room_description,
-       start_time, end_time, evaluator, room_quota, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+       start_time, end_time, evaluator, room_quota, active_school_year_id, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `;
 
     const [result] = await db.query(sql, [
@@ -65,7 +67,8 @@ router.post("/create_verify_document_schedule", async (req, res) => {
       start_time,
       end_time,
       evaluator,
-      room_quota
+      room_quota,
+      active_school_year_id
     ]);
 
     res.json({

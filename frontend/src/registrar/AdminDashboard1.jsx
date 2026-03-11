@@ -2153,7 +2153,9 @@ const AdminDashboard1 = () => {
               />
 
 
-
+              <Typography fontWeight="medium" >
+                Gender:
+              </Typography>
               {/* Gender */}
               <TextField
                 select

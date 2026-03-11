@@ -1209,9 +1209,9 @@ const RegistrarDashboard1 = () => {
                 />
             </Box>
             {searchError && <Typography color="error">{searchError}</Typography>}
-                 <hr style={{ border: "1px solid #ccc", width: "100%" }} />
-      <br />
-      <br />
+            <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+            <br />
+            <br />
 
 
             <Box
@@ -1557,11 +1557,11 @@ const RegistrarDashboard1 = () => {
                                 {index < steps.length - 1 && (
                                     <Box
                                         sx={{
-                                             height: "2px",
-                    backgroundColor: mainButtonColor,
-                    flex: 1,
-                    alignSelf: "center",
-                    mx: 2,
+                                            height: "2px",
+                                            backgroundColor: mainButtonColor,
+                                            flex: 1,
+                                            alignSelf: "center",
+                                            mx: 2,
                                         }}
                                     />
                                 )}
@@ -1613,7 +1613,7 @@ const RegistrarDashboard1 = () => {
                                 error={!!errors.campus}
                                 className="mb-4"
                             >
-                                
+
 
                                 <Select
                                     id="campus-select"
@@ -2169,7 +2169,9 @@ const RegistrarDashboard1 = () => {
                             />
 
 
-
+                            <Typography fontWeight="medium" >
+                                Gender:
+                            </Typography>
 
                             {/* Gender */}
                             <TextField
@@ -2801,7 +2803,7 @@ const RegistrarDashboard1 = () => {
                                 <TextField
                                     fullWidth
                                     InputProps={{ readOnly: true }}
-type="number"
+                                    type="number"
                                     size="small"
                                     name="presentZipCode"
                                     placeholder="Enter your Zip Code"

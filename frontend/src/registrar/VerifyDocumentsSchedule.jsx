@@ -111,6 +111,7 @@ const VerifyDocumentsSchedule = () => {
         { label: "Announcement", to: "/announcement_for_admission", icon: <CampaignIcon fontSize="large" /> },
     ];
 
+    
 
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = useState(1);
@@ -134,8 +135,14 @@ const VerifyDocumentsSchedule = () => {
     const [roomName, setRoomName] = useState("");
     const [buildingName, setBuildingName] = useState("");
 
-
-
+    const [schoolYearId, setSchoolYearId] = useState('');
+    
+      useEffect(() => {
+        axios.get(`${API_BASE_URL}/active_school_year`)
+          .then(res => {
+            setSchoolYearId(res.data[0]?.school_year_id);
+          });
+      }, []);
 
     useEffect(() => {
         const fetchRooms = async () => {
@@ -250,6 +257,7 @@ const VerifyDocumentsSchedule = () => {
                 end_time: endTime,
                 evaluator: evaluator,
                 room_quota: Number(roomQuota),
+                active_school_year_id: schoolYearId,
             });
 
             // ✅ SUCCESS
@@ -407,7 +415,8 @@ const VerifyDocumentsSchedule = () => {
                     start_time: startTime,
                     end_time: endTime,
                     evaluator: evaluator,
-                    room_quota: Number(roomQuota)
+                    room_quota: Number(roomQuota),
+                    active_school_year_id: schoolYearId
                 }
             );
 
