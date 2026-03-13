@@ -256,4 +256,86 @@ router.post("/program-slots", async (req, res) => {
   }
 });
 
+router.post("/program-slots/department", async (req, res) => {
+  const { dprtmnt_id, max_slots, year_id, semester_id } = req.body;
+
+  if (!dprtmnt_id || !max_slots || !year_id || !semester_id) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
+  const connection = await db.getConnection();
+
+  try {
+    const [activeRows] = await db3.query(
+      "SELECT id FROM active_school_year_table WHERE year_id = ? AND semester_id = ? LIMIT 1",
+      [year_id, semester_id],
+    );
+    const activeSchoolYearId = activeRows[0]?.id;
+
+    if (!activeSchoolYearId) {
+      return res
+        .status(400)
+        .json({ message: "Active school year not found for selection" });
+    }
+
+    const [curriculumRows] = await db3.query(
+      `
+      SELECT dc.curriculum_id
+      FROM dprtmnt_curriculum_table dc
+      WHERE dc.dprtmnt_id = ?
+    `,
+      [dprtmnt_id],
+    );
+
+    const curriculumIds = curriculumRows.map((row) => row.curriculum_id);
+    if (!curriculumIds.length) {
+      return res.status(404).json({ message: "No programs found for department" });
+    }
+
+    await connection.beginTransaction();
+
+    const [existingRows] = await connection.query(
+      `
+      SELECT curriculum_id
+      FROM admission.program_slots
+      WHERE active_school_year_id = ?
+        AND curriculum_id IN (?)
+    `,
+      [activeSchoolYearId, curriculumIds],
+    );
+    const existingSet = new Set(existingRows.map((row) => row.curriculum_id));
+
+    for (const curriculumId of curriculumIds) {
+      if (existingSet.has(curriculumId)) {
+        await connection.query(
+          `
+          UPDATE admission.program_slots
+          SET max_slots = ?
+          WHERE curriculum_id = ? AND active_school_year_id = ?
+        `,
+          [max_slots, curriculumId, activeSchoolYearId],
+        );
+      } else {
+        await connection.query(
+          `
+          INSERT INTO admission.program_slots
+          (curriculum_id, max_slots, active_school_year_id, created_at)
+          VALUES (?, ?, ?, NOW())
+        `,
+          [curriculumId, max_slots, activeSchoolYearId],
+        );
+      }
+    }
+
+    await connection.commit();
+    res.json({ message: "Program slots updated for department" });
+  } catch (err) {
+    await connection.rollback();
+    console.error("Error saving department program slots:", err);
+    res.status(500).json({ message: "Failed to save department program slots" });
+  } finally {
+    connection.release();
+  }
+});
+
 module.exports = router

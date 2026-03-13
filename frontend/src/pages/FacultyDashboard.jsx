@@ -160,23 +160,11 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    fetchAnnouncements();
-  }, []);
-
-  const fetchAnnouncements = async () => {
-    try {
-      const res = await axios.get(`${API_BASE_URL}/api/announcements/faculty`);
-      setAnnouncements(res.data); // 👈 no .data.data
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
-        const role = localStorage.getItem("role");
-        const res = await axios.get(`${API_BASE_URL}/api/announcements?role=${role}`);
+        const res = await axios.get(
+          `${API_BASE_URL}/api/announcements/faculty`,
+        );
         const data = Array.isArray(res.data) ? res.data : res.data?.data;
         setAnnouncements(data || []);
       } catch (err) {
@@ -206,7 +194,7 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
 
   const now = new Date();
   const manilaDate = new Date(
-    now.toLocaleString("en-US", { timeZone: "Asia/Manila" })
+    now.toLocaleString("en-US", { timeZone: "Asia/Manila" }),
   );
   const today = manilaDate.getDate();
   const thisMonth = manilaDate.getMonth();
@@ -240,7 +228,7 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
     const fetchHolidays = async () => {
       try {
         const res = await axios.get(
-          `https://date.nager.at/api/v3/PublicHolidays/${year}/PH`
+          `https://date.nager.at/api/v3/PublicHolidays/${year}/PH`,
         );
         const lookup = {};
         res.data.forEach((h) => {
@@ -254,9 +242,6 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
     };
     fetchHolidays();
   }, [year]);
-
-
-  const [dateTime, setDateTime] = useState(new Date());
 
   const formattedDate = new Date().toLocaleDateString("en-US", {
     weekday: "short",
@@ -287,8 +272,7 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
     weekday: "short",
     timeZone: "Asia/Manila",
   });
-
-  console.log(todayDay);
+  
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -303,14 +287,11 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
       formData.append("person_id", person_id);
 
       // ✅ Upload image using same backend API
-      await axios.post(
-        `${API_BASE_URL}/faculty/update_faculty`,
-        formData
-      );
+      await axios.post(`${API_BASE_URL}/faculty/update_faculty`, formData);
 
       // ✅ Refresh profile info to display the new image
       const updated = await axios.get(
-        `${API_BASE_URL}/api/person_data/${person_id}/${role}`
+        `${API_BASE_URL}/api/person_data/${person_id}/${role}`,
       );
 
       setPerson(updated.data);
@@ -323,7 +304,7 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
 
   const backgroundImage = settings?.bg_image
     ? `url(${API_BASE_URL}${settings.bg_image})`
-    : "linear-gradient(to right, #e0e0e0, #bdbdbd)"
+    : "linear-gradient(to right, #e0e0e0, #bdbdbd)";
 
   return (
     <Box
@@ -350,15 +331,13 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
         }}
       />
 
-
-
       {/* Scrollable content */}
       <Box
         sx={{
           position: "relative",
           zIndex: 1,
-          height: "100%",        // take full height of parent
-          overflowY: "auto",     // ✅ THIS allows scrolling
+          height: "100%", // take full height of parent
+          overflowY: "auto", // ✅ THIS allows scrolling
           padding: 2,
         }}
       >
@@ -397,7 +376,7 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
                         <Avatar
                           src={
                             profileImage ||
-                            `${API_BASE_URL}/uploads/${personData?.profile_image}`
+                            `${API_BASE_URL}/uploads/Faculty1by1/${personData?.profile_image}`
                           }
                           alt={personData?.fname}
                           sx={{
@@ -459,8 +438,9 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
                         >
                           Welcome back!
                           {personData
-                            ? `${personData.lname}, ${personData.fname} ${personData.mname || ""
-                            }`
+                            ? `${personData.lname}, ${personData.fname} ${
+                                personData.mname || ""
+                              }`
                             : ""}
                         </Typography>
 
@@ -479,7 +459,8 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
                               color: "black",
                             }}
                           >
-                            <b>Employee ID:</b> {personData?.employee_id || "N/A"}
+                            <b>Employee ID:</b>{" "}
+                            {personData?.employee_id || "N/A"}
                           </Typography>
 
                           <Typography
@@ -506,10 +487,18 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
                   >
                     {/* 📅 Right Section - Date */}
                     <Box textAlign="right" sx={{ color: "black" }}>
-                      <Typography variant="body1" fontSize="24px" fontWeight="bold" >
+                      <Typography
+                        variant="body1"
+                        fontSize="24px"
+                        fontWeight="bold"
+                      >
                         {formattedDate}
                       </Typography>
-                      <Typography variant="body1" fontSize="24px" sx={{ textAlign: "center" }}>
+                      <Typography
+                        variant="body1"
+                        fontSize="24px"
+                        sx={{ textAlign: "center" }}
+                      >
                         {formattedTime}
                       </Typography>
                     </Box>
@@ -625,7 +614,7 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
                               }}
                               onClick={() =>
                                 setOpenImage(
-                                  `${API_BASE_URL}/uploads/announcement/${announcements[currentIndex].file_path}`
+                                  `${API_BASE_URL}/uploads/announcement/${announcements[currentIndex].file_path}`,
                                 )
                               }
                             />
@@ -639,12 +628,12 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
                         >
                           Posted: {""}
                           {new Date(
-                            announcements[currentIndex].created_at
+                            announcements[currentIndex].created_at,
                           ).toLocaleDateString("en-US")}
                           <div style={{ width: "20px" }}></div>
                           Expires:{" "}
                           {new Date(
-                            announcements[currentIndex].expires_at
+                            announcements[currentIndex].expires_at,
                           ).toLocaleDateString("en-US")}
                         </Typography>
                       </Box>
@@ -658,7 +647,7 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
                             setCurrentIndex(
                               (prev) =>
                                 (prev - 1 + announcements.length) %
-                                announcements.length
+                                announcements.length,
                             )
                           }
                           sx={{
@@ -678,7 +667,7 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
                         <IconButton
                           onClick={() =>
                             setCurrentIndex(
-                              (prev) => (prev + 1) % announcements.length
+                              (prev) => (prev + 1) % announcements.length,
                             )
                           }
                           sx={{
@@ -889,10 +878,12 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
                       }
 
                       const isToday =
-                        day === today && month === thisMonth && year === thisYear;
+                        day === today &&
+                        month === thisMonth &&
+                        year === thisYear;
                       const dateKey = `${year}-${String(month + 1).padStart(
                         2,
-                        "0"
+                        "0",
                       )}-${String(day).padStart(2, "0")}`;
                       const isHoliday = holidays[dateKey];
                       const dayCell = (
@@ -945,7 +936,7 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
                           {dayCell}
                         </React.Fragment>
                       );
-                    })
+                    }),
                   )}
                 </Box>
               </CardContent>
@@ -1058,7 +1049,7 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
                   }}
                 >
                   {schedule.filter(
-                    (item) => item.description === todayDay.toUpperCase()
+                    (item) => item.description === todayDay.toUpperCase(),
                   ).length === 0 ? (
                     <Typography
                       sx={{
@@ -1073,7 +1064,7 @@ const FacultyDashboard = ({ profileImage, setProfileImage }) => {
                   ) : (
                     schedule
                       .filter(
-                        (item) => item.description === todayDay.toUpperCase()
+                        (item) => item.description === todayDay.toUpperCase(),
                       )
                       .map((item, index) => (
                         <Box

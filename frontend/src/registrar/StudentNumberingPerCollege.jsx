@@ -239,9 +239,6 @@ const StudentNumbering = () => {
         }
     };
 
-
-
-
     useEffect(() => {
         const storedID = localStorage.getItem("email");
 

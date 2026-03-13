@@ -75,6 +75,7 @@ const ProgramSlotLimit = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
+    const [confirmAllOpen, setConfirmAllOpen] = useState(false);
 
     const pageId = 110;
 
@@ -245,10 +246,27 @@ const ProgramSlotLimit = () => {
         setMaxSlots("");
         setIsEditing(false);
     };
+
+    const saveSlotLimitAll = async () => {
+        await axios.post(`${API_BASE_URL}/api/program-slots/department`, {
+            dprtmnt_id: selectedDepartmentFilter,
+            max_slots: maxSlots,
+            year_id: yearId,
+            semester_id: semesterId,
+        });
+
+        fetchSlotSummary();
+        setIsEditing(false);
+    };
     
     const handleConfirmSave = () => {
         if (!selectedProgram || !yearId || !semesterId || !maxSlots) return;
         setConfirmOpen(true);
+    };
+
+    const handleConfirmSaveAll = () => {
+        if (!selectedDepartmentFilter || !yearId || !semesterId || !maxSlots) return;
+        setConfirmAllOpen(true);
     };
 
     const handleCollegeChange = (e) => {
@@ -292,6 +310,13 @@ const ProgramSlotLimit = () => {
     const selectedProgramCode = selectedProgramItem
         ? selectedProgramItem.program_code
         : "";
+
+    const selectedDepartmentItem = department.find(
+        (d) => d.dprtmnt_id === Number(selectedDepartmentFilter),
+    );
+    const selectedDepartmentName = selectedDepartmentItem
+        ? selectedDepartmentItem.dprtmnt_name
+        : "selected department";
 
     return (
         <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
@@ -472,6 +497,14 @@ const ProgramSlotLimit = () => {
                     >
                         {isEditing ? "Update" : "Save"}
                     </Button>
+
+                    <Button
+                        variant="contained"
+                        onClick={handleConfirmSaveAll}
+                        disabled={!selectedDepartmentFilter || !yearId || !semesterId || !maxSlots || programs.length === 0}
+                    >
+                        Save All
+                    </Button>
                 </Box>
             </Paper>
             
@@ -496,6 +529,34 @@ const ProgramSlotLimit = () => {
                         onClick={async () => {
                             setConfirmOpen(false);
                             await saveSlotLimit();
+                        }}
+                    >
+                        Confirm
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={confirmAllOpen}
+                onClose={() => setConfirmAllOpen(false)}
+                aria-labelledby="confirm-all-slot-title"
+                aria-describedby="confirm-all-slot-description"
+            >
+                <DialogTitle id="confirm-all-slot-title">Confirm Slot Setup</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="confirm-all-slot-description">
+                        Do you want to set {maxSlots} slots for all programs in {selectedDepartmentName}?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setConfirmAllOpen(false)} color="inherit">
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={async () => {
+                            setConfirmAllOpen(false);
+                            await saveSlotLimitAll();
                         }}
                     >
                         Confirm

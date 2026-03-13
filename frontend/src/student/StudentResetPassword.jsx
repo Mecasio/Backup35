@@ -30,10 +30,19 @@ import {
 import API_BASE_URL from "../apiConfig";
 const passwordRules = [
   { label: "Minimum of 8 characters", test: (pw) => pw.length >= 8 },
-  { label: "At least one lowercase letter (e.g. abc)", test: (pw) => /[a-z]/.test(pw) },
-  { label: "At least one uppercase letter (e.g. ABC)", test: (pw) => /[A-Z]/.test(pw) },
+  {
+    label: "At least one lowercase letter (e.g. abc)",
+    test: (pw) => /[a-z]/.test(pw),
+  },
+  {
+    label: "At least one uppercase letter (e.g. ABC)",
+    test: (pw) => /[A-Z]/.test(pw),
+  },
   { label: "At least one number (e.g. 123)", test: (pw) => /\d/.test(pw) },
-  { label: "At least one special character (! # $ ^ * @)", test: (pw) => /[!#$^*@]/.test(pw) },
+  {
+    label: "At least one special character (! # $ ^ * @)",
+    test: (pw) => /[!#$^*@]/.test(pw),
+  },
 ];
 
 const StudentResetPassword = () => {
@@ -43,8 +52,8 @@ const StudentResetPassword = () => {
   const [subtitleColor, setSubtitleColor] = useState("#555555");
   const [borderColor, setBorderColor] = useState("#000000");
   const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
-  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
-  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff"); // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000"); // ✅ NEW
 
   const [fetchedLogo, setFetchedLogo] = useState(null);
   const [companyName, setCompanyName] = useState("");
@@ -58,9 +67,10 @@ const StudentResetPassword = () => {
     if (settings.title_color) setTitleColor(settings.title_color);
     if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
     if (settings.border_color) setBorderColor(settings.border_color);
-    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
-    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
-    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+    if (settings.main_button_color)
+      setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color); // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color); // ✅ NEW
 
     // 🏫 Logo
     if (settings.logo_url) {
@@ -73,7 +83,6 @@ const StudentResetPassword = () => {
     if (settings.company_name) setCompanyName(settings.company_name);
     if (settings.short_term) setShortTerm(settings.short_term);
     if (settings.campus_address) setCampusAddress(settings.campus_address);
-
   }, [settings]);
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -110,13 +119,14 @@ const StudentResetPassword = () => {
 
   const [otpRequired, setOtpRequired] = useState(true);
 
-
   // Fetch OTP setting
   useEffect(() => {
     const fetchOtpSetting = async () => {
       try {
         const person_id = localStorage.getItem("person_id");
-        const res = await axios.get(`${API_BASE_URL}/get-otp-setting/user/${person_id}`);
+        const res = await axios.get(
+          `${API_BASE_URL}/auth/get-otp-setting/user/${person_id}`,
+        );
         setOtpRequired(res.data.require_otp === 1);
       } catch (err) {
         console.error("Failed to load OTP setting for user", err);
@@ -132,7 +142,7 @@ const StudentResetPassword = () => {
 
     try {
       const person_id = localStorage.getItem("person_id");
-      const res = await axios.post(`${API_BASE_URL}/update-otp-setting`, {
+      const res = await axios.post(`${API_BASE_URL}/auth/update-otp-setting`, {
         type: "user",
         person_id,
         require_otp: newValue ? 1 : 0,
@@ -152,7 +162,6 @@ const StudentResetPassword = () => {
     }
   };
 
-
   const isValid = validations.every(Boolean) && newPassword === confirmPassword;
 
   // ✅ Update Password API
@@ -160,11 +169,14 @@ const StudentResetPassword = () => {
     e.preventDefault();
     try {
       const person_id = localStorage.getItem("person_id");
-      const response = await axios.post(`${API_BASE_URL}/student-change-password`, {
-        person_id,
-        currentPassword,
-        newPassword,
-      });
+      const response = await axios.post(
+        `${API_BASE_URL}/student-change-password`,
+        {
+          person_id,
+          currentPassword,
+          newPassword,
+        },
+      );
 
       setSnack({
         open: true,
@@ -187,17 +199,16 @@ const StudentResetPassword = () => {
     setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
-
   // 🔒 Disable right-click
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.addEventListener("contextmenu", (e) => e.preventDefault());
 
   // 🔒 Block DevTools shortcuts silently
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener("keydown", (e) => {
     const isBlockedKey =
-      e.key === 'F12' ||
-      e.key === 'F11' ||
-      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-      (e.ctrlKey && e.key === 'U');
+      e.key === "F12" ||
+      e.key === "F11" ||
+      (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) ||
+      (e.ctrlKey && e.key === "U");
 
     if (isBlockedKey) {
       e.preventDefault();
@@ -206,7 +217,16 @@ const StudentResetPassword = () => {
   });
 
   return (
-       <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
+    <Box
+      sx={{
+        height: "calc(100vh - 150px)",
+        overflowY: "auto",
+        paddingRight: 1,
+        backgroundColor: "transparent",
+        mt: 1,
+        padding: 2,
+      }}
+    >
       {/* 🔝 Header Section */}
       <Box
         sx={{
@@ -259,7 +279,11 @@ const StudentResetPassword = () => {
                 p: 1,
               }}
             />
-            <Typography variant="h5" fontWeight="bold" sx={{ mt: 1, color: subtitleColor, }}>
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+              sx={{ mt: 1, color: subtitleColor }}
+            >
               SETTINGS
             </Typography>
             <Typography fontSize={13} color="text.secondary">
@@ -281,26 +305,24 @@ const StudentResetPassword = () => {
                   onChange={handleOtpToggle}
                   sx={{
                     height: 50,
-                
+
                     width: 90, // adjust width proportionally
-                    '& .MuiSwitch-switchBase': {
+                    "& .MuiSwitch-switchBase": {
                       top: 3,
                       left: 3,
                       padding: 0,
-                        color: "black",
-                    
-                      '&.Mui-checked': {
-                        transform: 'translateX(40px)',
-                        color: "black"
+                      color: "black",
 
+                      "&.Mui-checked": {
+                        transform: "translateX(40px)",
+                        color: "black",
                       },
                     },
-                    '& .MuiSwitch-thumb': {
+                    "& .MuiSwitch-thumb": {
                       width: 44,
                       height: 44,
-                        
                     },
-                    '& .MuiSwitch-track': {
+                    "& .MuiSwitch-track": {
                       borderRadius: 10,
                     },
                   }}
@@ -327,8 +349,15 @@ const StudentResetPassword = () => {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={() => toggleShowPassword("current")} edge="end">
-                        {showPassword.current ? <Visibility /> : <VisibilityOff />}
+                      <IconButton
+                        onClick={() => toggleShowPassword("current")}
+                        edge="end"
+                      >
+                        {showPassword.current ? (
+                          <Visibility />
+                        ) : (
+                          <VisibilityOff />
+                        )}
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -349,7 +378,10 @@ const StudentResetPassword = () => {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={() => toggleShowPassword("new")} edge="end">
+                      <IconButton
+                        onClick={() => toggleShowPassword("new")}
+                        edge="end"
+                      >
                         {showPassword.new ? <Visibility /> : <VisibilityOff />}
                       </IconButton>
                     </InputAdornment>
@@ -368,7 +400,9 @@ const StudentResetPassword = () => {
                 variant="outlined"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                error={Boolean(confirmPassword && confirmPassword !== newPassword)}
+                error={Boolean(
+                  confirmPassword && confirmPassword !== newPassword,
+                )}
                 helperText={
                   confirmPassword && confirmPassword !== newPassword
                     ? "Passwords do not match"
@@ -377,8 +411,15 @@ const StudentResetPassword = () => {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={() => toggleShowPassword("confirm")} edge="end">
-                        {showPassword.confirm ? <Visibility /> : <VisibilityOff />}
+                      <IconButton
+                        onClick={() => toggleShowPassword("confirm")}
+                        edge="end"
+                      >
+                        {showPassword.confirm ? (
+                          <Visibility />
+                        ) : (
+                          <VisibilityOff />
+                        )}
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -407,8 +448,13 @@ const StudentResetPassword = () => {
             </List>
 
             {/* Note */}
-            <Typography variant="body2" color="warning.main" sx={{ mt: 1, mb: 2 }}>
-              Note: You are required to change your password to continue using the system securely.
+            <Typography
+              variant="body2"
+              color="warning.main"
+              sx={{ mt: 1, mb: 2 }}
+            >
+              Note: You are required to change your password to continue using
+              the system securely.
             </Typography>
 
             {/* Submit Button */}

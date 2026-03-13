@@ -3,73 +3,66 @@ import { SettingsContext } from "../App";
 import axios from "axios";
 import { Box, Container, Typography } from "@mui/material";
 import EaristLogo from "../assets/EaristLogo.png";
-import ForwardIcon from '@mui/icons-material/Forward';
+import ForwardIcon from "@mui/icons-material/Forward";
 import { FcPrint } from "react-icons/fc";
 import { useLocation } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import API_BASE_URL from "../apiConfig";
 
-
-
 const AdmissionFormProcess = () => {
   const settings = useContext(SettingsContext);
 
-    const [titleColor, setTitleColor] = useState("#000000");
-    const [subtitleColor, setSubtitleColor] = useState("#555555");
-    const [borderColor, setBorderColor] = useState("#000000");
-    const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
-    const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
-    const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+  const [titleColor, setTitleColor] = useState("#000000");
+  const [subtitleColor, setSubtitleColor] = useState("#555555");
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff"); // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000"); // ✅ NEW
 
-    const [fetchedLogo, setFetchedLogo] = useState(null);
-    const [companyName, setCompanyName] = useState("");
-    const [shortTerm, setShortTerm] = useState("");
+  const [fetchedLogo, setFetchedLogo] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [shortTerm, setShortTerm] = useState("");
 
-    const [branches, setBranches] = useState([]);
+  const [branches, setBranches] = useState([]);
 
-    useEffect(() => {
-        if (!settings) return;
+  useEffect(() => {
+    if (!settings) return;
 
-        // 🎨 Colors
-        if (settings.title_color) setTitleColor(settings.title_color);
-        if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
-        if (settings.border_color) setBorderColor(settings.border_color);
-        if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
-        if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);
-        if (settings.stepper_color) setStepperColor(settings.stepper_color);
+    // 🎨 Colors
+    if (settings.title_color) setTitleColor(settings.title_color);
+    if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
+    if (settings.border_color) setBorderColor(settings.border_color);
+    if (settings.main_button_color)
+      setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);
 
-        // 🏫 Logo
-        if (settings.logo_url) {
-            setFetchedLogo(`${API_BASE_URL}${settings.logo_url}`);
-        } else {
-            setFetchedLogo(EaristLogo);
-        }
+    // 🏫 Logo
+    if (settings.logo_url) {
+      setFetchedLogo(`${API_BASE_URL}${settings.logo_url}`);
+    } else {
+      setFetchedLogo(EaristLogo);
+    }
 
-        // 🏷️ School Info
-        if (settings.company_name) setCompanyName(settings.company_name);
-        if (settings.short_term) setShortTerm(settings.short_term);
+    // 🏷️ School Info
+    if (settings.company_name) setCompanyName(settings.company_name);
+    if (settings.short_term) setShortTerm(settings.short_term);
 
-        // ✅ Branches (JSON stored in DB)
-        if (settings?.branches) {
-            try {
-                const parsed =
-                    typeof settings.branches === "string"
-                        ? JSON.parse(settings.branches)
-                        : settings.branches;
+    // ✅ Branches (JSON stored in DB)
+    if (settings?.branches) {
+      try {
+        const parsed =
+          typeof settings.branches === "string"
+            ? JSON.parse(settings.branches)
+            : settings.branches;
 
-                setBranches(parsed);
-            } catch (err) {
-                console.error("Failed to parse branches:", err);
-                setBranches([]);
-            }
-        }
-
-
-    }, [settings]);
-
-
-
-
+        setBranches(parsed);
+      } catch (err) {
+        console.error("Failed to parse branches:", err);
+        setBranches([]);
+      }
+    }
+  }, [settings]);
 
   const words = companyName.trim().split(" ");
   const middle = Math.ceil(words.length / 2);
@@ -129,10 +122,30 @@ const AdmissionFormProcess = () => {
     permanentMunicipality: "",
     permanentDswdHouseholdNumber: "",
     father_deceased: "",
-    father_family_name: "", father_given_name: "", father_middle_name: "", father_ext: "", father_contact: "", father_occupation: "",
-    father_income: "", father_email: "", mother_deceased: "", mother_family_name: "", mother_given_name: "", mother_middle_name: "",
-    mother_contact: "", mother_occupation: "", mother_income: "", guardian: "", guardian_family_name: "", guardian_given_name: "",
-    guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "",
+    father_family_name: "",
+    father_given_name: "",
+    father_middle_name: "",
+    father_ext: "",
+    father_contact: "",
+    father_occupation: "",
+    father_income: "",
+    father_email: "",
+    mother_deceased: "",
+    mother_family_name: "",
+    mother_given_name: "",
+    mother_middle_name: "",
+    mother_contact: "",
+    mother_occupation: "",
+    mother_income: "",
+    guardian: "",
+    guardian_family_name: "",
+    guardian_given_name: "",
+    guardian_middle_name: "",
+    guardian_ext: "",
+    guardian_nickname: "",
+    guardian_address: "",
+    guardian_contact: "",
+    guardian_email: "",
     schoolLevel: "",
     schoolLastAttended: "",
     schoolAddress: "",
@@ -161,7 +174,9 @@ const AdmissionFormProcess = () => {
         let personData = res.data;
 
         // Fetch applicant number separately
-        const applicantRes = await axios.get(`${API_BASE_URL}/api/applicant_number/${pid}`);
+        const applicantRes = await axios.get(
+          `${API_BASE_URL}/api/applicant_number/${pid}`,
+        );
         if (applicantRes.data?.applicant_number) {
           personData.applicant_number = applicantRes.data.applicant_number;
         }
@@ -174,7 +189,6 @@ const AdmissionFormProcess = () => {
 
     fetchData();
   }, []);
-
 
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -200,17 +214,12 @@ const AdmissionFormProcess = () => {
     }
   }, []);
 
-
-
-
-
-
   const divToPrintRef = useRef();
 
   const printDiv = () => {
     const divToPrint = divToPrintRef.current;
     if (divToPrint) {
-      const newWin = window.open('', 'Print-Window');
+      const newWin = window.open("", "Print-Window");
       newWin.document.open();
       newWin.document.write(`
       <html>
@@ -285,7 +294,7 @@ const AdmissionFormProcess = () => {
     // 1-5: Use branch metadata + person.campus to resolve the correct branch address.
     const branchId = person?.campus;
     const matchedBranch = branches.find(
-      (branch) => String(branch?.id) === String(branchId)
+      (branch) => String(branch?.id) === String(branchId),
     );
 
     // 6: Replace campusAddress with the resolved branch address, fallback to settings defaults.
@@ -302,8 +311,6 @@ const AdmissionFormProcess = () => {
     setCampusAddress(settings.address || "");
   }, [settings, branches, person?.campus]);
 
-
-
   // ✅ Fetch person data from backend
   const fetchPersonData = async (id) => {
     try {
@@ -313,7 +320,6 @@ const AdmissionFormProcess = () => {
       console.error("Failed to fetch person:", error);
     }
   };
-
 
   const [curriculumOptions, setCurriculumOptions] = useState([]);
 
@@ -333,27 +339,24 @@ const AdmissionFormProcess = () => {
   {
     curriculumOptions.find(
       (item) =>
-        item?.curriculum_id?.toString() === (person?.program ?? "").toString()
-    )?.program_description || (person?.program ?? "")
-
+        item?.curriculum_id?.toString() === (person?.program ?? "").toString(),
+    )?.program_description ||
+      (person?.program ?? "");
   }
 
-
-
-
-
-
   // 🔒 Disable right-click
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.addEventListener("contextmenu", (e) => e.preventDefault());
 
   // 🔒 Block DevTools shortcuts + Ctrl+P silently
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener("keydown", (e) => {
     const isBlockedKey =
-      e.key === 'F12' || // DevTools
-      e.key === 'F11' || // Fullscreen
-      (e.ctrlKey && e.shiftKey && (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'j')) || // Ctrl+Shift+I/J
-      (e.ctrlKey && e.key.toLowerCase() === 'u') || // Ctrl+U (View Source)
-      (e.ctrlKey && e.key.toLowerCase() === 'p');   // Ctrl+P (Print)
+      e.key === "F12" || // DevTools
+      e.key === "F11" || // Fullscreen
+      (e.ctrlKey &&
+        e.shiftKey &&
+        (e.key.toLowerCase() === "i" || e.key.toLowerCase() === "j")) || // Ctrl+Shift+I/J
+      (e.ctrlKey && e.key.toLowerCase() === "u") || // Ctrl+U (View Source)
+      (e.ctrlKey && e.key.toLowerCase() === "p"); // Ctrl+P (Print)
 
     if (isBlockedKey) {
       e.preventDefault();
@@ -361,11 +364,17 @@ const AdmissionFormProcess = () => {
     }
   });
 
-
-
-
   return (
-    <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
+    <Box
+      sx={{
+        height: "calc(100vh - 150px)",
+        overflowY: "auto",
+        paddingRight: 1,
+        backgroundColor: "transparent",
+        mt: 1,
+        padding: 2,
+      }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -422,15 +431,9 @@ const AdmissionFormProcess = () => {
         </span>
       </button>
 
-
       <Container>
-
-
-
         <div ref={divToPrintRef} style={{ marginBottom: "10%" }}>
-
           <Container>
-
             <div
               className="student-table"
               style={{
@@ -462,7 +465,6 @@ const AdmissionFormProcess = () => {
                       marginLeft: "10px",
                       marginTop: "-25px",
                       borderRadius: "50%", // ✅ Makes it perfectly circular
-
                     }}
                   />
                 </div>
@@ -480,14 +482,11 @@ const AdmissionFormProcess = () => {
                     paddingBottom: 0,
                   }}
                 >
-                  <div
-                    style={{ fontFamily: "Arial", fontSize: "12px" }}
-                  >
+                  <div style={{ fontFamily: "Arial", fontSize: "12px" }}>
                     Republic of the Philippines
                   </div>
                   <div
                     style={{
-
                       letterSpacing: "2px",
                       fontWeight: "bold",
                     }}
@@ -497,7 +496,6 @@ const AdmissionFormProcess = () => {
                   {secondLine && (
                     <div
                       style={{
-
                         letterSpacing: "2px",
                         fontWeight: "bold",
                       }}
@@ -506,14 +504,18 @@ const AdmissionFormProcess = () => {
                     </div>
                   )}
                   {campusAddress && (
-                    <div style={{ fontSize: "12px", letterSpacing: "1px", fontFamily: "Arial" }}>
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        letterSpacing: "1px",
+                        fontFamily: "Arial",
+                      }}
+                    >
                       {campusAddress}
                     </div>
                   )}
 
-                  <div
-                    style={{ fontFamily: "Arial", letterSpacing: "1px" }}
-                  >
+                  <div style={{ fontFamily: "Arial", letterSpacing: "1px" }}>
                     <b>OFFICE OF THE ADMISSION SERVICES</b>
                   </div>
 
@@ -537,14 +539,12 @@ const AdmissionFormProcess = () => {
                 <div
                   style={{
                     display: "flex",
-                    flexDirection: "row",   // ✅ side by side
+                    flexDirection: "row", // ✅ side by side
                     alignItems: "center",
                     marginRight: "10px",
-                    gap: "10px",            // ✅ 10px space between them
+                    gap: "10px", // ✅ 10px space between them
                   }}
                 >
-
-
                   <div
                     style={{
                       width: "1.3in",
@@ -552,10 +552,10 @@ const AdmissionFormProcess = () => {
                       display: "flex",
                       justifyContent: "center",
                       alignItems: "center",
-                      border: "1px solid black",  // ✅ same border as profile_img
-                      background: "#fff",         // ✅ same background
+                      border: "1px solid black", // ✅ same border as profile_img
+                      background: "#fff", // ✅ same background
                       flexShrink: 0,
-                      position: "relative"        // ✅ needed for overlay text
+                      position: "relative", // ✅ needed for overlay text
                     }}
                   >
                     {person?.qr_code ? (
@@ -580,25 +580,19 @@ const AdmissionFormProcess = () => {
                         fontWeight: "bold",
                         color: "maroon",
                         background: "white",
-                        padding: "2px"
+                        padding: "2px",
                       }}
                     >
                       {person.applicant_number}
                     </div>
                   </div>
-
-
                 </div>
-
               </div>
             </div>
-
-
           </Container>
           <br />
           <br />
           <table
-
             style={{
               borderCollapse: "collapse",
               fontFamily: "Arial, Helvetica, sans-serif",
@@ -610,7 +604,6 @@ const AdmissionFormProcess = () => {
               tableLayout: "fixed",
             }}
           >
-
             <tbody>
               {/* Name of Student Row */}
               {/* Name of Student Row */}
@@ -618,13 +611,18 @@ const AdmissionFormProcess = () => {
                 <td
                   colSpan={40}
                   style={{
-
                     fontSize: "13px",
                     paddingTop: "5px",
                     marginTop: 0,
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
                     <span
                       style={{
                         fontWeight: "bold",
@@ -634,17 +632,51 @@ const AdmissionFormProcess = () => {
                     >
                       Name of Student:
                     </span>
-                    <div style={{ flexGrow: 1, display: "flex", justifyContent: "space-between" }}>
-                      <span style={{ width: "25%", textAlign: "center", fontSize: "14.5px", borderBottom: "1px solid black" }}>
+                    <div
+                      style={{
+                        flexGrow: 1,
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: "25%",
+                          textAlign: "center",
+                          fontSize: "14.5px",
+                          borderBottom: "1px solid black",
+                        }}
+                      >
                         {person.last_name}
                       </span>
-                      <span style={{ width: "25%", textAlign: "center", fontSize: "14.5px", borderBottom: "1px solid black" }}>
+                      <span
+                        style={{
+                          width: "25%",
+                          textAlign: "center",
+                          fontSize: "14.5px",
+                          borderBottom: "1px solid black",
+                        }}
+                      >
                         {person.first_name}
                       </span>
-                      <span style={{ width: "25%", textAlign: "center", fontSize: "14.5px", borderBottom: "1px solid black" }}>
+                      <span
+                        style={{
+                          width: "25%",
+                          textAlign: "center",
+                          fontSize: "14.5px",
+                          borderBottom: "1px solid black",
+                        }}
+                      >
                         {person.middle_name}
                       </span>
-                      <span style={{ width: "25%", textAlign: "center", fontSize: "14.5px", borderBottom: "1px solid black" }}>
+                      <span
+                        style={{
+                          width: "25%",
+                          textAlign: "center",
+                          fontSize: "14.5px",
+                          borderBottom: "1px solid black",
+                        }}
+                      >
                         {person.extension}
                       </span>
                     </div>
@@ -657,7 +689,6 @@ const AdmissionFormProcess = () => {
                 <td
                   colSpan={40}
                   style={{
-
                     fontSize: "12px",
                     paddingTop: "2px",
                   }}
@@ -667,33 +698,86 @@ const AdmissionFormProcess = () => {
                       display: "flex",
                       justifyContent: "space-between",
                       marginLeft: "120px",
-                      marginTop: "-4px"
+                      marginTop: "-4px",
                     }}
                   >
-                    <span style={{ width: "25%", textAlign: "center" }}>Last Name</span>
-                    <span style={{ width: "25%", textAlign: "center" }}>Given Name</span>
-                    <span style={{ width: "25%", textAlign: "center" }}>Middle Name</span>
-                    <span style={{ width: "25%", textAlign: "center" }}>Ext. Name</span>
+                    <span style={{ width: "25%", textAlign: "center" }}>
+                      Last Name
+                    </span>
+                    <span style={{ width: "25%", textAlign: "center" }}>
+                      Given Name
+                    </span>
+                    <span style={{ width: "25%", textAlign: "center" }}>
+                      Middle Name
+                    </span>
+                    <span style={{ width: "25%", textAlign: "center" }}>
+                      Ext. Name
+                    </span>
                   </div>
                 </td>
               </tr>
 
-
               {/* Email & Applicant ID */}
               <tr style={{ fontSize: "13px" }}>
                 <td colSpan={20}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Email:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "14px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.emailAddress}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Email:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.emailAddress}
+                      </div>
                     </span>
                   </div>
                 </td>
                 <td colSpan={20}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Applicant Id No.:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "14px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.emailAddress}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Applicant Id No.:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.emailAddress}
+                      </div>
                     </span>
                   </div>
                 </td>
@@ -702,19 +786,37 @@ const AdmissionFormProcess = () => {
               {/* Permanent Address */}
               <tr style={{ fontSize: "13px" }}>
                 <td colSpan={40}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%", marginTop: "2px" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Permanent Address:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                      marginTop: "2px",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Permanent Address:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
                       <div style={{ marginTop: "-3px" }} className="dataField">
-                        {person.permanentStreet}{" "}
-                        {person.permanentBarangay}{" "}
-                        {person.permanentMunicipality}{" "}
-                        {person.permanentRegion}{" "}
+                        {person.permanentStreet} {person.permanentBarangay}{" "}
+                        {person.permanentMunicipality} {person.permanentRegion}{" "}
                         {person.permanentZipCode}
                       </div>
                     </span>
-
-
                   </div>
                 </td>
               </tr>
@@ -722,26 +824,100 @@ const AdmissionFormProcess = () => {
               {/* Cellphone No, Civil Status, Gender */}
               <tr style={{ fontSize: "13px" }}>
                 <td colSpan={13}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Cellphone No:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.cellphoneNumber}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Cellphone No:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.cellphoneNumber}
+                      </div>
                     </span>
                   </div>
                 </td>
                 <td colSpan={13}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Civil Status:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.civilStatus}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Civil Status:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.civilStatus}
+                      </div>
                     </span>
                   </div>
                 </td>
                 <td colSpan={14}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Gender:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">   {person.gender === 0 ? "Male" : person.gender === 1 ? "Female" : ""}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Gender:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {" "}
+                        {person.gender === 0
+                          ? "Male"
+                          : person.gender === 1
+                            ? "Female"
+                            : ""}
+                      </div>
                     </span>
                   </div>
                 </td>
@@ -750,26 +926,95 @@ const AdmissionFormProcess = () => {
               {/* Date of Birth, Place of Birth, Age */}
               <tr style={{ fontSize: "13px" }}>
                 <td colSpan={13}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Date of Birth:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.birthOfDate}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Date of Birth:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.birthOfDate}
+                      </div>
                     </span>
                   </div>
                 </td>
                 <td colSpan={14}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Place of Birth:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.birthPlace}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Place of Birth:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.birthPlace}
+                      </div>
                     </span>
                   </div>
                 </td>
                 <td colSpan={13}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Age:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.age}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Age:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.age}
+                      </div>
                     </span>
                   </div>
                 </td>
@@ -778,8 +1023,20 @@ const AdmissionFormProcess = () => {
               <tr style={{ fontSize: "13px" }}>
                 {/* Please Check */}
                 <td colSpan={10}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
                       Please Check (✓):
                     </label>
                     <span
@@ -797,8 +1054,20 @@ const AdmissionFormProcess = () => {
 
                 {/* Freshman */}
                 <td colSpan={10}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
                       Freshman:
                     </label>
                     <span
@@ -812,15 +1081,31 @@ const AdmissionFormProcess = () => {
                         fontWeight: "bold",
                       }}
                     >
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.classifiedAs === "Freshman (First Year)" ? "✓" : ""}</div>
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.classifiedAs === "Freshman (First Year)"
+                          ? "✓"
+                          : ""}
+                      </div>
                     </span>
                   </div>
                 </td>
 
                 {/* Transferee */}
                 <td colSpan={10}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
                       Transferee:
                     </label>
                     <span
@@ -834,15 +1119,33 @@ const AdmissionFormProcess = () => {
                         fontWeight: "bold",
                       }}
                     >
-                      <div style={{ marginTop: "-3px" }} className="dataField">{["Transferee", "Returnee", "Shiftee"].includes(person.classifiedAs) ? "✓" : ""}</div>
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {["Transferee", "Returnee", "Shiftee"].includes(
+                          person.classifiedAs,
+                        )
+                          ? "✓"
+                          : ""}
+                      </div>
                     </span>
                   </div>
                 </td>
 
                 {/* Others */}
                 <td colSpan={10}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
                       Others:
                     </label>
                     <span
@@ -856,20 +1159,44 @@ const AdmissionFormProcess = () => {
                         fontWeight: "bold",
                       }}
                     >
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.classifiedAs === "Foreign Student" ? "✓" : ""}</div>
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.classifiedAs === "Foreign Student" ? "✓" : ""}
+                      </div>
                     </span>
                   </div>
                 </td>
               </tr>
 
-
               {/* Last School Attended */}
               <tr style={{ fontSize: "13px" }}>
                 <td colSpan={40}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Last School Attended:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.schoolLastAttended1}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Last School Attended:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.schoolLastAttended1}
+                      </div>
                     </span>
                   </div>
                 </td>
@@ -878,7 +1205,13 @@ const AdmissionFormProcess = () => {
               {/* Degree/Program & Major */}
               <tr style={{ fontSize: "13px" }}>
                 <td colSpan={25} style={{ verticalAlign: "top" }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      width: "100%",
+                    }}
+                  >
                     <label
                       style={{
                         fontWeight: "bold",
@@ -893,7 +1226,7 @@ const AdmissionFormProcess = () => {
                         flexGrow: 1,
                         borderBottom: "1px solid black",
                         minHeight: "1.2em",
-                        whiteSpace: "normal",   // allow text wrapping
+                        whiteSpace: "normal", // allow text wrapping
                         wordWrap: "break-word", // break long words
                         lineHeight: "1.4em",
                         paddingBottom: "2px",
@@ -901,17 +1234,24 @@ const AdmissionFormProcess = () => {
                     >
                       {curriculumOptions.length > 0
                         ? curriculumOptions.find(
-                          (item) =>
-                            item?.curriculum_id?.toString() ===
-                            (person?.program ?? "").toString()
-                        )?.program_description || (person?.program ?? "")
+                            (item) =>
+                              item?.curriculum_id?.toString() ===
+                              (person?.program ?? "").toString(),
+                          )?.program_description ||
+                          (person?.program ?? "")
                         : "Loading..."}
                     </div>
                   </div>
                 </td>
 
                 <td colSpan={15} style={{ verticalAlign: "top" }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      width: "100%",
+                    }}
+                  >
                     <label
                       style={{
                         fontWeight: "bold",
@@ -934,25 +1274,21 @@ const AdmissionFormProcess = () => {
                     >
                       {curriculumOptions.length > 0
                         ? curriculumOptions.find(
-                          (item) =>
-                            item?.curriculum_id?.toString() ===
-                            (person?.program ?? "").toString()
-                        )?.major || ""
+                            (item) =>
+                              item?.curriculum_id?.toString() ===
+                              (person?.program ?? "").toString(),
+                          )?.major || ""
                         : "Loading..."}
                     </div>
                   </div>
                 </td>
               </tr>
 
-
-
-
               <tr>
                 <td colSpan="40" style={{ height: "0.5px" }}></td>
               </tr>
 
               <tr>
-
                 <td
                   colSpan={40}
                   style={{
@@ -971,14 +1307,25 @@ const AdmissionFormProcess = () => {
                     }}
                   >
                     <b>{"\u00A0\u00A0"}APPLICATION PROCEDURE:</b>
-                    {"\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0"}For Enrollment Officer: Please sign and put Remarks box if they done
+                    {
+                      "\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0"
+                    }
+                    For Enrollment Officer: Please sign and put Remarks box if
+                    they done
                   </div>
                 </td>
-
               </tr>
 
               <tr>
-                <td colSpan={15} style={{ border: "1px solid black", textAlign: "left", padding: "8px", fontSize: "12px" }}>
+                <td
+                  colSpan={15}
+                  style={{
+                    border: "1px solid black",
+                    textAlign: "left",
+                    padding: "8px",
+                    fontSize: "12px",
+                  }}
+                >
                   <b> Guidance Office</b> (as per Schedule)
                   <br />
                   <b> Step 1:</b> ECAT Examination
@@ -986,199 +1333,272 @@ const AdmissionFormProcess = () => {
                 <td
                   colSpan={5}
                   style={{
-
                     height: "50px",
                     textAlign: "center",
                     verticalAlign: "middle",
                   }}
+                ></td>
+
+                <td
+                  colSpan={16}
+                  style={{
+                    fontSize: "12px",
+                    fontFamily: "Arial",
+                    border: "1px solid black",
+                    padding: "8px",
+                    textAlign: "left",
+                  }}
                 >
-
-                </td>
-
-                <td colSpan={16} style={{ fontSize: "12px", fontFamily: "Arial", border: "1px solid black", padding: "8px", textAlign: "left" }}> <b>College Dean's Office</b>
+                  {" "}
+                  <b>College Dean's Office</b>
                   <br />
-                  <b>Step 2: </b>College Interview, Qualifying / Aptitude Test and College Approval
-
+                  <b>Step 2: </b>College Interview, Qualifying / Aptitude Test
+                  and College Approval
                 </td>
                 <td
                   colSpan={5}
                   style={{
-
                     textAlign: "center",
                     verticalAlign: "middle",
                     height: "35px",
-
                   }}
-                >
-
-                </td>
+                ></td>
               </tr>
               <tr>
-                <td colSpan={15} style={{ border: "1px solid black", textAlign: "center", padding: "8px", fontSize: "12px" }}>
-
-                </td>
+                <td
+                  colSpan={15}
+                  style={{
+                    border: "1px solid black",
+                    textAlign: "center",
+                    padding: "8px",
+                    fontSize: "12px",
+                  }}
+                ></td>
                 <td
                   colSpan={5}
                   style={{
-
                     textAlign: "center",
                     verticalAlign: "middle",
                     height: "50px",
-
                   }}
                 >
-
                   <ForwardIcon
                     sx={{
                       marginTop: "-53px",
                       fontSize: 70, // normal screen size
-                      '@media print': {
+                      "@media print": {
                         fontSize: 14, // smaller print size
                         margin: 0,
-                      }
+                      },
                     }}
                   />
-
-                </td>
-                <td colSpan={5} style={{ border: "1px solid black", textAlign: "center", padding: "8px", fontSize: "12px" }}>
-
-                </td>
-                <td colSpan={6} style={{ border: "1px solid black", textAlign: "center", padding: "8px", fontSize: "12px" }}>
-
-                </td>
-                <td colSpan={5} style={{ border: "1px solid black", textAlign: "center", padding: "8px", fontSize: "12px" }}>
-
                 </td>
                 <td
                   colSpan={5}
                   style={{
-
+                    border: "1px solid black",
+                    textAlign: "center",
+                    padding: "8px",
+                    fontSize: "12px",
+                  }}
+                ></td>
+                <td
+                  colSpan={6}
+                  style={{
+                    border: "1px solid black",
+                    textAlign: "center",
+                    padding: "8px",
+                    fontSize: "12px",
+                  }}
+                ></td>
+                <td
+                  colSpan={5}
+                  style={{
+                    border: "1px solid black",
+                    textAlign: "center",
+                    padding: "8px",
+                    fontSize: "12px",
+                  }}
+                ></td>
+                <td
+                  colSpan={5}
+                  style={{
                     textAlign: "center",
                     verticalAlign: "middle",
                   }}
                 >
-
                   <ForwardIcon
                     sx={{
                       marginTop: "-53px",
                       fontSize: 70, // normal screen size
-                      '@media print': {
+                      "@media print": {
                         fontSize: 14, // smaller print size
                         margin: 0,
-                      }
+                      },
                     }}
                   />
-
                 </td>
-
               </tr>
-
 
               <tr>
                 <td colSpan="40" style={{ height: "20px" }}></td>
               </tr>
 
-
               <tr>
-                <td colSpan={10} style={{ border: "1px solid black", textAlign: "left", padding: "8px", fontSize: "12px", }}>
-                  <b> Medical and Dental Service Office</b><br />   <b>Step 3:</b> Medical Examination
+                <td
+                  colSpan={10}
+                  style={{
+                    border: "1px solid black",
+                    textAlign: "left",
+                    padding: "8px",
+                    fontSize: "12px",
+                  }}
+                >
+                  <b> Medical and Dental Service Office</b>
+                  <br /> <b>Step 3:</b> Medical Examination
                 </td>
                 <td
                   colSpan={5}
                   style={{
-
                     textAlign: "center",
                     verticalAlign: "middle",
+                  }}
+                ></td>
 
+                <td
+                  colSpan={11}
+                  style={{
+                    fontSize: "12px",
+                    fontFamily: "Arial",
+                    border: "1px solid black",
+                    padding: "8px",
+                    textAlign: "left",
                   }}
                 >
-
-                </td>
-
-                <td colSpan={11} style={{ fontSize: "12px", fontFamily: "Arial", border: "1px solid black", padding: "8px", textAlign: "left" }}> <b>Registrar's Office</b><br /><b>Step 4:</b> Submission of Original Cridentials
-
+                  {" "}
+                  <b>Registrar's Office</b>
+                  <br />
+                  <b>Step 4:</b> Submission of Original Cridentials
                 </td>
                 <td
                   colSpan={5}
                   style={{
-
                     textAlign: "center",
                     verticalAlign: "middle",
-
+                  }}
+                ></td>
+                <td
+                  colSpan={10}
+                  style={{
+                    fontSize: "12px",
+                    fontFamily: "Arial",
+                    border: "1px solid black",
+                    padding: "8px",
+                    textAlign: "left",
                   }}
                 >
-
+                  {" "}
+                  <b>College Dean's Office</b>
+                  <br />
+                  <b>Step 5:</b>College Enrollment
                 </td>
-                <td colSpan={10} style={{ fontSize: "12px", fontFamily: "Arial", border: "1px solid black", padding: "8px", textAlign: "left" }}> <b>College Dean's Office</b><br /><b>Step 5:</b>College Enrollment</td>
               </tr>
 
               <tr>
-                <td colSpan={10} style={{ border: "1px solid black", textAlign: "center", padding: "8px", fontSize: "12px", }}>
-
-                </td>
+                <td
+                  colSpan={10}
+                  style={{
+                    border: "1px solid black",
+                    textAlign: "center",
+                    padding: "8px",
+                    fontSize: "12px",
+                  }}
+                ></td>
                 <td
                   colSpan={5}
                   style={{
-
                     textAlign: "center",
                     verticalAlign: "middle",
                   }}
                 >
-
                   <ForwardIcon
                     sx={{
                       marginTop: "-53px",
                       fontSize: 70, // normal screen size
-                      '@media print': {
+                      "@media print": {
                         fontSize: 14, // smaller print size
                         margin: 0,
-                      }
+                      },
                     }}
                   />
-
                 </td>
 
-
-                <td colSpan={11} style={{ height: "50px", fontSize: "12px", fontFamily: "Arial", border: "1px solid black", padding: "8px", textAlign: "left" }}>
-
-                </td>
+                <td
+                  colSpan={11}
+                  style={{
+                    height: "50px",
+                    fontSize: "12px",
+                    fontFamily: "Arial",
+                    border: "1px solid black",
+                    padding: "8px",
+                    textAlign: "left",
+                  }}
+                ></td>
                 <td
                   colSpan={5}
                   style={{
-
                     textAlign: "center",
                     verticalAlign: "middle",
                   }}
                 >
-
                   <ForwardIcon
                     sx={{
                       marginTop: "-53px",
                       fontSize: 70, // normal screen size
-                      '@media print': {
+                      "@media print": {
                         fontSize: 14, // smaller print size
                         margin: 0,
-                      }
+                      },
                     }}
                   />
-
                 </td>
-                <td colSpan={10} style={{ fontSize: "12px", fontFamily: "Arial", border: "1px solid black", padding: "8px", textAlign: "left" }}> </td>
+                <td
+                  colSpan={10}
+                  style={{
+                    fontSize: "12px",
+                    fontFamily: "Arial",
+                    border: "1px solid black",
+                    padding: "8px",
+                    textAlign: "left",
+                  }}
+                >
+                  {" "}
+                </td>
               </tr>
 
-
-
               <tr>
-                <td colSpan={40} style={{ height: "0.2in", fontSize: "72.5%", border: "transparent", color: "white" }}>
-                  <div style={{ fontWeight: "normal", fontSize: "14px", color: "black", textAlign: "right" }}>
+                <td
+                  colSpan={40}
+                  style={{
+                    height: "0.2in",
+                    fontSize: "72.5%",
+                    border: "transparent",
+                    color: "white",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: "normal",
+                      fontSize: "14px",
+                      color: "black",
+                      textAlign: "right",
+                    }}
+                  >
                     Registrar's Copy
                   </div>
                 </td>
               </tr>
-
-
             </tbody>
-
           </table>
 
           <hr
@@ -1191,11 +1611,7 @@ const AdmissionFormProcess = () => {
             }}
           />
 
-
-
           <Container>
-
-
             <div
               style={{
                 width: "8in", // matches table width assuming 8in for 40 columns
@@ -1226,7 +1642,6 @@ const AdmissionFormProcess = () => {
                       marginLeft: "10px",
                       marginTop: "-25px",
                       borderRadius: "50%", // ✅ Makes it perfectly circular
-
                     }}
                   />
                 </div>
@@ -1244,14 +1659,11 @@ const AdmissionFormProcess = () => {
                     paddingBottom: 0,
                   }}
                 >
-                  <div
-                    style={{ fontFamily: "Arial", fontSize: "12px" }}
-                  >
+                  <div style={{ fontFamily: "Arial", fontSize: "12px" }}>
                     Republic of the Philippines
                   </div>
                   <div
                     style={{
-
                       letterSpacing: "2px",
                       fontWeight: "bold",
                     }}
@@ -1261,7 +1673,6 @@ const AdmissionFormProcess = () => {
                   {secondLine && (
                     <div
                       style={{
-
                         letterSpacing: "2px",
                         fontWeight: "bold",
                       }}
@@ -1270,14 +1681,18 @@ const AdmissionFormProcess = () => {
                     </div>
                   )}
                   {campusAddress && (
-                    <div style={{ fontSize: "12px", letterSpacing: "1px", fontFamily: "Arial" }}>
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        letterSpacing: "1px",
+                        fontFamily: "Arial",
+                      }}
+                    >
                       {campusAddress}
                     </div>
                   )}
 
-                  <div
-                    style={{ fontFamily: "Arial", letterSpacing: "1px" }}
-                  >
+                  <div style={{ fontFamily: "Arial", letterSpacing: "1px" }}>
                     <b>OFFICE OF THE ADMISSION SERVICES</b>
                   </div>
 
@@ -1301,14 +1716,12 @@ const AdmissionFormProcess = () => {
                 <div
                   style={{
                     display: "flex",
-                    flexDirection: "row",   // ✅ side by side
+                    flexDirection: "row", // ✅ side by side
                     alignItems: "center",
                     marginRight: "10px",
-                    gap: "10px",            // ✅ 10px space between them
+                    gap: "10px", // ✅ 10px space between them
                   }}
                 >
-
-
                   <div
                     style={{
                       width: "1.3in",
@@ -1316,10 +1729,10 @@ const AdmissionFormProcess = () => {
                       display: "flex",
                       justifyContent: "center",
                       alignItems: "center",
-                      border: "1px solid black",  // ✅ same border as profile_img
-                      background: "#fff",         // ✅ same background
+                      border: "1px solid black", // ✅ same border as profile_img
+                      background: "#fff", // ✅ same background
                       flexShrink: 0,
-                      position: "relative"        // ✅ needed for overlay text
+                      position: "relative", // ✅ needed for overlay text
                     }}
                   >
                     {person?.qr_code ? (
@@ -1344,24 +1757,19 @@ const AdmissionFormProcess = () => {
                         fontWeight: "bold",
                         color: "maroon",
                         background: "white",
-                        padding: "2px"
+                        padding: "2px",
                       }}
                     >
                       {person.applicant_number}
                     </div>
                   </div>
-
                 </div>
-
               </div>
             </div>
-
-
           </Container>
           <br />
           <br />
           <table
-
             style={{
               borderCollapse: "collapse",
               fontFamily: "Arial, Helvetica, sans-serif",
@@ -1373,7 +1781,6 @@ const AdmissionFormProcess = () => {
               tableLayout: "fixed",
             }}
           >
-
             <tbody>
               {/* Name of Student Row */}
               {/* Name of Student Row */}
@@ -1381,13 +1788,18 @@ const AdmissionFormProcess = () => {
                 <td
                   colSpan={40}
                   style={{
-
                     fontSize: "13px",
                     paddingTop: "5px",
                     marginTop: 0,
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
                     <span
                       style={{
                         fontWeight: "bold",
@@ -1397,17 +1809,51 @@ const AdmissionFormProcess = () => {
                     >
                       Name of Student:
                     </span>
-                    <div style={{ flexGrow: 1, display: "flex", justifyContent: "space-between" }}>
-                      <span style={{ width: "25%", textAlign: "center", fontSize: "14.5px", borderBottom: "1px solid black" }}>
+                    <div
+                      style={{
+                        flexGrow: 1,
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: "25%",
+                          textAlign: "center",
+                          fontSize: "14.5px",
+                          borderBottom: "1px solid black",
+                        }}
+                      >
                         {person.last_name}
                       </span>
-                      <span style={{ width: "25%", textAlign: "center", fontSize: "14.5px", borderBottom: "1px solid black" }}>
+                      <span
+                        style={{
+                          width: "25%",
+                          textAlign: "center",
+                          fontSize: "14.5px",
+                          borderBottom: "1px solid black",
+                        }}
+                      >
                         {person.first_name}
                       </span>
-                      <span style={{ width: "25%", textAlign: "center", fontSize: "14.5px", borderBottom: "1px solid black" }}>
+                      <span
+                        style={{
+                          width: "25%",
+                          textAlign: "center",
+                          fontSize: "14.5px",
+                          borderBottom: "1px solid black",
+                        }}
+                      >
                         {person.middle_name}
                       </span>
-                      <span style={{ width: "25%", textAlign: "center", fontSize: "14.5px", borderBottom: "1px solid black" }}>
+                      <span
+                        style={{
+                          width: "25%",
+                          textAlign: "center",
+                          fontSize: "14.5px",
+                          borderBottom: "1px solid black",
+                        }}
+                      >
                         {person.extension}
                       </span>
                     </div>
@@ -1420,7 +1866,6 @@ const AdmissionFormProcess = () => {
                 <td
                   colSpan={40}
                   style={{
-
                     fontSize: "12px",
                     paddingTop: "2px",
                   }}
@@ -1430,33 +1875,86 @@ const AdmissionFormProcess = () => {
                       display: "flex",
                       justifyContent: "space-between",
                       marginLeft: "120px",
-                      marginTop: "-4px"
+                      marginTop: "-4px",
                     }}
                   >
-                    <span style={{ width: "25%", textAlign: "center" }}>Last Name</span>
-                    <span style={{ width: "25%", textAlign: "center" }}>Given Name</span>
-                    <span style={{ width: "25%", textAlign: "center" }}>Middle Name</span>
-                    <span style={{ width: "25%", textAlign: "center" }}>Ext. Name</span>
+                    <span style={{ width: "25%", textAlign: "center" }}>
+                      Last Name
+                    </span>
+                    <span style={{ width: "25%", textAlign: "center" }}>
+                      Given Name
+                    </span>
+                    <span style={{ width: "25%", textAlign: "center" }}>
+                      Middle Name
+                    </span>
+                    <span style={{ width: "25%", textAlign: "center" }}>
+                      Ext. Name
+                    </span>
                   </div>
                 </td>
               </tr>
 
-
               {/* Email & Applicant ID */}
               <tr style={{ fontSize: "13px" }}>
                 <td colSpan={20}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Email:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "14px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.emailAddress}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Email:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.emailAddress}
+                      </div>
                     </span>
                   </div>
                 </td>
                 <td colSpan={20}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Applicant Id No.:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "14px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.emailAddress}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Applicant Id No.:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.emailAddress}
+                      </div>
                     </span>
                   </div>
                 </td>
@@ -1465,19 +1963,36 @@ const AdmissionFormProcess = () => {
               {/* Permanent Address */}
               <tr style={{ fontSize: "13px" }}>
                 <td colSpan={40}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Permanent Address:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Permanent Address:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
                       <div style={{ marginTop: "-3px" }} className="dataField">
-                        {person.permanentStreet}{" "}
-                        {person.permanentBarangay}{" "}
-                        {person.permanentMunicipality}{" "}
-                        {person.permanentRegion}{" "}
+                        {person.permanentStreet} {person.permanentBarangay}{" "}
+                        {person.permanentMunicipality} {person.permanentRegion}{" "}
                         {person.permanentZipCode}
                       </div>
                     </span>
-
-
                   </div>
                 </td>
               </tr>
@@ -1485,26 +2000,100 @@ const AdmissionFormProcess = () => {
               {/* Cellphone No, Civil Status, Gender */}
               <tr style={{ fontSize: "13px" }}>
                 <td colSpan={13}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Cellphone No:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.cellphoneNumber}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Cellphone No:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.cellphoneNumber}
+                      </div>
                     </span>
                   </div>
                 </td>
                 <td colSpan={13}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Civil Status:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.civilStatus}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Civil Status:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.civilStatus}
+                      </div>
                     </span>
                   </div>
                 </td>
                 <td colSpan={14}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Gender:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">   {person.gender === 0 ? "Male" : person.gender === 1 ? "Female" : ""}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Gender:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {" "}
+                        {person.gender === 0
+                          ? "Male"
+                          : person.gender === 1
+                            ? "Female"
+                            : ""}
+                      </div>
                     </span>
                   </div>
                 </td>
@@ -1513,26 +2102,95 @@ const AdmissionFormProcess = () => {
               {/* Date of Birth, Place of Birth, Age */}
               <tr style={{ fontSize: "13px" }}>
                 <td colSpan={13}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Date of Birth:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.birthOfDate}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Date of Birth:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.birthOfDate}
+                      </div>
                     </span>
                   </div>
                 </td>
                 <td colSpan={14}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Place of Birth:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.birthPlace}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Place of Birth:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.birthPlace}
+                      </div>
                     </span>
                   </div>
                 </td>
                 <td colSpan={13}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Age:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.age}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Age:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.age}
+                      </div>
                     </span>
                   </div>
                 </td>
@@ -1541,8 +2199,20 @@ const AdmissionFormProcess = () => {
               <tr style={{ fontSize: "13px" }}>
                 {/* Please Check */}
                 <td colSpan={10}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
                       Please Check (✓):
                     </label>
                     <span
@@ -1560,8 +2230,20 @@ const AdmissionFormProcess = () => {
 
                 {/* Freshman */}
                 <td colSpan={10}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
                       Freshman:
                     </label>
                     <span
@@ -1575,15 +2257,31 @@ const AdmissionFormProcess = () => {
                         fontWeight: "bold",
                       }}
                     >
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.classifiedAs === "Freshman (First Year)" ? "✓" : ""}</div>
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.classifiedAs === "Freshman (First Year)"
+                          ? "✓"
+                          : ""}
+                      </div>
                     </span>
                   </div>
                 </td>
 
                 {/* Transferee */}
                 <td colSpan={10}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
                       Transferee:
                     </label>
                     <span
@@ -1597,15 +2295,33 @@ const AdmissionFormProcess = () => {
                         fontWeight: "bold",
                       }}
                     >
-                      <div style={{ marginTop: "-3px" }} className="dataField">{["Transferee", "Returnee", "Shiftee"].includes(person.classifiedAs) ? "✓" : ""}</div>
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {["Transferee", "Returnee", "Shiftee"].includes(
+                          person.classifiedAs,
+                        )
+                          ? "✓"
+                          : ""}
+                      </div>
                     </span>
                   </div>
                 </td>
 
                 {/* Others */}
                 <td colSpan={10}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
                       Others:
                     </label>
                     <span
@@ -1619,20 +2335,44 @@ const AdmissionFormProcess = () => {
                         fontWeight: "bold",
                       }}
                     >
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.classifiedAs === "Foreign Student" ? "✓" : ""}</div>
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.classifiedAs === "Foreign Student" ? "✓" : ""}
+                      </div>
                     </span>
                   </div>
                 </td>
               </tr>
 
-
               {/* Last School Attended */}
               <tr style={{ fontSize: "13px" }}>
                 <td colSpan={40}>
-                  <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Last School Attended:</label>
-                    <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.3em", fontSize: "13px" }}>
-                      <div style={{ marginTop: "-3px" }} className="dataField">{person.schoolLastAttended1}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        marginRight: "10px",
+                      }}
+                    >
+                      Last School Attended:
+                    </label>
+                    <span
+                      style={{
+                        flexGrow: 1,
+                        borderBottom: "1px solid black",
+                        height: "1.3em",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div style={{ marginTop: "-3px" }} className="dataField">
+                        {person.schoolLastAttended1}
+                      </div>
                     </span>
                   </div>
                 </td>
@@ -1641,7 +2381,13 @@ const AdmissionFormProcess = () => {
               {/* Degree/Program & Major */}
               <tr style={{ fontSize: "13px" }}>
                 <td colSpan={25} style={{ verticalAlign: "top" }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      width: "100%",
+                    }}
+                  >
                     <label
                       style={{
                         fontWeight: "bold",
@@ -1656,7 +2402,7 @@ const AdmissionFormProcess = () => {
                         flexGrow: 1,
                         borderBottom: "1px solid black",
                         minHeight: "1.2em",
-                        whiteSpace: "normal",   // allow text wrapping
+                        whiteSpace: "normal", // allow text wrapping
                         wordWrap: "break-word", // break long words
                         lineHeight: "1.4em",
                         paddingBottom: "2px",
@@ -1664,17 +2410,24 @@ const AdmissionFormProcess = () => {
                     >
                       {curriculumOptions.length > 0
                         ? curriculumOptions.find(
-                          (item) =>
-                            item?.curriculum_id?.toString() ===
-                            (person?.program ?? "").toString()
-                        )?.program_description || (person?.program ?? "")
+                            (item) =>
+                              item?.curriculum_id?.toString() ===
+                              (person?.program ?? "").toString(),
+                          )?.program_description ||
+                          (person?.program ?? "")
                         : "Loading..."}
                     </div>
                   </div>
                 </td>
 
                 <td colSpan={15} style={{ verticalAlign: "top" }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      width: "100%",
+                    }}
+                  >
                     <label
                       style={{
                         fontWeight: "bold",
@@ -1697,26 +2450,21 @@ const AdmissionFormProcess = () => {
                     >
                       {curriculumOptions.length > 0
                         ? curriculumOptions.find(
-                          (item) =>
-                            item?.curriculum_id?.toString() ===
-                            (person?.program ?? "").toString()
-                        )?.major || ""
+                            (item) =>
+                              item?.curriculum_id?.toString() ===
+                              (person?.program ?? "").toString(),
+                          )?.major || ""
                         : "Loading..."}
                     </div>
                   </div>
                 </td>
               </tr>
 
-
-
-
-
               <tr>
                 <td colSpan="40" style={{ height: "10px" }}></td>
               </tr>
 
               <tr>
-
                 <td
                   colSpan={40}
                   style={{
@@ -1735,14 +2483,25 @@ const AdmissionFormProcess = () => {
                     }}
                   >
                     <b>{"\u00A0\u00A0"}APPLICATION PROCEDURE:</b>
-                    {"\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0"}For Enrollment Officer: Please sign and put Remarks box if they done
+                    {
+                      "\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0"
+                    }
+                    For Enrollment Officer: Please sign and put Remarks box if
+                    they done
                   </div>
                 </td>
-
               </tr>
 
               <tr>
-                <td colSpan={15} style={{ border: "1px solid black", textAlign: "left", padding: "8px", fontSize: "12px" }}>
+                <td
+                  colSpan={15}
+                  style={{
+                    border: "1px solid black",
+                    textAlign: "left",
+                    padding: "8px",
+                    fontSize: "12px",
+                  }}
+                >
                   <b> Guidance Office</b> (as per Schedule)
                   <br />
                   <b> Step 1:</b> ECAT Examination
@@ -1750,207 +2509,277 @@ const AdmissionFormProcess = () => {
                 <td
                   colSpan={5}
                   style={{
-
                     height: "50px",
                     textAlign: "center",
                     verticalAlign: "middle",
                   }}
+                ></td>
+
+                <td
+                  colSpan={16}
+                  style={{
+                    fontSize: "12px",
+                    fontFamily: "Arial",
+                    border: "1px solid black",
+                    padding: "8px",
+                    textAlign: "left",
+                  }}
                 >
-
-                </td>
-
-                <td colSpan={16} style={{ fontSize: "12px", fontFamily: "Arial", border: "1px solid black", padding: "8px", textAlign: "left" }}> <b>College Dean's Office</b>
+                  {" "}
+                  <b>College Dean's Office</b>
                   <br />
-                  <b>Step 2: </b>College Interview, Qualifying / Aptitude Test and College Approval
-
+                  <b>Step 2: </b>College Interview, Qualifying / Aptitude Test
+                  and College Approval
                 </td>
                 <td
                   colSpan={5}
                   style={{
-
                     textAlign: "center",
                     verticalAlign: "middle",
                     height: "35px",
-
                   }}
-                >
-
-                </td>
+                ></td>
               </tr>
               <tr>
-                <td colSpan={15} style={{ border: "1px solid black", textAlign: "center", padding: "8px", fontSize: "12px" }}>
-
-                </td>
+                <td
+                  colSpan={15}
+                  style={{
+                    border: "1px solid black",
+                    textAlign: "center",
+                    padding: "8px",
+                    fontSize: "12px",
+                  }}
+                ></td>
                 <td
                   colSpan={5}
                   style={{
-
                     textAlign: "center",
                     verticalAlign: "middle",
                     height: "50px",
-
                   }}
                 >
-
                   <ForwardIcon
                     sx={{
                       marginTop: "-53px",
                       fontSize: 70, // normal screen size
-                      '@media print': {
+                      "@media print": {
                         fontSize: 14, // smaller print size
                         margin: 0,
-                      }
+                      },
                     }}
                   />
-
-                </td>
-                <td colSpan={5} style={{ border: "1px solid black", textAlign: "center", padding: "8px", fontSize: "12px" }}>
-
-                </td>
-                <td colSpan={6} style={{ border: "1px solid black", textAlign: "center", padding: "8px", fontSize: "12px" }}>
-
-                </td>
-                <td colSpan={5} style={{ border: "1px solid black", textAlign: "center", padding: "8px", fontSize: "12px" }}>
-
                 </td>
                 <td
                   colSpan={5}
                   style={{
-
+                    border: "1px solid black",
+                    textAlign: "center",
+                    padding: "8px",
+                    fontSize: "12px",
+                  }}
+                ></td>
+                <td
+                  colSpan={6}
+                  style={{
+                    border: "1px solid black",
+                    textAlign: "center",
+                    padding: "8px",
+                    fontSize: "12px",
+                  }}
+                ></td>
+                <td
+                  colSpan={5}
+                  style={{
+                    border: "1px solid black",
+                    textAlign: "center",
+                    padding: "8px",
+                    fontSize: "12px",
+                  }}
+                ></td>
+                <td
+                  colSpan={5}
+                  style={{
                     textAlign: "center",
                     verticalAlign: "middle",
                   }}
                 >
-
                   <ForwardIcon
                     sx={{
                       marginTop: "-53px",
                       fontSize: 70, // normal screen size
-                      '@media print': {
+                      "@media print": {
                         fontSize: 14, // smaller print size
                         margin: 0,
-                      }
+                      },
                     }}
                   />
-
                 </td>
-
               </tr>
-
 
               <tr>
                 <td colSpan="40" style={{ height: "20px" }}></td>
               </tr>
 
-
               <tr>
-                <td colSpan={10} style={{ border: "1px solid black", textAlign: "left", padding: "8px", fontSize: "12px", }}>
-                  <b> Medical and Dental Service Office</b><br />   <b>Step 3:</b> Medical Examination
+                <td
+                  colSpan={10}
+                  style={{
+                    border: "1px solid black",
+                    textAlign: "left",
+                    padding: "8px",
+                    fontSize: "12px",
+                  }}
+                >
+                  <b> Medical and Dental Service Office</b>
+                  <br /> <b>Step 3:</b> Medical Examination
                 </td>
                 <td
                   colSpan={5}
                   style={{
-
                     textAlign: "center",
                     verticalAlign: "middle",
+                  }}
+                ></td>
 
+                <td
+                  colSpan={11}
+                  style={{
+                    fontSize: "12px",
+                    fontFamily: "Arial",
+                    border: "1px solid black",
+                    padding: "8px",
+                    textAlign: "left",
                   }}
                 >
-
-                </td>
-
-                <td colSpan={11} style={{ fontSize: "12px", fontFamily: "Arial", border: "1px solid black", padding: "8px", textAlign: "left" }}> <b>Registrar's Office</b><br /><b>Step 4:</b> Submission of Original Cridentials
-
+                  {" "}
+                  <b>Registrar's Office</b>
+                  <br />
+                  <b>Step 4:</b> Submission of Original Cridentials
                 </td>
                 <td
                   colSpan={5}
                   style={{
-
                     textAlign: "center",
                     verticalAlign: "middle",
-
+                  }}
+                ></td>
+                <td
+                  colSpan={10}
+                  style={{
+                    fontSize: "12px",
+                    fontFamily: "Arial",
+                    border: "1px solid black",
+                    padding: "8px",
+                    textAlign: "left",
                   }}
                 >
-
+                  {" "}
+                  <b>College Dean's Office</b>
+                  <br />
+                  <b>Step 5:</b>College Enrollment
                 </td>
-                <td colSpan={10} style={{ fontSize: "12px", fontFamily: "Arial", border: "1px solid black", padding: "8px", textAlign: "left" }}> <b>College Dean's Office</b><br /><b>Step 5:</b>College Enrollment</td>
               </tr>
 
               <tr>
-                <td colSpan={10} style={{ border: "1px solid black", textAlign: "center", padding: "8px", fontSize: "12px", }}>
-
-                </td>
+                <td
+                  colSpan={10}
+                  style={{
+                    border: "1px solid black",
+                    textAlign: "center",
+                    padding: "8px",
+                    fontSize: "12px",
+                  }}
+                ></td>
                 <td
                   colSpan={5}
                   style={{
-
                     textAlign: "center",
                     verticalAlign: "middle",
                   }}
                 >
-
                   <ForwardIcon
                     sx={{
                       marginTop: "-53px",
                       fontSize: 70, // normal screen size
-                      '@media print': {
+                      "@media print": {
                         fontSize: 14, // smaller print size
                         margin: 0,
-                      }
+                      },
                     }}
                   />
-
                 </td>
 
-
-                <td colSpan={11} style={{ height: "50px", fontSize: "12px", fontFamily: "Arial", border: "1px solid black", padding: "8px", textAlign: "left" }}>
-
-                </td>
+                <td
+                  colSpan={11}
+                  style={{
+                    height: "50px",
+                    fontSize: "12px",
+                    fontFamily: "Arial",
+                    border: "1px solid black",
+                    padding: "8px",
+                    textAlign: "left",
+                  }}
+                ></td>
                 <td
                   colSpan={5}
                   style={{
-
                     textAlign: "center",
                     verticalAlign: "middle",
                   }}
                 >
-
                   <ForwardIcon
                     sx={{
                       marginTop: "-53px",
                       fontSize: 70, // normal screen size
-                      '@media print': {
+                      "@media print": {
                         fontSize: 14, // smaller print size
                         margin: 0,
-                      }
+                      },
                     }}
                   />
-
                 </td>
-                <td colSpan={10} style={{ fontSize: "12px", fontFamily: "Arial", border: "1px solid black", padding: "8px", textAlign: "left" }}> </td>
+                <td
+                  colSpan={10}
+                  style={{
+                    fontSize: "12px",
+                    fontFamily: "Arial",
+                    border: "1px solid black",
+                    padding: "8px",
+                    textAlign: "left",
+                  }}
+                >
+                  {" "}
+                </td>
               </tr>
 
-
-
               <tr>
-                <td colSpan={40} style={{ height: "0.2in", fontSize: "72.5%", border: "transparent", color: "white" }}>
-                  <div style={{ fontWeight: "normal", fontSize: "14px", color: "black", textAlign: "right" }}>
+                <td
+                  colSpan={40}
+                  style={{
+                    height: "0.2in",
+                    fontSize: "72.5%",
+                    border: "transparent",
+                    color: "white",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: "normal",
+                      fontSize: "14px",
+                      color: "black",
+                      textAlign: "right",
+                    }}
+                  >
                     Dean's Copy
                   </div>
                 </td>
               </tr>
-
-
             </tbody>
-
           </table>
         </div>
       </Container>
-
     </Box>
   );
 };
 
 export default AdmissionFormProcess;
-
-

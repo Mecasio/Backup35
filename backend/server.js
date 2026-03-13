@@ -39,7 +39,7 @@ const allowedOrigins = [
   'http://192.168.50.211:5173',
   'http://136.239.248.62:5173',
   'http://192.168.50.62:5173',
-  'http://192.168.0.108:5173',
+  'http://192.168.0.180:5173',
 ];
 
 app.use(
@@ -5249,13 +5249,13 @@ WHERE proctor LIKE ?
       // ✅ Save to student_numbering_table
       await db3.query(
         `INSERT INTO student_numbering_table (student_number, person_id) VALUES (?, ?)`,
-        [student_number, personIdForStudent],
+        [student_number, personIdForStudent + 1],
       );
 
       await db3.query(
         `INSERT INTO person_status_table (person_id, exam_status, requirements, residency, student_registration_status, exam_result, hs_ave)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [personIdForStudent, 0, 0, 0, 0, 0, 0],
+        [personIdForStudent + 1, 0, 0, 0, 0, 0, 0],
       );
 
       // ✅ Copy requirements to db3
@@ -5266,7 +5266,7 @@ WHERE proctor LIKE ?
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             req.requirements_id,
-            personIdForStudent,
+            personIdForStudent + 1,
             req.submitted_documents,
             req.file_path,
             req.original_name,
@@ -5290,7 +5290,7 @@ WHERE proctor LIKE ?
       // ✅ Update registration status
       await db3.query(
         `UPDATE person_status_table SET student_registration_status = 1 WHERE person_id = ?`,
-        [personIdForStudent],
+        [personIdForStudent + 1],
       );
 
       await db3.query(
@@ -5299,7 +5299,7 @@ WHERE proctor LIKE ?
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
         [
-          personIdForStudent,
+          personIdForStudent + 1,
           student_number,
           studentProfileImg,
           person_data.campus,
@@ -5454,18 +5454,18 @@ WHERE proctor LIKE ?
       // ✅ Insert login credentials (or update if existing)
       const [existingUser] = await db3.query(
         `SELECT * FROM user_accounts WHERE person_id = ?`,
-        [personIdForStudent],
+        [personIdForStudent + 1],
       );
 
       if (existingUser.length === 0) {
         await db3.query(
           `INSERT INTO user_accounts (person_id, email, password, role) VALUES (?, ?, ?, 'student')`,
-          [personIdForStudent, person_data.emailAddress, hashedPassword],
+          [personIdForStudent + 1, person_data.emailAddress, hashedPassword],
         );
       } else {
         await db3.query(
           `UPDATE user_accounts SET email = ?, password = ?, role = 'student', status = 1 WHERE person_id = ?`,
-          [person_data.emailAddress, hashedPassword, personIdForStudent],
+          [person_data.emailAddress, hashedPassword, personIdForStudent + 1],
         );
       }
 
@@ -10301,6 +10301,7 @@ app.get(
   },
 );
 
+
 app.get("/get_school_year", async (req, res) => {
   try {
     const query = `
@@ -11613,11 +11614,12 @@ app.get("/api/student_schedule/:id", async (req, res) => {
     LEFT JOIN time_table AS tt
       ON tt.course_id = es.course_id
      AND tt.department_section_id = es.department_section_id
+     AND tt.school_year_id = es.active_school_year_id
     LEFT JOIN room_day_table AS rdt ON tt.room_day = rdt.id
     LEFT JOIN room_table AS rt ON tt.department_room_id = rt.room_id
     LEFT JOIN prof_table AS pft ON tt.professor_id = pft.prof_id
     JOIN active_school_year_table AS sy ON es.active_school_year_id = sy.id
-    WHERE pt.person_id = ? AND sy.astatus = 1;;`,
+    WHERE pt.person_id = ? AND sy.astatus = 1;`,
       [id],
     );
 
@@ -11686,7 +11688,8 @@ app.get("/api/student_grade/:id", async (req, res) => {
         JOIN section_table AS st ON dst.section_id = st.id
         LEFT JOIN time_table AS tt
           ON tt.course_id = es.course_id
-        AND tt.department_section_id = es.department_section_id
+          AND tt.department_section_id = es.department_section_id
+          AND tt.school_year_id = es.active_school_year_id
         LEFT JOIN room_day_table AS rdt ON tt.room_day = rdt.id
         LEFT JOIN room_table AS rt ON tt.department_room_id = rt.room_id
         LEFT JOIN prof_table AS pft ON tt.professor_id = pft.prof_id
@@ -11814,7 +11817,7 @@ app.get("/api/student_course/:id", async (req, res) => {
         LEFT JOIN year_table AS yrt ON sy.year_id = yrt.year_id
         LEFT JOIN year_table AS cyt ON cct.year_id = cyt.year_id
         LEFT JOIN semester_table AS smt ON sy.semester_id = smt.semester_id
-      WHERE pst.person_id = 1 AND sy.astatus = 1 AND es.fe_status = 0;
+      WHERE pst.person_id = ? AND sy.astatus = 1 AND es.fe_status = 0;
     `,
       [id],
     );
@@ -12374,6 +12377,7 @@ app.get("/api/person_data/:person_id/:role", async (req, res) => {
       const [rows] = await db3.query(
         `SELECT
            pt.person_id,
+           pt.employee_id,
            pt.profile_image,
            pt.fname,
            pt.lname,
@@ -12393,10 +12397,13 @@ app.get("/api/person_data/:person_id/:role", async (req, res) => {
            pt.middle_name AS mname,
            pt.last_name AS lname,
            ua.role,
+           snt.student_number,
            ua.email
          FROM person_table AS pt
          INNER JOIN user_accounts AS ua
            ON pt.person_id = ua.person_id
+         INNER JOIN student_numbering_table AS snt 
+           ON snt.person_id = pt.person_id
          WHERE pt.person_id = ? AND ua.role = 'student'`,
         [person_id],
       );
@@ -12876,15 +12883,15 @@ app.get("/api/college/persons", async (req, res) => {
   try {
     // STEP 1: Get all eligible persons (from ENROLLMENT DB)
     const [persons] = await db.execute(`
-        SELECT p.*, SUBSTRING(a.applicant_number, 5, 1) AS middle_code, pt.*
-        FROM admission.person_table p
-        JOIN admission.person_status_table ps ON p.person_id = ps.person_id
-        LEFT JOIN admission.applicant_numbering_table AS a
-          ON p.person_id = a.person_id
-        INNER JOIN enrollment.curriculum_table ct ON p.program = ct.curriculum_id
-        INNER JOIN enrollment.program_table pt ON ct.program_id = pt.program_id
-        WHERE ps.student_registration_status = 0 AND ps.exam_status = 1 AND ps.interview_status = 1
-        AND p.person_id NOT IN (SELECT person_id FROM enrollment.student_numbering_table);
+      SELECT p.*, SUBSTRING(a.applicant_number, 5, 1) AS middle_code, pt.*
+      FROM admission.person_table p
+      JOIN admission.person_status_table ps ON p.person_id = ps.person_id
+      LEFT JOIN admission.applicant_numbering_table AS a
+        ON p.person_id = a.person_id
+      INNER JOIN enrollment.curriculum_table ct ON p.program = ct.curriculum_id
+      INNER JOIN enrollment.program_table pt ON ct.program_id = pt.program_id
+      WHERE ps.student_registration_status = 0 AND ps.exam_status = 1 AND ps.interview_status = 1
+      AND p.emailAddress NOT IN (SELECT emailAddress FROM enrollment.person_table);
     `);
 
     if (persons.length === 0) return res.json([]);
@@ -12983,53 +12990,6 @@ app.put(
   },
 );
 
-// app.get("/api/college/persons", async (req, res) => {
-//   try {
-//     // STEP 1: Get all eligible persons (from ENROLLMENT DB)
-//     const [persons] = await db.execute(`
-//       SELECT p.*, SUBSTRING(a.applicant_number, 5, 1) AS middle_code
-//       FROM admission.person_table p
-//       JOIN admission.person_status_table ps ON p.person_id = ps.person_id
-//       LEFT JOIN admission.applicant_numbering_table AS a
-//         ON p.person_id = a.person_id
-//       WHERE ps.student_registration_status = 0
-//       AND p.person_id NOT IN (SELECT person_id FROM enrollment.student_numbering_table)
-//     `);
-
-//     if (persons.length === 0) return res.json([]);
-
-//     const personIds = persons.map((p) => p.person_id);
-
-//     // STEP 2: Get all applicant numbers for those person_ids (from ADMISSION DB)
-//     const [applicantNumbers] = await db.query(
-//       `
-//       SELECT applicant_number, person_id
-//       FROM applicant_numbering_table
-//       WHERE person_id IN (?)
-//     `,
-//       [personIds],
-//     );
-
-//     // Create a quick lookup map
-//     const applicantMap = {};
-//     for (let row of applicantNumbers) {
-//       applicantMap[row.person_id] = row.applicant_number;
-//     }
-
-//     // STEP 3: Merge applicant_number into each person object
-//     const merged = persons.map((person) => ({
-//       ...person,
-//       applicant_number: applicantMap[person.person_id] || null,
-//     }));
-
-//     res.json(merged);
-//   } catch (err) {
-//     console.error("❌ Error merging person + applicant ID:", err);
-//     res.status(500).send("Server error");
-//   }
-// });
-
-// --------------------------------- FOR MIGRATION DATA PANEL
 // --------------------------------- FOR MIGRATION DATA PANEL
 
 // 📌 Get interviewer schedules + applicants
@@ -13193,8 +13153,10 @@ app.put("/api/enrollment_person/:id", async (req, res) => {
 
 app.get("/api/student-person-data/:id", async (req, res) => {
   const { id } = req.params;
+  console.log("id: ",)
 
   try {
+
     const [rows] = await db3.query(
       `SELECT snt.student_number, pt.* FROM student_numbering_table AS snt
       LEFT JOIN person_table AS pt ON snt.person_id = pt.person_id
@@ -13207,6 +13169,7 @@ app.get("/api/student-person-data/:id", async (req, res) => {
     }
 
     res.json(rows[0]);
+    console.log("Person Data: ", rows[0])
   } catch (err) {
     console.error("Error fetching person data:", err);
     res.status(500).json({ error: "Database error" });
@@ -13672,6 +13635,7 @@ app.get("/registrar-users", async (req, res) => {
 
 app.get("/api/my_schedule/:prof_id", async (req, res) => {
   const { prof_id } = req.params;
+  console.log("Professor Id: ", prof_id);
   try {
     const sql = `
     SELECT rdt.description, rt.room_description, tt.school_time_start, tt.school_time_end, ct.course_code, pgt.program_code, st.description AS section  FROM time_table AS tt
@@ -13683,7 +13647,7 @@ app.get("/api/my_schedule/:prof_id", async (req, res) => {
     LEFT JOIN curriculum_table AS cct ON dst.curriculum_id = cct.curriculum_id
     LEFT JOIN program_table AS pgt ON cct.program_id = pgt.program_id
     LEFT JOIN section_table AS st ON dst.section_id = st.id
-    WHERE tt.professor_id = ? AND sy.astatus = 1;;`;
+    WHERE tt.professor_id = ? AND sy.astatus = 1;`;
     const [rows] = await db3.query(sql, [prof_id]);
 
     res.json(rows);
@@ -14321,43 +14285,55 @@ app.get("/api/student_data_as_applicant/:id", async (req, res) => {
   try {
     const [[person]] = await db3.query(
       `
-      SELECT
-        pt.*,
-        ant.applicant_number
-      FROM enrollment.person_table pt
-      JOIN admission.applicant_numbering_table ant ON pt.person_id = ant.person_id
-      WHERE pt.person_id = ? OR ant.applicant_number = ?
-      LIMIT 1
-    `,
-      [id, id],
+      SELECT *
+      FROM enrollment.person_table
+      WHERE person_id = ?
+      `,
+      [id]
     );
 
     if (!person) {
       return res.status(404).json({ message: "Person not found" });
     }
 
-    // get latest document status + evaluator
+    // Get applicant number
+    const [[applicant]] = await db.query(
+      `
+      SELECT applicant_number
+      FROM applicant_numbering_table
+      WHERE person_id = ?
+      `,
+      [person.person_id]
+    );
+
+    // Merge applicant_number into person object
+    person.applicant_number = applicant ? applicant.applicant_number : null;
+
+    // Get latest document status + evaluator
     const [rows] = await db.query(
       `
       SELECT
-        ru.document_status    AS upload_document_status,
-        rt.id                 AS requirement_id,
-        ua.email              AS evaluator_email,
-        ua.role               AS evaluator_role,
-        pr.fname              AS evaluator_fname,
-        pr.mname              AS evaluator_mname,
-        pr.lname              AS evaluator_lname,
+        ru.document_status AS upload_document_status,
+        rt.id AS requirement_id,
+        ua.email AS evaluator_email,
+        ua.role AS evaluator_role,
+        pr.fname AS evaluator_fname,
+        pr.mname AS evaluator_mname,
+        pr.lname AS evaluator_lname,
         ru.created_at,
         ru.last_updated_by
       FROM enrollment.requirement_uploads AS ru
-      LEFT JOIN enrollment.requirements_table AS rt ON ru.requirements_id = rt.id
-      LEFT JOIN enrollment.user_accounts ua ON ru.last_updated_by = ua.person_id
-      LEFT JOIN enrollment.prof_table pr   ON ua.person_id = pr.person_id
+      LEFT JOIN enrollment.requirements_table AS rt 
+        ON ru.requirements_id = rt.id
+      LEFT JOIN enrollment.user_accounts ua 
+        ON ru.last_updated_by = ua.person_id
+      LEFT JOIN enrollment.prof_table pr   
+        ON ua.person_id = pr.person_id
       WHERE ru.person_id = ?
       ORDER BY ru.created_at DESC
       LIMIT 1
-    `,
-      [person.person_id],
+      `,
+      [person.person_id]
     );
 
     if (rows.length > 0) {
@@ -14369,6 +14345,7 @@ app.get("/api/student_data_as_applicant/:id", async (req, res) => {
     }
 
     res.json(person);
+
   } catch (err) {
     console.error("❌ Error fetching person_with_applicant:", err);
     res.status(500).json({ error: "Failed to fetch person" });
@@ -15157,21 +15134,32 @@ app.get("/api/all-persons", (req, res) => {
   );
 });
 
-app.get("/api/person/:id", (req, res) => {
-  const id = req.params.id;
+app.get("/api/person/student/:storedID", async (req, res) => {
+  const id = req.params.storedID;
 
-  const sql = `
-    SELECT p.*, a.applicant_number
-    FROM person_table p
-    LEFT JOIN applicant_numbering_table a
-    ON p.person_id = a.person_id
-    WHERE p.person_id = ?
-  `;
+  try {
+    const [personRows] = await db3.query(
+      `SELECT emailAddress FROM person_table WHERE person_id = ? `, [id]
+    );
 
-  db.query(sql, [id], (err, result) => {
-    if (err) return res.status(500).json(err);
-    res.json(result[0]);
-  });
+    const personEmail = personRows[0].emailAddress
+
+    const sql = `
+      SELECT p.*, a.applicant_number
+      FROM person_table p
+      LEFT JOIN applicant_numbering_table a
+      ON p.person_id = a.person_id
+      WHERE p.emailAddress = ?
+    `;
+
+    const [rows] = await db.query(sql, [personEmail])
+    console.log("Person Data: ", rows)
+
+    res.status(200).json({ message: "Successfully  etch student record from admission", rows})
+  } catch (err) {
+    console.error("Error fetching registrar count:", error);
+    res.status(500).json({ message: "Server error while fetching registrar count" });
+  }
 });
 
 // ---------------------- ALL FILTERING FOR ADMISSION DASHBOARD ---------------------- //
@@ -16612,7 +16600,7 @@ io.on("connection", (socket) => {
         });
       }
 
-      // 🔎 Get room quota
+      // 🔎 Get quota
       const [[scheduleInfo]] = await db.query(
         `SELECT room_quota FROM verify_document_schedule WHERE schedule_id = ?`,
         [schedule_id]
@@ -16627,30 +16615,32 @@ io.on("connection", (socket) => {
 
       const roomQuota = scheduleInfo.room_quota;
 
-      // 🔎 Count existing
+      // 🔎 Current count
       const [[{ currentCount }]] = await db.query(
         `SELECT COUNT(*) AS currentCount FROM verify_applicants WHERE schedule_id = ?`,
         [schedule_id]
       );
 
-      if (currentCount + applicant_numbers.length > roomQuota) {
-        return socket.emit("update_verify_schedule_result", {
-          success: false,
-          error: `Room quota exceeded! Capacity: ${roomQuota}, Current: ${currentCount}`,
-        });
-      }
+      let runningCount = currentCount;
 
       const assigned = [];
       const updated = [];
       const skipped = [];
 
       for (const applicant_number of applicant_numbers) {
+
+        // 🚫 STOP when full
+        if (runningCount >= roomQuota) {
+          break;
+        }
+
         const [check] = await db.query(
-          `SELECT * FROM verify_applicants WHERE applicant_id = ?`,
+          `SELECT schedule_id FROM verify_applicants WHERE applicant_id = ?`,
           [applicant_number]
         );
 
         if (check.length > 0) {
+
           if (check[0].schedule_id === schedule_id) {
             skipped.push(applicant_number);
           } else {
@@ -16659,14 +16649,19 @@ io.on("connection", (socket) => {
               [schedule_id, applicant_number]
             );
             updated.push(applicant_number);
+            runningCount++; // increase count
           }
+
         } else {
+
           await db.query(
             `INSERT INTO verify_applicants (applicant_id, schedule_id, email_sent)
-             VALUES (?, ?, 0)`,
+            VALUES (?, ?, 0)`,
             [applicant_number, schedule_id]
           );
+
           assigned.push(applicant_number);
+          runningCount++; // increase count
         }
       }
 
@@ -16676,8 +16671,6 @@ io.on("connection", (socket) => {
         updated,
         skipped,
       });
-
-
 
     } catch (err) {
       console.error("❌ Verify assign error:", err);

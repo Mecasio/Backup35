@@ -277,45 +277,31 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
         style={{ borderRight: `5px solid ${borderColor}` }}
       >
 
-        <div className="flex items-center flex-col mt-24 mb-4 relative">
-          {/* 🧑 Profile Picture */}
-          {!(profileImage || personData?.profile_image) ? (
-            <Avatar
-              sx={{
-                width: 106,
-                height: 106,
-                border: `2px solid ${borderColor}`,
-                bgcolor: settings?.header_color || "#1976d2",
-                marginBottom: "15px",
-              }}
-            />
-          ) : (
-            <Avatar
-              src={
-                profileImage ||
-                `${API_BASE_URL}/uploads/${dir}/${personData.profile_image}?t=${Date.now()}`
-              }
-              sx={{
-                width: 116,
-                height: 116,
-                mx: "auto",
-                border: `4px solid ${borderColor}`,
-              }}
-            />
-          )}
-
-          {/* ✅ Name Text with Theme Colors */}
-          <div className="mt-2 text-center">
-            <p style={{ color: titleColor, fontWeight: 600, fontSize: "16px" }}>
-              {personData?.first_name}
-            </p>
-            <p style={{ color: titleColor, fontWeight: 600, fontSize: "16px" }}>
-              {personData?.middle_name}
-            </p>
-            <p style={{ color: titleColor, fontWeight: 600, fontSize: "16px" }}>
-              {personData?.last_name}
-            </p>
-          </div>
+        <div className="flex items-center mt-[75px] mb-4 gap-3">
+          <div className="relative">
+            {/* 🧑 Profile Picture */}
+            {!(profileImage || personData?.profile_image) ? (
+              <Avatar
+                sx={{
+                  width: 50,
+                  height: 50,
+                  border: `2px solid ${borderColor}`,
+                  bgcolor: settings?.header_color || "#1976d2",
+                }}
+              />
+            ) : (
+              <Avatar
+                src={
+                  profileImage ||
+                  `${API_BASE_URL}/uploads/${dir}/${personData.profile_image}?t=${Date.now()}`
+                }
+                sx={{
+                  width: 50,
+                  height: 50,
+                  border: `2px solid ${borderColor}`,
+                }}
+              />
+            )}
 
           {/* ➕ Plus Icon Overlay — REGISTRAR */}
           {role === "registrar" && (
@@ -324,20 +310,20 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
                 htmlFor="sidebar-profile-upload"
                 style={{
                   position: "absolute",
-                  bottom: "72px",
-                  right: "calc(50% - 55px)",
+                  bottom: -6,
+                  right: -6,
                   cursor: "pointer",
                 }}
               >
                 <AddCircleIcon
                   sx={{
                     color: settings?.header_color || "#1976d2",
-                    fontSize: 32,
+                    fontSize: 18,
                     backgroundColor: "white",
-                    width: "36px",
-                    height: "36px",
+                    width: "20px",
+                    height: "20px",
                     borderRadius: "50%",
-                    border: `4px solid ${borderColor}`,
+                    border: `2px solid ${borderColor}`,
                   }}
                 />
               </label>
@@ -386,20 +372,20 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
                 htmlFor="sidebar-profile-upload"
                 style={{
                   position: "absolute",
-                  bottom: "72px",
-                  right: "calc(50% - 55px)",
+                  bottom: -6,
+                  right: -6,
                   cursor: "pointer",
                 }}
               >
                 <AddCircleIcon
                   sx={{
                     color: settings?.header_color || "#1976d2",
-                    fontSize: 32,
+                    fontSize: 18,
                     backgroundColor: "white",
                     borderRadius: "50%",
-                    width: "36px",
-                    height: "36px",
-                    border: `4px solid ${borderColor}`,
+                    width: "20px",
+                    height: "20px",
+                    border: `2px solid ${borderColor}`,
                   }}
                 />
               </label>
@@ -455,20 +441,20 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
                 htmlFor="sidebar-profile-upload"
                 style={{
                   position: "absolute",
-                  bottom: "72px",
-                  right: "calc(50% - 55px)",
+                  bottom: -6,
+                  right: -6,
                   cursor: "pointer",
                 }}
               >
                 <AddCircleIcon
                   sx={{
                     color: settings?.header_color || "#1976d2",
-                    fontSize: 32,
+                    fontSize: 18,
                     backgroundColor: "white",
                     borderRadius: "50%",
-                    width: "36px",
-                    height: "36px",
-                    border: `4px solid ${borderColor}`,
+                    width: "20px",
+                    height: "20px",
+                    border: `2px solid ${borderColor}`,
                   }}
                 />
               </label>
@@ -517,19 +503,19 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
                 htmlFor="sidebar-profile-upload"
                 style={{
                   position: "absolute",
-                  bottom: "72px",
-                  right: "calc(50% - 55px)",
+                  bottom: -6,
+                  right: -6,
                   cursor: "pointer",
                 }}
               >
                 <AddCircleIcon
                   sx={{
                     color: settings?.header_color || "#1976d2",
-                    fontSize: 32,
+                    fontSize: 18,
                     backgroundColor: "white",
                     borderRadius: "50%",
-                    width: "36px",
-                    height: "36px",
+                    width: "20px",
+                    height: "20px",
                     border: `2px solid ${borderColor}`,
                   }}
                 />
@@ -572,16 +558,18 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
             </>
           )}
 
+          </div>
+
           {/* 👤 Role + Name Display */}
           {role === "registrar" && (
-            <span className="mt-4 text-center">
+            <span className="text-left">
               {personData && (personData.fname || personData.lname) ? (
                 <>
-                  <Typography variant="h6">
+                  <Typography variant="subtitle1">
                     {personData.fname} {personData.lname}
                   </Typography>
                   <Typography variant="body2" color="maroon">
-                    {accessDescription || "Administrator"}
+                    {accessDescription || "Administrator"} ({personData.employee_id})
                   </Typography>
                 </>
               ) : (
@@ -590,10 +578,10 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
             </span>
           )}
           {role === "applicant" && (
-            <span className="mt-4 text-center">
+            <span className="text-left">
               {personData && (personData.fname || personData.lname) ? (
                 <>
-                  <Typography variant="h6">
+                  <Typography variant="subtitle1">
                     {personData.fname} {personData.lname}
                   </Typography>
                   <Typography variant="body2" color="maroon">
@@ -607,15 +595,15 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
             </span>
           )}
           {role === "faculty" && (
-            <span className="mt-4 text-center">
+            <span className="text-left">
               {personData && (personData.fname || personData.lname) ? (
                 <>
-                  <Typography variant="h6">
+                  <Typography variant="subtitle1">
                     {personData.fname} {personData.lname}
                   </Typography>
                   <Typography variant="body2" color="maroon">
                     {personData.role.charAt(0).toUpperCase() +
-                      personData.role.slice(1)}
+                      personData.role.slice(1)} ({personData.employee_id})
                   </Typography>
                 </>
               ) : (
@@ -624,15 +612,15 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
             </span>
           )}
           {role === "student" && (
-            <span className="mt-4 text-center">
+            <span className="text-left">
               {personData && (personData.fname || personData.lname) ? (
                 <>
-                  <Typography variant="h6">
+                  <Typography variant="subtitle1">
                     {personData.fname} {personData.lname}
                   </Typography>
                   <Typography variant="body2" color="maroon">
                     {personData.role.charAt(0).toUpperCase() +
-                      personData.role.slice(1)}
+                      personData.role.slice(1)} ({personData.student_number})
                   </Typography>
                 </>
               ) : (

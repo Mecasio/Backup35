@@ -1,11 +1,30 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { SettingsContext } from "../App";
-import '../styles/TempStyles.css';
-import axios from 'axios';
+import "../styles/TempStyles.css";
+import axios from "axios";
 import { FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx-js-style";
-import { saveAs } from "file-saver"
-import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TextField, Button, FormControl, Select, InputLabel, MenuItem, Box, Typography, Paper, Snackbar, Alert, Autocomplete } from "@mui/material";
+import { saveAs } from "file-saver";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TableContainer,
+  TextField,
+  Button,
+  FormControl,
+  Select,
+  InputLabel,
+  MenuItem,
+  Box,
+  Typography,
+  Paper,
+  Snackbar,
+  Alert,
+  Autocomplete,
+} from "@mui/material";
 import API_BASE_URL from "../apiConfig";
 import { useLocation } from "react-router-dom";
 import { FcPrint } from "react-icons/fc";
@@ -19,8 +38,8 @@ const GradingSheet = () => {
   const [subtitleColor, setSubtitleColor] = useState("#555555");
   const [borderColor, setBorderColor] = useState("#000000");
   const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
-  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
-  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff"); // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000"); // ✅ NEW
   const [fetchedLogo, setFetchedLogo] = useState(null);
   const [companyName, setCompanyName] = useState("");
   const [shortTerm, setShortTerm] = useState("");
@@ -33,9 +52,10 @@ const GradingSheet = () => {
     if (settings.title_color) setTitleColor(settings.title_color);
     if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
     if (settings.border_color) setBorderColor(settings.border_color);
-    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
-    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
-    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+    if (settings.main_button_color)
+      setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color); // ✅ NEW
+    if (settings.stepper_color) setStepperColor(settings.stepper_color); // ✅ NEW
 
     // 🏫 Logo
     if (settings.logo_url) {
@@ -48,7 +68,6 @@ const GradingSheet = () => {
     if (settings.company_name) setCompanyName(settings.company_name);
     if (settings.short_term) setShortTerm(settings.short_term);
     if (settings.campus_address) setCampusAddress(settings.campus_address);
-
   }, [settings]);
 
   const [userID, setUserID] = useState("");
@@ -67,16 +86,20 @@ const GradingSheet = () => {
   const [sectionsHandle, setSectionsHandle] = useState([]);
   const [courseAssignedTo, setCoursesAssignedTo] = useState([]);
   const [schoolYears, setSchoolYears] = useState([]);
-  const [selectedSchoolYear, setSelectedSchoolYear] = useState('');
+  const [selectedSchoolYear, setSelectedSchoolYear] = useState("");
   const [schoolSemester, setSchoolSemester] = useState([]);
-  const [selectedSchoolSemester, setSelectedSchoolSemester] = useState('');
-  const [selectedActiveSchoolYear, setSelectedActiveSchoolYear] = useState('');
-  const [selectedSectionID, setSelectedSectionID] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState('');
+  const [selectedSchoolSemester, setSelectedSchoolSemester] = useState("");
+  const [selectedActiveSchoolYear, setSelectedActiveSchoolYear] = useState("");
+  const [selectedSectionID, setSelectedSectionID] = useState("");
+  const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState("asc");
-  const [snack, setSnack] = useState({ open: false, message: '', severity: 'info' });
+  const [snack, setSnack] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -113,7 +136,7 @@ const GradingSheet = () => {
 
   const fetchPersonData = async (id) => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/get_prof_data/${id}`)
+      const res = await axios.get(`${API_BASE_URL}/get_prof_data/${id}`);
       const first = res.data[0];
 
       const profInfo = {
@@ -128,7 +151,7 @@ const GradingSheet = () => {
       setLoading(false);
       setMessage("Error Fetching Professor Personal Data");
     }
-  }
+  };
 
   useEffect(() => {
     if (userID) {
@@ -142,7 +165,9 @@ const GradingSheet = () => {
   useEffect(() => {
     if (userID && selectedCourse && selectedActiveSchoolYear) {
       axios
-        .get(`${API_BASE_URL}/handle_section_of/${userID}/${selectedCourse}/${selectedActiveSchoolYear}`)
+        .get(
+          `${API_BASE_URL}/handle_section_of/${userID}/${selectedCourse}/${selectedActiveSchoolYear}`,
+        )
         .then((res) => setSectionsHandle(res.data))
         .catch((err) => console.error(err));
     }
@@ -154,7 +179,7 @@ const GradingSheet = () => {
       .then((res) => {
         const currentYear = new Date().getFullYear();
         const filteredYears = res.data.filter(
-          (yearObj) => Number(yearObj.current_year) <= currentYear
+          (yearObj) => Number(yearObj.current_year) <= currentYear,
         );
 
         setSchoolYears(filteredYears);
@@ -170,7 +195,6 @@ const GradingSheet = () => {
   }, []);
 
   useEffect(() => {
-
     axios
       .get(`${API_BASE_URL}/active_school_year`)
       .then((res) => {
@@ -180,13 +204,14 @@ const GradingSheet = () => {
         }
       })
       .catch((err) => console.error(err));
-
   }, []);
 
   useEffect(() => {
     if (selectedSchoolYear && selectedSchoolSemester) {
       axios
-        .get(`${API_BASE_URL}/get_selecterd_year/${selectedSchoolYear}/${selectedSchoolSemester}`)
+        .get(
+          `${API_BASE_URL}/get_selecterd_year/${selectedSchoolYear}/${selectedSchoolSemester}`,
+        )
         .then((res) => {
           if (res.data.length > 0) {
             setSelectedActiveSchoolYear(res.data[0].school_year_id);
@@ -201,14 +226,16 @@ const GradingSheet = () => {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/enrolled_student_list/${userID}/${selectedCourse}/${department_section_id}/${selectedActiveSchoolYear}`
+        `${API_BASE_URL}/enrolled_student_list/${userID}/${selectedCourse}/${department_section_id}/${selectedActiveSchoolYear}`,
       );
       const data = await response.json();
 
       if (response.ok) {
         if (data.length === 0) {
           setStudents([]);
-          setMessage("There are no currently enrolled students in this subject and section");
+          setMessage(
+            "There are no currently enrolled students in this subject and section",
+          );
         } else {
           const studentsWithSubject = data.map((student) => ({
             ...student,
@@ -229,7 +256,7 @@ const GradingSheet = () => {
       setMessage("Fetch error");
     }
   };
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const filteredStudents = students
     .filter((s) => {
@@ -262,62 +289,73 @@ const GradingSheet = () => {
       if (aMatch && !bMatch) return -1;
       if (!aMatch && bMatch) return 1;
       return 0;
-    })
+    });
 
   const findPastClass = async () => {
-  try {
-    if (!userID || !selectedSchoolYear || !selectedSchoolSemester) {
+    try {
+      if (!userID || !selectedSchoolYear || !selectedSchoolSemester) {
+        setSnack({
+          open: true,
+          message: "Please select School Year and Semester first!",
+          severity: "warning",
+        });
+        return;
+      }
+
+      // 1️⃣ Fetch courses assigned to the professor
+      const courseRes = await axios.get(
+        `${API_BASE_URL}/course_assigned_to/${userID}/${selectedSchoolYear}/${selectedSchoolSemester}`,
+      );
+      const courses = courseRes.data;
+      setCoursesAssignedTo(courses);
+
+      if (courses.length === 0) {
+        setSectionsHandle([]);
+        setStudents([]);
+        setSnack({
+          open: true,
+          message: "No courses found for this period.",
+          severity: "info",
+        });
+        return;
+      }
+
+      // 2️⃣ Choose first course if none selected
+      const courseId = selectedCourse || courses[0].course_id;
+      setSelectedCourse(courseId);
+
+      // 3️⃣ Fetch sections for the selected course
+      const sectionRes = await axios.get(
+        `${API_BASE_URL}/handle_section_of/${userID}/${courseId}/${selectedActiveSchoolYear}`,
+      );
+      const sections = sectionRes.data;
+      setSectionsHandle(sections);
+
+      if (sections.length === 0) {
+        setStudents([]);
+        setSnack({
+          open: true,
+          message: "No sections found for this course.",
+          severity: "info",
+        });
+        return;
+      }
+
+      // 4️⃣ Choose first section if none selected
+      const sectionId = selectedSectionID || sections[0].department_section_id;
+      setSelectedSectionID(sectionId);
+
+      // 5️⃣ Fetch students for this section
+      handleFetchStudents(sectionId);
+    } catch (err) {
+      console.error("Error fetching past class data:", err);
       setSnack({
         open: true,
-        message: "Please select School Year and Semester first!",
-        severity: "warning",
+        message: "Failed to fetch data.",
+        severity: "error",
       });
-      return;
     }
-
-    // 1️⃣ Fetch courses assigned to the professor
-    const courseRes = await axios.get(
-      `${API_BASE_URL}/course_assigned_to/${userID}/${selectedSchoolYear}/${selectedSchoolSemester}`
-    );
-    const courses = courseRes.data;
-    setCoursesAssignedTo(courses);
-
-    if (courses.length === 0) {
-      setSectionsHandle([]);
-      setStudents([]);
-      setSnack({ open: true, message: "No courses found for this period.", severity: "info" });
-      return;
-    }
-
-    // 2️⃣ Choose first course if none selected
-    const courseId = selectedCourse || courses[0].course_id;
-    setSelectedCourse(courseId);
-
-    // 3️⃣ Fetch sections for the selected course
-    const sectionRes = await axios.get(
-      `${API_BASE_URL}/handle_section_of/${userID}/${courseId}/${selectedActiveSchoolYear}`
-    );
-    const sections = sectionRes.data;
-    setSectionsHandle(sections);
-
-    if (sections.length === 0) {
-      setStudents([]);
-      setSnack({ open: true, message: "No sections found for this course.", severity: "info" });
-      return;
-    }
-
-    // 4️⃣ Choose first section if none selected
-    const sectionId = selectedSectionID || sections[0].department_section_id;
-    setSelectedSectionID(sectionId);
-
-    // 5️⃣ Fetch students for this section
-    handleFetchStudents(sectionId);
-
-  } catch (err) {
-    console.error("Error fetching past class data:", err);
-    setSnack({ open: true, message: "Failed to fetch data.", severity: "error" });
-  }
-};
+  };
 
   const gradeStats = filteredStudents.reduce(
     (acc, student) => {
@@ -342,7 +380,7 @@ const GradingSheet = () => {
       }
       return acc;
     },
-    { noGrade: 0, passed: 0, failed: 0, incomplete: 0, drop: 0 }
+    { noGrade: 0, passed: 0, failed: 0, incomplete: 0, drop: 0 },
   );
 
   const gradeOptions = [
@@ -351,14 +389,11 @@ const GradingSheet = () => {
     "DRP",
   ];
 
-  const hasGrades = students?.some(s => {
+  const hasGrades = students?.some((s) => {
     const mid = Number(s.midterm);
     const fin = Number(s.finals);
 
-    return (
-      !isNaN(mid) && mid !== 0 &&
-      !isNaN(fin) && fin !== 0
-    );
+    return !isNaN(mid) && mid !== 0 && !isNaN(fin) && fin !== 0;
   });
 
   const exportToExcel = () => {
@@ -389,54 +424,62 @@ const GradingSheet = () => {
       title: {
         font: { bold: true, sz: 14, color: { rgb: "FFFFFF" } },
         fill: { fgColor: { rgb: "333333" } }, // Dark Grey Background
-        alignment: { horizontal: "center", vertical: "center" }
+        alignment: { horizontal: "center", vertical: "center" },
       },
       header: {
         font: { bold: true, sz: 11 },
         fill: { fgColor: { rgb: "F2F2F2" } }, // Light Beige/Grey
         alignment: { horizontal: "center", vertical: "center" },
         border: {
-          top: { style: "thin" }, bottom: { style: "thin" },
-          left: { style: "thin" }, right: { style: "thin" }
-        }
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        },
       },
       cellCenter: {
         alignment: { horizontal: "center", vertical: "center" },
         border: {
-          top: { style: "thin" }, bottom: { style: "thin" },
-          left: { style: "thin" }, right: { style: "thin" }
-        }
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        },
       },
       cellLeft: {
         alignment: { horizontal: "left", vertical: "center" },
         border: {
-          top: { style: "thin" }, bottom: { style: "thin" },
-          left: { style: "thin" }, right: { style: "thin" }
-        }
-      }
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        },
+      },
     };
 
     // ---------------------------------------------------------
     // BUILD ROWS
     // ---------------------------------------------------------
-    
+
     // Row 1: Main Title
     XLSX.utils.sheet_add_aoa(ws, [[sheetTitle]], { origin: "A1" });
 
     // Row 2: (Empty - handled by merge below to make title taller)
-    
+
     // Row 3: Headers
-    const headers = [["#", "Student Number", "Student Name", "Midterm", "Finals"]];
+    const headers = [
+      ["#", "Student Number", "Student Name", "Midterm", "Finals"],
+    ];
     XLSX.utils.sheet_add_aoa(ws, headers, { origin: "A3" });
 
     // Row 4+: Student Data
     // Map your SQL data to the Excel structure
     const dataRows = students.map((s, index) => [
-      index + 1,                                       // #
-      s.student_number,                                // Student Number
+      index + 1, // #
+      s.student_number, // Student Number
       `${s.last_name}, ${s.first_name} ${s.middle_name || ""}`.trim(), // Name
-      s.midterm || "",                                 // Midterm
-      s.finals || ""                                   // Finals
+      s.midterm || "", // Midterm
+      s.finals || "", // Finals
     ]);
 
     XLSX.utils.sheet_add_aoa(ws, dataRows, { origin: "A4" });
@@ -444,30 +487,28 @@ const GradingSheet = () => {
     // ---------------------------------------------------------
     // MERGES & COLUMNS
     // ---------------------------------------------------------
-    
+
     // Merge A1:E2 for the big Title Bar
-    ws["!merges"] = [
-      { s: { r: 0, c: 0 }, e: { r: 1, c: 4 } } 
-    ];
+    ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 1, c: 4 } }];
 
     // Set Column Widths
     ws["!cols"] = [
-      { wch: 5 },  // A: #
+      { wch: 5 }, // A: #
       { wch: 15 }, // B: Student Number
       { wch: 40 }, // C: Name (Wide)
       { wch: 10 }, // D: Midterm
-      { wch: 10 }  // E: Finals
+      { wch: 10 }, // E: Finals
     ];
 
     // ---------------------------------------------------------
     // APPLY STYLES TO CELLS
     // ---------------------------------------------------------
-    
+
     // 1. Apply Title Style (A1:E2)
     for (let r = 0; r <= 1; r++) {
       for (let c = 0; c <= 4; c++) {
         const ref = XLSX.utils.encode_cell({ r, c });
-        if (!ws[ref]) ws[ref] = { t: 's', v: '' }; // Ensure cell exists
+        if (!ws[ref]) ws[ref] = { t: "s", v: "" }; // Ensure cell exists
         ws[ref].s = styles.title;
       }
     }
@@ -489,7 +530,7 @@ const GradingSheet = () => {
         if (!ws[ref]) continue;
 
         // Apply Left align for Name (Column C / index 2), Center for others
-        ws[ref].s = (c === 2) ? styles.cellLeft : styles.cellCenter;
+        ws[ref].s = c === 2 ? styles.cellLeft : styles.cellCenter;
       }
     }
 
@@ -498,9 +539,11 @@ const GradingSheet = () => {
     // ---------------------------------------------------------
     XLSX.utils.book_append_sheet(wb, ws, "Grading Sheet");
     const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([wbout], { type: "application/octet-stream" }), "GradingSheet.xlsx");
+    saveAs(
+      new Blob([wbout], { type: "application/octet-stream" }),
+      "GradingSheet.xlsx",
+    );
   };
-
 
   function validateGradeInput(rawValue) {
     if (rawValue === null || rawValue === undefined) return "";
@@ -608,12 +651,8 @@ const GradingSheet = () => {
           },
         }}
       />
-
     );
   };
-
-
-
 
   const handleChanges = (index, field, value) => {
     const updatedStudents = [...students];
@@ -624,9 +663,9 @@ const GradingSheet = () => {
     // ----------------------------
     if (value?.toUpperCase() === "DRP") {
       if (field === "midterm") {
-        updatedStudents[index].finals = "DRP";   // autofill finals
+        updatedStudents[index].finals = "DRP"; // autofill finals
       } else if (field === "finals") {
-        updatedStudents[index].midterm = "DRP";   // autofill midterm
+        updatedStudents[index].midterm = "DRP"; // autofill midterm
       }
     }
 
@@ -654,12 +693,11 @@ const GradingSheet = () => {
     setStudents(updatedStudents);
   };
 
-
   const addStudentInfo = async (student) => {
     try {
       const response = await fetch(`${API_BASE_URL}/add_grades`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           midterm: student.midterm,
           finals: student.finals,
@@ -667,7 +705,7 @@ const GradingSheet = () => {
           en_remarks: student.en_remarks,
           student_number: student.student_number,
           subject_id: selectedCourse,
-        })
+        }),
       });
 
       if (response.ok) {
@@ -675,12 +713,15 @@ const GradingSheet = () => {
         try {
           const page_name = "Grading Sheet";
           const fullName = `${profData.lname}, ${profData.fname} ${profData.mname}`;
-          const type = "submit"
+          const type = "submit";
 
-          await axios.post(`${API_BASE_URL}/insert-logs/faculty/${profData.prof_id}`, {
-            message: `User #${profData.prof_id} - ${fullName} successfully submit the student grades in ${page_name}`, type: type,
-          });
-
+          await axios.post(
+            `${API_BASE_URL}/insert-logs/faculty/${profData.prof_id}`,
+            {
+              message: `User #${profData.prof_id} - ${fullName} successfully submit the student grades in ${page_name}`,
+              type: type,
+            },
+          );
         } catch (err) {
           console.error("Error inserting audit log");
         }
@@ -701,7 +742,7 @@ const GradingSheet = () => {
     } catch (error) {
       setLoading(false);
     }
-  }
+  };
 
   const remarkConversion = (student) => {
     if (student.en_remarks === 0) {
@@ -715,10 +756,9 @@ const GradingSheet = () => {
     } else if (student.en_remarks === 4) {
       return "DROPPED";
     } else {
-      console.log("Error in Remark Conversion")
+      console.log("Error in Remark Conversion");
     }
   };
-
 
   function convertRawToRating(value) {
     if (value === null || value === undefined || value === "") return "";
@@ -731,7 +771,7 @@ const GradingSheet = () => {
 
     // Handle numeric values
     const num = Number(v);
-    if (isNaN(num) || num === "0.00" || num === 0.00) return ""; // anything invalid
+    if (isNaN(num) || num === "0.00" || num === 0.0) return ""; // anything invalid
 
     if (num >= 97 && num <= 100) return "1.00";
     if (num >= 94 && num <= 96) return "1.25";
@@ -760,10 +800,9 @@ const GradingSheet = () => {
   };
 
   const handleSnackClose = (_, reason) => {
-    if (reason === 'clickaway') return;
-    setSnack(prev => ({ ...prev, open: false }));
+    if (reason === "clickaway") return;
+    setSnack((prev) => ({ ...prev, open: false }));
   };
-
 
   const handleImport = async () => {
     try {
@@ -782,21 +821,27 @@ const GradingSheet = () => {
       formData.append("active_school_year_id", selectedActiveSchoolYear);
       formData.append("department_section_id", selectedSectionID);
 
-
-      const res = await axios.post(`${API_BASE_URL}/api/grades/import`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await axios.post(
+        `${API_BASE_URL}/api/grades/import`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      );
 
       if (res.data.success) {
         try {
           const page_name = "Grading Sheet";
           const fullName = `${profData.lname}, ${profData.fname} ${profData.mname}`;
-          const type = "upload"
+          const type = "upload";
 
-          await axios.post(`${API_BASE_URL}/insert-logs/faculty/${profData.prof_id}`, {
-            message: `User #${profData.prof_id} - ${fullName} successfully upload file in ${page_name}`, type: type,
-          });
-
+          await axios.post(
+            `${API_BASE_URL}/insert-logs/faculty/${profData.prof_id}`,
+            {
+              message: `User #${profData.prof_id} - ${fullName} successfully upload file in ${page_name}`,
+              type: type,
+            },
+          );
         } catch (err) {
           console.error("Error inserting audit log");
         }
@@ -816,12 +861,15 @@ const GradingSheet = () => {
         try {
           const page_name = "Grading Sheet";
           const fullName = `${profData.lname}, ${profData.fname} ${profData.mname}`;
-          const type = "upload"
+          const type = "upload";
 
-          await axios.post(`${API_BASE_URL}/insert-logs/faculty/${profData.prof_id}`, {
-            message: `User #${profData.prof_id} - ${fullName} tried to upload file in ${page_name}`, type: type,
-          });
-
+          await axios.post(
+            `${API_BASE_URL}/insert-logs/faculty/${profData.prof_id}`,
+            {
+              message: `User #${profData.prof_id} - ${fullName} tried to upload file in ${page_name}`,
+              type: type,
+            },
+          );
         } catch (err) {
           console.error("Error inserting audit log");
         }
@@ -836,12 +884,15 @@ const GradingSheet = () => {
       try {
         const page_name = "Grading Sheet";
         const fullName = `${profData.lname}, ${profData.fname} ${profData.mname}`;
-        const type = "upload"
+        const type = "upload";
 
-        await axios.post(`${API_BASE_URL}/insert-logs/faculty/${profData.prof_id}`, {
-          message: `User #${profData.prof_id} - ${fullName} failed to upload file in ${page_name}`, type: type,
-        });
-
+        await axios.post(
+          `${API_BASE_URL}/insert-logs/faculty/${profData.prof_id}`,
+          {
+            message: `User #${profData.prof_id} - ${fullName} failed to upload file in ${page_name}`,
+            type: type,
+          },
+        );
       } catch (err) {
         console.error("Error inserting audit log");
       }
@@ -863,7 +914,7 @@ const GradingSheet = () => {
 
   const paginatedStudents = students.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   const handleSort = () => {
@@ -874,7 +925,9 @@ const GradingSheet = () => {
       const nameA = a.last_name.toLowerCase();
       const nameB = b.last_name.toLowerCase();
 
-      return newOrder === "asc" ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+      return newOrder === "asc"
+        ? nameA.localeCompare(nameB)
+        : nameB.localeCompare(nameA);
     });
 
     setStudents(sorted);
@@ -900,8 +953,8 @@ const GradingSheet = () => {
       const promises = students.map(async (student) => {
         try {
           const response = await fetch(`${API_BASE_URL}/add_grades`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               midterm: student.midterm,
               finals: student.finals,
@@ -909,7 +962,7 @@ const GradingSheet = () => {
               en_remarks: student.en_remarks,
               student_number: student.student_number,
               subject_id: selectedCourse,
-            })
+            }),
           });
 
           if (response.ok) {
@@ -926,17 +979,20 @@ const GradingSheet = () => {
 
       // Audit Log
       try {
-          const page_name = "Grading Sheet";
-          const fullName = `${profData.lname}, ${profData.fname} ${profData.mname}`;
-          const type = "submit"
+        const page_name = "Grading Sheet";
+        const fullName = `${profData.lname}, ${profData.fname} ${profData.mname}`;
+        const type = "submit";
 
-          await axios.post(`${API_BASE_URL}/insert-logs/faculty/${profData.prof_id}`, {
-            message: `User #${profData.prof_id} - ${fullName} executed Save All in ${page_name}. Success: ${successCount}, Failed: ${failCount}`, type: type,
-          });
-
-        } catch (err) {
-          console.error("Error inserting audit log");
-        }
+        await axios.post(
+          `${API_BASE_URL}/insert-logs/faculty/${profData.prof_id}`,
+          {
+            message: `User #${profData.prof_id} - ${fullName} executed Save All in ${page_name}. Success: ${successCount}, Failed: ${failCount}`,
+            type: type,
+          },
+        );
+      } catch (err) {
+        console.error("Error inserting audit log");
+      }
 
       if (failCount === 0) {
         setSnack({
@@ -945,7 +1001,7 @@ const GradingSheet = () => {
           severity: "success",
         });
       } else if (successCount === 0) {
-         setSnack({
+        setSnack({
           open: true,
           message: "Failed to save grades.",
           severity: "error",
@@ -957,7 +1013,6 @@ const GradingSheet = () => {
           severity: "warning",
         });
       }
-
     } catch (error) {
       console.error("Error saving all grades:", error);
       setSnack({
@@ -1032,16 +1087,18 @@ const GradingSheet = () => {
   };
 
   // 🔒 Disable right-click
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.addEventListener("contextmenu", (e) => e.preventDefault());
 
   // 🔒 Block DevTools shortcuts + Ctrl+P silently
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener("keydown", (e) => {
     const isBlockedKey =
-      e.key === 'F12' || // DevTools
-      e.key === 'F11' || // Fullscreen
-      (e.ctrlKey && e.shiftKey && (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'j')) || // Ctrl+Shift+I/J
-      (e.ctrlKey && e.key.toLowerCase() === 'u') || // Ctrl+U (View Source)
-      (e.ctrlKey && e.key.toLowerCase() === 'p');   // Ctrl+P (Print)
+      e.key === "F12" || // DevTools
+      e.key === "F11" || // Fullscreen
+      (e.ctrlKey &&
+        e.shiftKey &&
+        (e.key.toLowerCase() === "i" || e.key.toLowerCase() === "j")) || // Ctrl+Shift+I/J
+      (e.ctrlKey && e.key.toLowerCase() === "u") || // Ctrl+U (View Source)
+      (e.ctrlKey && e.key.toLowerCase() === "p"); // Ctrl+P (Print)
 
     if (isBlockedKey) {
       e.preventDefault();
@@ -1050,7 +1107,16 @@ const GradingSheet = () => {
   });
 
   return (
-        <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
+    <Box
+      sx={{
+        height: "calc(100vh - 150px)",
+        overflowY: "auto",
+        paddingRight: 1,
+        backgroundColor: "transparent",
+        mt: 1,
+        padding: 2,
+      }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -1126,12 +1192,24 @@ const GradingSheet = () => {
 
       <br />
 
-      <TableContainer component={Paper} sx={{ width: '100%', }}>
+      <TableContainer component={Paper} sx={{ width: "100%" }}>
         <Table size="small">
-          <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
+          <TableHead sx={{ backgroundColor: "#6D2323", color: "white" }}>
             <TableRow>
-              <TableCell colSpan={10} sx={{ border: `2px solid ${borderColor}`, py: 0.5, backgroundColor: settings?.header_color || "#1976d2", color: "white" }}>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
+              <TableCell
+                colSpan={10}
+                sx={{
+                  border: `2px solid ${borderColor}`,
+                  py: 0.5,
+                  backgroundColor: settings?.header_color || "#1976d2",
+                  color: "white",
+                }}
+              >
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
                   {/* Left: Total Count */}
                   <Typography fontSize="14px" fontWeight="bold" color="white">
                     Total Students: {students.length}
@@ -1150,23 +1228,25 @@ const GradingSheet = () => {
                         color: "white",
                         borderColor: "white",
                         backgroundColor: "transparent",
-                        '&:hover': {
-                          borderColor: 'white',
-                          backgroundColor: 'rgba(255,255,255,0.1)',
+                        "&:hover": {
+                          borderColor: "white",
+                          backgroundColor: "rgba(255,255,255,0.1)",
                         },
-                        '&.Mui-disabled': {
+                        "&.Mui-disabled": {
                           color: "white",
                           borderColor: "white",
                           backgroundColor: "transparent",
                           opacity: 1,
-                        }
+                        },
                       }}
                     >
                       First
                     </Button>
 
                     <Button
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
                       disabled={currentPage === 1}
                       variant="outlined"
                       size="small"
@@ -1175,16 +1255,16 @@ const GradingSheet = () => {
                         color: "white",
                         borderColor: "white",
                         backgroundColor: "transparent",
-                        '&:hover': {
-                          borderColor: 'white',
-                          backgroundColor: 'rgba(255,255,255,0.1)',
+                        "&:hover": {
+                          borderColor: "white",
+                          backgroundColor: "rgba(255,255,255,0.1)",
                         },
-                        '&.Mui-disabled': {
+                        "&.Mui-disabled": {
                           color: "white",
                           borderColor: "white",
                           backgroundColor: "transparent",
                           opacity: 1,
-                        }
+                        },
                       }}
                     >
                       Prev
@@ -1194,34 +1274,36 @@ const GradingSheet = () => {
                       <FormControl size="small" sx={{ minWidth: 80 }}>
                         <Select
                           value={currentPage}
-                          onChange={(e) => setCurrentPage(Number(e.target.value))}
+                          onChange={(e) =>
+                            setCurrentPage(Number(e.target.value))
+                          }
                           displayEmpty
                           sx={{
-                            fontSize: '12px',
+                            fontSize: "12px",
                             height: 36,
-                            color: 'white',
-                            border: '1px solid white',
-                            backgroundColor: 'transparent',
-                            '.MuiOutlinedInput-notchedOutline': {
-                              borderColor: 'white',
+                            color: "white",
+                            border: "1px solid white",
+                            backgroundColor: "transparent",
+                            ".MuiOutlinedInput-notchedOutline": {
+                              borderColor: "white",
                             },
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                              borderColor: 'white',
+                            "&:hover .MuiOutlinedInput-notchedOutline": {
+                              borderColor: "white",
                             },
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                              borderColor: 'white',
+                            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                              borderColor: "white",
                             },
-                            '& svg': {
-                              color: 'white', // dropdown arrow icon color
-                            }
+                            "& svg": {
+                              color: "white", // dropdown arrow icon color
+                            },
                           }}
                           MenuProps={{
                             PaperProps: {
                               sx: {
                                 maxHeight: 200,
-                                backgroundColor: '#fff', // dropdown background
-                              }
-                            }
+                                backgroundColor: "#fff", // dropdown background
+                              },
+                            },
                           }}
                         >
                           {Array.from({ length: totalPages }, (_, i) => (
@@ -1233,11 +1315,13 @@ const GradingSheet = () => {
                       </FormControl>
                     )}
                     <Typography fontSize="11px" color="white">
-                      {totalPages} page{totalPages > 1 ? 's' : ''}
+                      {totalPages} page{totalPages > 1 ? "s" : ""}
                     </Typography>
 
                     <Button
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                      }
                       disabled={currentPage === totalPages}
                       variant="outlined"
                       size="small"
@@ -1246,16 +1330,16 @@ const GradingSheet = () => {
                         color: "white",
                         borderColor: "white",
                         backgroundColor: "transparent",
-                        '&:hover': {
-                          borderColor: 'white',
-                          backgroundColor: 'rgba(255,255,255,0.1)',
+                        "&:hover": {
+                          borderColor: "white",
+                          backgroundColor: "rgba(255,255,255,0.1)",
                         },
-                        '&.Mui-disabled': {
+                        "&.Mui-disabled": {
                           color: "white",
                           borderColor: "white",
                           backgroundColor: "transparent",
                           opacity: 1,
-                        }
+                        },
                       }}
                     >
                       Next
@@ -1271,21 +1355,21 @@ const GradingSheet = () => {
                         color: "white",
                         borderColor: "white",
                         backgroundColor: "transparent",
-                        '&:hover': {
-                          borderColor: 'white',
-                          backgroundColor: 'rgba(255,255,255,0.1)',
+                        "&:hover": {
+                          borderColor: "white",
+                          backgroundColor: "rgba(255,255,255,0.1)",
                         },
-                        '&.Mui-disabled': {
+                        "&.Mui-disabled": {
                           color: "white",
                           borderColor: "white",
                           backgroundColor: "transparent",
                           opacity: 1,
-                        }
+                        },
                       }}
                     >
                       Last
                     </Button>
-                    
+
                     <Button
                       onClick={handleSort}
                       variant="outlined"
@@ -1295,15 +1379,15 @@ const GradingSheet = () => {
                         color: "white",
                         borderColor: "white",
                         backgroundColor: "transparent",
-                        '&:hover': {
-                          borderColor: 'white',
-                          backgroundColor: 'rgba(65, 64, 64, 0.1)',
+                        "&:hover": {
+                          borderColor: "white",
+                          backgroundColor: "rgba(65, 64, 64, 0.1)",
                         },
                       }}
                     >
                       Sort: {sortOrder === "asc" ? "A–Z" : "Z–A"}
                     </Button>
-                    
+
                     <FormControl size="small" sx={{ minWidth: 140 }}>
                       <Select
                         value={selectedSchoolYear}
@@ -1324,7 +1408,7 @@ const GradingSheet = () => {
                           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                             borderColor: "white",
                           },
-                          "& svg": { color: "white" }
+                          "& svg": { color: "white" },
                         }}
                         MenuProps={{
                           PaperProps: {
@@ -1342,7 +1426,7 @@ const GradingSheet = () => {
 
                         {/* Loop through school years */}
                         {schoolYears.map((yearObj) => (
-                          <MenuItem 
+                          <MenuItem
                             key={yearObj.year_id}
                             value={yearObj.year_id}
                           >
@@ -1355,7 +1439,9 @@ const GradingSheet = () => {
                     <FormControl size="small" sx={{ minWidth: 140 }}>
                       <Select
                         value={selectedSchoolSemester}
-                        onChange={(e) => setSelectedSchoolSemester(e.target.value)}
+                        onChange={(e) =>
+                          setSelectedSchoolSemester(e.target.value)
+                        }
                         displayEmpty
                         sx={{
                           fontSize: "12px",
@@ -1363,16 +1449,22 @@ const GradingSheet = () => {
                           color: "white",
                           border: "1px solid white",
                           backgroundColor: "transparent",
-                          ".MuiOutlinedInput-notchedOutline": { borderColor: "white" },
-                          "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "white" },
-                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "white" },
-                          "& svg": { color: "white" }
+                          ".MuiOutlinedInput-notchedOutline": {
+                            borderColor: "white",
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "white",
+                          },
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "white",
+                          },
+                          "& svg": { color: "white" },
                         }}
                         MenuProps={{
                           PaperProps: {
-                            sx: { 
-                              maxHeight: 200, 
-                              backgroundColor: "#fff"
+                            sx: {
+                              maxHeight: 200,
+                              backgroundColor: "#fff",
                             },
                           },
                         }}
@@ -1384,8 +1476,8 @@ const GradingSheet = () => {
 
                         {/* Loop through semester list */}
                         {schoolSemester.map((sem) => (
-                          <MenuItem 
-                            key={sem.semester_id} 
+                          <MenuItem
+                            key={sem.semester_id}
                             value={sem.semester_id}
                           >
                             {sem.semester_description}
@@ -1403,9 +1495,9 @@ const GradingSheet = () => {
                         color: "white",
                         borderColor: "white",
                         backgroundColor: "transparent",
-                        '&:hover': {
-                          borderColor: 'white',
-                          backgroundColor: 'rgba(255,255,255,0.1)',
+                        "&:hover": {
+                          borderColor: "white",
+                          backgroundColor: "rgba(255,255,255,0.1)",
                         },
                       }}
                     >
@@ -1419,11 +1511,34 @@ const GradingSheet = () => {
         </Table>
       </TableContainer>
 
-      <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, p: 2, marginRight: "4rem" }}>
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: "2rem", alignItems: "center", justifyContent: 'space-between' }}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          width: "100%",
+          border: `2px solid ${borderColor}`,
+          p: 2,
+          marginRight: "4rem",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "2rem",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <Box>
-            <Box display="flex" alignItems="center" gap={1} sx={{ minWidth: 500 }}>
-              <Typography fontSize={13} sx={{ minWidth: "100px" }}>Course: </Typography>
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={1}
+              sx={{ minWidth: 500 }}
+            >
+              <Typography fontSize={13} sx={{ minWidth: "100px" }}>
+                Course:{" "}
+              </Typography>
               <FormControl fullWidth>
                 <InputLabel id="demo-simple-select-label">Course</InputLabel>
                 <Select
@@ -1441,15 +1556,28 @@ const GradingSheet = () => {
                     ))
                   ) : (
                     <MenuItem disabled>No courses assigned</MenuItem>
-                  )
-                  }
+                  )}
                 </Select>
               </FormControl>
             </Box>
             <Box display="flex" alignItems="center">
-              <Typography fontSize={13} sx={{ minWidth: "109px" }}>Section: </Typography>
+              <Typography fontSize={13} sx={{ minWidth: "109px" }}>
+                Section:{" "}
+              </Typography>
               {!selectedCourse ? (
-                <Typography variant="body1" color="text.secondary" sx={{ width: "100%", fontStyle: "italic", border: "rgba(0,0,0,0.2) 1px solid", marginTop: "1rem", padding: "2rem", textAlign: "center", borderRadius: '5px' }}>
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  sx={{
+                    width: "100%",
+                    fontStyle: "italic",
+                    border: "rgba(0,0,0,0.2) 1px solid",
+                    marginTop: "1rem",
+                    padding: "2rem",
+                    textAlign: "center",
+                    borderRadius: "5px",
+                  }}
+                >
                   Please select a course first
                 </Typography>
               ) : (
@@ -1476,7 +1604,18 @@ const GradingSheet = () => {
                       </Button>
                     ))
                   ) : (
-                    <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic", border: "rgba(0,0,0,0.2) 1px solid", marginTop: "1rem", padding: "2rem", textAlign: "center", borderRadius: '5px' }}>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        fontStyle: "italic",
+                        border: "rgba(0,0,0,0.2) 1px solid",
+                        marginTop: "1rem",
+                        padding: "2rem",
+                        textAlign: "center",
+                        borderRadius: "5px",
+                      }}
+                    >
                       No sections available for this course
                     </Typography>
                   )}
@@ -1484,13 +1623,42 @@ const GradingSheet = () => {
               )}
             </Box>
           </Box>
-          <Box sx={{ display: "flex", flexDirection: "column", flexWrap: "wrap", gap: "1rem" }}>
-
-            <Typography fontSize={13} sx={{ minWidth: "100%", border: "maroon 1px solid", padding: "3px", color: "maroon", textAlign: "center" }}>
-              {selectedFile ? `SELECTED FILE: ${selectedFile.name}` : "Choose Excel File to Upload"}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              flexWrap: "wrap",
+              gap: "1rem",
+            }}
+          >
+            <Typography
+              fontSize={13}
+              sx={{
+                minWidth: "100%",
+                border: "maroon 1px solid",
+                padding: "3px",
+                color: "maroon",
+                textAlign: "center",
+              }}
+            >
+              {selectedFile
+                ? `SELECTED FILE: ${selectedFile.name}`
+                : "Choose Excel File to Upload"}
             </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginBottom: "0.5rem" }}>
-              <Box display="flex" alignItems="center" gap={1} sx={{ minWidth: 200 }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "1rem",
+                marginBottom: "0.5rem",
+              }}
+            >
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={1}
+                sx={{ minWidth: 200 }}
+              >
                 <input
                   type="file"
                   accept=".xlsx,.xls"
@@ -1499,7 +1667,9 @@ const GradingSheet = () => {
                   id="excel-upload"
                 />
                 <button
-                  onClick={() => document.getElementById("excel-upload").click()}
+                  onClick={() =>
+                    document.getElementById("excel-upload").click()
+                  }
                   style={{
                     border: "2px solid green",
                     backgroundColor: "#f0fdf4",
@@ -1522,14 +1692,31 @@ const GradingSheet = () => {
                   Import Excel
                 </button>
               </Box>
-              <Box display="flex" alignItems="center" gap={1} sx={{ minWidth: 200 }}>
-                <Button variant="contained" fullWidth sx={{ height: '50px', backgroundColor: mainButtonColor }} onClick={handleImport}>
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={1}
+                sx={{ minWidth: 200 }}
+              >
+                <Button
+                  variant="contained"
+                  fullWidth
+                  sx={{ height: "50px", backgroundColor: mainButtonColor }}
+                  onClick={handleImport}
+                >
                   Upload
                 </Button>
               </Box>
             </Box>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center" }}>
-               <button
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "1rem",
+                alignItems: "center",
+              }}
+            >
+              <button
                 onClick={handleSaveAll}
                 style={{
                   width: "230px",
@@ -1540,7 +1727,7 @@ const GradingSheet = () => {
                   cursor: "pointer",
                   fontSize: "16px",
                   fontWeight: "bold",
-                  border: "none"
+                  border: "none",
                 }}
               >
                 Save All
@@ -1556,7 +1743,7 @@ const GradingSheet = () => {
                   cursor: "pointer",
                   fontSize: "16px",
                   fontWeight: "bold",
-                  border: "none"
+                  border: "none",
                 }}
               >
                 {hasGrades ? "Export File" : "Download Template"}
@@ -1566,22 +1753,126 @@ const GradingSheet = () => {
         </Box>
       </TableContainer>
 
-      <TableContainer component={Paper} sx={{ width: "100%", marginTop: "2rem" }}>
+      <TableContainer
+        component={Paper}
+        sx={{ width: "100%", marginTop: "2rem" }}
+      >
         <Table size="small">
           {/* Header */}
-          <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2" }}>
+          <TableHead
+            sx={{ backgroundColor: settings?.header_color || "#1976d2" }}
+          >
             <TableRow>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>#</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Student Number</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Name</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Section</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Midterm</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Equivalent</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Finals</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Equivalent</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Final Grade</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Remarks</TableCell>
-              <TableCell sx={{ color: "white", textAlign: "center", fontSize: "12px", border: `2px solid ${borderColor}` }}>Action</TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  textAlign: "center",
+                  fontSize: "12px",
+                  border: `2px solid ${borderColor}`,
+                }}
+              >
+                #
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  textAlign: "center",
+                  fontSize: "12px",
+                  border: `2px solid ${borderColor}`,
+                }}
+              >
+                Student Number
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  textAlign: "center",
+                  fontSize: "12px",
+                  border: `2px solid ${borderColor}`,
+                }}
+              >
+                Name
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  textAlign: "center",
+                  fontSize: "12px",
+                  border: `2px solid ${borderColor}`,
+                }}
+              >
+                Section
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  textAlign: "center",
+                  fontSize: "12px",
+                  border: `2px solid ${borderColor}`,
+                }}
+              >
+                Midterm
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  textAlign: "center",
+                  fontSize: "12px",
+                  border: `2px solid ${borderColor}`,
+                }}
+              >
+                Equivalent
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  textAlign: "center",
+                  fontSize: "12px",
+                  border: `2px solid ${borderColor}`,
+                }}
+              >
+                Finals
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  textAlign: "center",
+                  fontSize: "12px",
+                  border: `2px solid ${borderColor}`,
+                }}
+              >
+                Equivalent
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  textAlign: "center",
+                  fontSize: "12px",
+                  border: `2px solid ${borderColor}`,
+                }}
+              >
+                Final Grade
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  textAlign: "center",
+                  fontSize: "12px",
+                  border: `2px solid ${borderColor}`,
+                }}
+              >
+                Remarks
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  textAlign: "center",
+                  fontSize: "12px",
+                  border: `2px solid ${borderColor}`,
+                }}
+              >
+                Action
+              </TableCell>
             </TableRow>
           </TableHead>
 
@@ -1589,19 +1880,48 @@ const GradingSheet = () => {
           <TableBody>
             {message ? (
               <TableRow>
-                <TableCell colSpan={11} sx={{ textAlign: "center", padding: "1rem", border: "1px solid gray" }}>
+                <TableCell
+                  colSpan={11}
+                  sx={{
+                    textAlign: "center",
+                    padding: "1rem",
+                    border: "1px solid gray",
+                  }}
+                >
                   {message}
                 </TableCell>
               </TableRow>
             ) : (
               filteredStudents.map((student, index) => (
                 <TableRow key={index}>
-                  <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>{index + 1}</TableCell>
-                  <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>{student.student_number}</TableCell>
-                  <TableCell sx={{ border: `2px solid ${borderColor}`, width: "350px" }}>
-                    {student.last_name}, {student.first_name} {student.middle_name}
+                  <TableCell
+                    sx={{
+                      textAlign: "center",
+                      border: `2px solid ${borderColor}`,
+                    }}
+                  >
+                    {index + 1}
                   </TableCell>
-                  <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
+                  <TableCell
+                    sx={{
+                      textAlign: "center",
+                      border: `2px solid ${borderColor}`,
+                    }}
+                  >
+                    {student.student_number}
+                  </TableCell>
+                  <TableCell
+                    sx={{ border: `2px solid ${borderColor}`, width: "350px" }}
+                  >
+                    {student.last_name}, {student.first_name}{" "}
+                    {student.middle_name}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      textAlign: "center",
+                      border: `2px solid ${borderColor}`,
+                    }}
+                  >
                     {student.program_code}-{student.section_description}
                   </TableCell>
                   <TableCell sx={{ border: `2px solid ${borderColor}` }}>
@@ -1611,7 +1931,12 @@ const GradingSheet = () => {
                       placeholder="Enter grade"
                     />
                   </TableCell>
-                  <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
+                  <TableCell
+                    sx={{
+                      border: `2px solid ${borderColor}`,
+                      textAlign: "center",
+                    }}
+                  >
                     {convertRawToRating(student.midterm)}
                   </TableCell>
                   <TableCell sx={{ border: `2px solid ${borderColor}` }}>
@@ -1621,7 +1946,12 @@ const GradingSheet = () => {
                       placeholder="Enter grade"
                     />
                   </TableCell>
-                  <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
+                  <TableCell
+                    sx={{
+                      border: `2px solid ${borderColor}`,
+                      textAlign: "center",
+                    }}
+                  >
                     {convertRawToRating(student.finals)}
                   </TableCell>
                   <TableCell sx={{ border: `2px solid ${borderColor}` }}>
@@ -1647,15 +1977,22 @@ const GradingSheet = () => {
                       {remarkConversion(student)}
                     </span>
                   </TableCell>
-                  <TableCell sx={{ textAlign: "center", border: `2px solid ${borderColor}` }}>
-                    <Button sx={{
-                      height: "40px",
-                      width: "100px", // ✅ matches Print
-                      backgroundColor: mainButtonColor,
-                      "&:hover": { backgroundColor: "" },
-                      color: "white"
+                  <TableCell
+                    sx={{
+                      textAlign: "center",
+                      border: `2px solid ${borderColor}`,
                     }}
-                      onClick={() => addStudentInfo(student)}>
+                  >
+                    <Button
+                      sx={{
+                        height: "40px",
+                        width: "100px", // ✅ matches Print
+                        backgroundColor: mainButtonColor,
+                        "&:hover": { backgroundColor: "" },
+                        color: "white",
+                      }}
+                      onClick={() => addStudentInfo(student)}
+                    >
                       Save
                     </Button>
                   </TableCell>
@@ -1696,94 +2033,301 @@ const GradingSheet = () => {
           >
             {/* Logo */}
             <div>
-
               <img
                 src={fetchedLogo}
                 alt="Logo"
-                style={{ width: "80px", height: "80px", objectFit: "contain", marginTop: "-10px" }}
+                style={{
+                  width: "80px",
+                  height: "80px",
+                  objectFit: "contain",
+                  marginTop: "-10px",
+                }}
               />
-
             </div>
 
             {/* School Info */}
-            <div style={{ textAlign: "center", flex: 1, marginLeft: "10px", marginRight: "10px" }}>
-              <span style={{ margin: 0, fontSize: "12px" }}>Republic of the Philippines</span>
-              <h2 style={{ margin: 0, fontSize: "20px", letterSpacing: "-1px" }}>{companyName}</h2>
-              <span style={{ margin: 0, fontSize: "12px" }}>{campusAddress || "Nagtahan St. Sampaloc, Manila"}</span>
+            <div
+              style={{
+                textAlign: "center",
+                flex: 1,
+                marginLeft: "10px",
+                marginRight: "10px",
+              }}
+            >
+              <span style={{ margin: 0, fontSize: "12px" }}>
+                Republic of the Philippines
+              </span>
+              <h2
+                style={{ margin: 0, fontSize: "20px", letterSpacing: "-1px" }}
+              >
+                {companyName}
+              </h2>
+              <span style={{ margin: 0, fontSize: "12px" }}>
+                {campusAddress || "Nagtahan St. Sampaloc, Manila"}
+              </span>
             </div>
 
             {/* Empty space or right-aligned info */}
             <div style={{ width: "80px" }}></div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", lineSpacing: "-1px", marginTop: "2rem", marginBottom: "1rem" }}>
-            <span style={{ fontSize: "20px" }}><b>GRADE SHEET</b></span>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+              lineSpacing: "-1px",
+              marginTop: "2rem",
+              marginBottom: "1rem",
+            }}
+          >
+            <span style={{ fontSize: "20px" }}>
+              <b>GRADE SHEET</b>
+            </span>
           </div>
 
           {/* School Info Table */}
-          <table style={{ borderCollapse: "collapse", fontSize: "12px", lineHeight: "1", padding: 0 }}>
+          <table
+            style={{
+              borderCollapse: "collapse",
+              fontSize: "12px",
+              lineHeight: "1",
+              padding: 0,
+            }}
+          >
             <thead>
               {/* Subject Code + Class Section */}
               <tr>
-                <td colSpan={1} style={{ width: "80px", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>Subject Code:</td>
-                <td colSpan={7} style={{ borderRight: "none", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
+                <td
+                  colSpan={1}
+                  style={{
+                    width: "80px",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  Subject Code:
+                </td>
+                <td
+                  colSpan={7}
+                  style={{
+                    borderRight: "none",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
                   {filteredStudents[0]?.course_code || ""}
                 </td>
 
-                <td colSpan={1} style={{ paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
-                  <div style={{ display: "flex", justifyContent: "end" }}>Ac. Year & Term:</div>
+                <td
+                  colSpan={1}
+                  style={{
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "end" }}>
+                    Ac. Year & Term:
+                  </div>
                 </td>
 
-                <td colSpan={1} style={{ paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
-                  {filteredStudents[0]?.current_year || ""}-{filteredStudents[0]?.next_year || ""}, {filteredStudents[0]?.semester_description || ""},
+                <td
+                  colSpan={1}
+                  style={{
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  {filteredStudents[0]?.current_year || ""}-
+                  {filteredStudents[0]?.next_year || ""},{" "}
+                  {filteredStudents[0]?.semester_description || ""},
                 </td>
               </tr>
 
               {/* Subject Title + Year Level */}
               <tr>
-                <td colSpan={1} style={{ width: "80px", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>Subject Title:</td>
+                <td
+                  colSpan={1}
+                  style={{
+                    width: "80px",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  Subject Title:
+                </td>
 
-                <td colSpan={7} style={{ borderRight: "none", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
+                <td
+                  colSpan={7}
+                  style={{
+                    borderRight: "none",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
                   {filteredStudents[0]?.course_description || ""}
                 </td>
 
-                <td colSpan={1} style={{ paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
-                  <div style={{ display: "flex", justifyContent: "end" }}>Section:</div>
+                <td
+                  colSpan={1}
+                  style={{
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "end" }}>
+                    Section:
+                  </div>
                 </td>
 
-                <td colSpan={1} style={{ paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
-                  {filteredStudents[0]?.program_code || ""}-{filteredStudents[0]?.section_description || ""}
+                <td
+                  colSpan={1}
+                  style={{
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  {filteredStudents[0]?.program_code || ""}-
+                  {filteredStudents[0]?.section_description || ""}
                 </td>
               </tr>
 
               {/* Academic Units + Lab Units + Schedule */}
               <tr>
-                <td colSpan={1} style={{ width: "80px", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>Lec Units:</td>
+                <td
+                  colSpan={1}
+                  style={{
+                    width: "80px",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  Lec Units:
+                </td>
 
-                <td colSpan={1} style={{ paddingRight: "2px", textAlign: "center", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
+                <td
+                  colSpan={1}
+                  style={{
+                    paddingRight: "2px",
+                    textAlign: "center",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
                   {filteredStudents[0]?.course_unit || "0"}
                 </td>
 
-                <td colSpan={1} style={{ width: "80px", borderLeft: "none", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>Lab Units:</td>
+                <td
+                  colSpan={1}
+                  style={{
+                    width: "80px",
+                    borderLeft: "none",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  Lab Units:
+                </td>
 
-                <td colSpan={1} style={{ paddingRight: "2px", textAlign: "center", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
+                <td
+                  colSpan={1}
+                  style={{
+                    paddingRight: "2px",
+                    textAlign: "center",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
                   {filteredStudents[0]?.lab_unit || "0"}
                 </td>
 
-                <td colSpan={1} style={{ width: "80px", borderLeft: "none", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>Credit Units:</td>
-
-                <td colSpan={1} style={{ paddingRight: "2px", textAlign: "center", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
-                  {filteredStudents[0]?.lab_unit + filteredStudents[0]?.course_unit}
+                <td
+                  colSpan={1}
+                  style={{
+                    width: "80px",
+                    borderLeft: "none",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  Credit Units:
                 </td>
 
-                <td colSpan={2} style={{ paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
+                <td
+                  colSpan={1}
+                  style={{
+                    paddingRight: "2px",
+                    textAlign: "center",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  {filteredStudents[0]?.lab_unit +
+                    filteredStudents[0]?.course_unit}
+                </td>
+
+                <td
+                  colSpan={2}
+                  style={{
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
                   <div style={{ display: "flex", justifyContent: "end" }}></div>
                 </td>
 
-                <td colSpan={1} style={{ paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
-                  <div style={{ display: "flex", justifyContent: "end" }}>Session:</div>
+                <td
+                  colSpan={1}
+                  style={{
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "end" }}>
+                    Session:
+                  </div>
                 </td>
-                <td colSpan={1} style={{ paddingRight: "2px", paddingLeft: "2px", borderBottom: "none", paddingBottom: "1px", paddingTop: "6px", width: "60px" }}>
+                <td
+                  colSpan={1}
+                  style={{
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    borderBottom: "none",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                    width: "60px",
+                  }}
+                >
                   {/* {filteredStudents.length > 0 ? (
                     filteredStudents.map((student, index) => (
                       <div key={index}>
@@ -1801,48 +2345,256 @@ const GradingSheet = () => {
               </tr>
               {/* Faculty */}
               <tr>
-                <td colSpan={1} style={{ width: "80px", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", borderTop: "none" }}>Faculty:</td>
-                <td colSpan={7} style={{ paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px" }}>{profData.fname} {profData.mname} {profData.lname}</td>
-                <td colSpan={1} style={{ paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px" }}><div style={{ display: "flex", justifyContent: "end" }}>Date Posted:</div></td>
-                <td colSpan={1} style={{ paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px" }}></td>
+                <td
+                  colSpan={1}
+                  style={{
+                    width: "80px",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    borderTop: "none",
+                  }}
+                >
+                  Faculty:
+                </td>
+                <td
+                  colSpan={7}
+                  style={{
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                  }}
+                >
+                  {profData.fname} {profData.mname} {profData.lname}
+                </td>
+                <td
+                  colSpan={1}
+                  style={{
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "end" }}>
+                    Date Posted:
+                  </div>
+                </td>
+                <td
+                  colSpan={1}
+                  style={{
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                  }}
+                ></td>
               </tr>
             </thead>
           </table>
 
           {/* Students Table */}
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", marginTop: "0.5rem" }}>
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              fontSize: "13px",
+              marginTop: "0.5rem",
+            }}
+          >
             <thead>
               <tr>
-                <th rowSpan={2} style={{ border: "1px solid black", padding: "2px 0px", width: "30px", textAlign: "center" }}>#</th>
-                <th rowSpan={2} style={{ border: "1px solid black", padding: "2px 0px", width: "80px", textAlign: "center" }}>Student No.</th>
-                <th rowSpan={2} style={{ border: "1px solid black", padding: "2px", width: "200px", textAlign: "start" }}>Student Name</th>
-                <th colSpan={5} style={{ border: "1px solid black", padding: "2px 0px", textAlign: "center" }}>GRADES</th>
+                <th
+                  rowSpan={2}
+                  style={{
+                    border: "1px solid black",
+                    padding: "2px 0px",
+                    width: "30px",
+                    textAlign: "center",
+                  }}
+                >
+                  #
+                </th>
+                <th
+                  rowSpan={2}
+                  style={{
+                    border: "1px solid black",
+                    padding: "2px 0px",
+                    width: "80px",
+                    textAlign: "center",
+                  }}
+                >
+                  Student No.
+                </th>
+                <th
+                  rowSpan={2}
+                  style={{
+                    border: "1px solid black",
+                    padding: "2px",
+                    width: "200px",
+                    textAlign: "start",
+                  }}
+                >
+                  Student Name
+                </th>
+                <th
+                  colSpan={5}
+                  style={{
+                    border: "1px solid black",
+                    padding: "2px 0px",
+                    textAlign: "center",
+                  }}
+                >
+                  GRADES
+                </th>
               </tr>
               <tr>
-                <th style={{ border: "1px solid black", padding: "2px 0px", fontSize: "10px", width: "50px", textAlign: "center" }}>Mid</th>
-                <th style={{ border: "1px solid black", padding: "2px 0px", fontSize: "10px", width: "50px", textAlign: "center" }}>Final</th>
-                <th style={{ border: "1px solid black", padding: "2px 0px", fontSize: "10px", width: "50px", textAlign: "center" }}>Final Grade</th>
-                <th style={{ border: "1px solid black", padding: "2px 0px", fontSize: "10px", width: "50px", textAlign: "center" }}>Re exam</th>
-                <th style={{ border: "1px solid black", padding: "2px 0px", fontSize: "10px", width: "50px", textAlign: "center" }}>Remarks</th>
+                <th
+                  style={{
+                    border: "1px solid black",
+                    padding: "2px 0px",
+                    fontSize: "10px",
+                    width: "50px",
+                    textAlign: "center",
+                  }}
+                >
+                  Mid
+                </th>
+                <th
+                  style={{
+                    border: "1px solid black",
+                    padding: "2px 0px",
+                    fontSize: "10px",
+                    width: "50px",
+                    textAlign: "center",
+                  }}
+                >
+                  Final
+                </th>
+                <th
+                  style={{
+                    border: "1px solid black",
+                    padding: "2px 0px",
+                    fontSize: "10px",
+                    width: "50px",
+                    textAlign: "center",
+                  }}
+                >
+                  Final Grade
+                </th>
+                <th
+                  style={{
+                    border: "1px solid black",
+                    padding: "2px 0px",
+                    fontSize: "10px",
+                    width: "50px",
+                    textAlign: "center",
+                  }}
+                >
+                  Re exam
+                </th>
+                <th
+                  style={{
+                    border: "1px solid black",
+                    padding: "2px 0px",
+                    fontSize: "10px",
+                    width: "50px",
+                    textAlign: "center",
+                  }}
+                >
+                  Remarks
+                </th>
               </tr>
             </thead>
             <tbody>
               {filteredStudents.length > 0 ? (
                 filteredStudents.map((s, index) => (
                   <tr key={s.student_number}>
-                    <td style={{ border: "1px solid black", fontSize: "10px", padding: "6px", textAlign: "center" }}>{index + 1}</td>
-                    <td style={{ border: "1px solid black", fontSize: "10px", padding: "6px", textAlign: "center" }}>{s.student_number}</td>
-                    <td style={{ border: "1px solid black", fontSize: "10px", padding: "6px" }}>{`${s.last_name}, ${s.first_name} ${s.middle_name || ""}`}</td>
-                    <td style={{ border: "1px solid black", fontSize: "10px", padding: "6px", textAlign: "center" }}>{convertRawToRating(s.midterm)}  </td>
-                    <td style={{ border: "1px solid black", fontSize: "10px", padding: "6px", textAlign: "center" }}>{convertRawToRating(s.finals)}</td>
-                    <td style={{ border: "1px solid black", fontSize: "10px", padding: "6px", textAlign: "center" }}>{convertRawToRating(s.final_grade)}</td>
-                    <td style={{ border: "1px solid black", fontSize: "10px", padding: "6px", textAlign: "center" }}></td>
-                    <td style={{ border: "1px solid black", fontSize: "10px", padding: "6px", textAlign: "center" }}>{remarkConversion(s)}</td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        fontSize: "10px",
+                        padding: "6px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {index + 1}
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        fontSize: "10px",
+                        padding: "6px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {s.student_number}
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        fontSize: "10px",
+                        padding: "6px",
+                      }}
+                    >{`${s.last_name}, ${s.first_name} ${s.middle_name || ""}`}</td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        fontSize: "10px",
+                        padding: "6px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {convertRawToRating(s.midterm)}{" "}
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        fontSize: "10px",
+                        padding: "6px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {convertRawToRating(s.finals)}
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        fontSize: "10px",
+                        padding: "6px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {convertRawToRating(s.final_grade)}
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        fontSize: "10px",
+                        padding: "6px",
+                        textAlign: "center",
+                      }}
+                    ></td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        fontSize: "10px",
+                        padding: "6px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {remarkConversion(s)}
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={11} style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>
+                  <td
+                    colSpan={11}
+                    style={{
+                      border: "1px solid black",
+                      padding: "6px",
+                      textAlign: "center",
+                    }}
+                  >
                     No class details available
                   </td>
                 </tr>
@@ -1850,18 +2602,39 @@ const GradingSheet = () => {
             </tbody>
           </table>
           <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
-            <div style={{ marginTop: "1rem", padding: "1.7rem", fontSize: "12px", border: "1px solid black", maxWidth: "170px" }}>
-              <div style={{ textDecoration: "underline", textUnderlineOffset: "2px" }}>Grade Sheet Statistic</div>
+            <div
+              style={{
+                marginTop: "1rem",
+                padding: "1.7rem",
+                fontSize: "12px",
+                border: "1px solid black",
+                maxWidth: "170px",
+              }}
+            >
+              <div
+                style={{
+                  textDecoration: "underline",
+                  textUnderlineOffset: "2px",
+                }}
+              >
+                Grade Sheet Statistic
+              </div>
               <div style={{ display: "flex", alignItems: "center" }}>
-                <span style={{ marginLeft: "16px", width: "10rem" }}>Passed</span>
+                <span style={{ marginLeft: "16px", width: "10rem" }}>
+                  Passed
+                </span>
                 <span>{gradeStats.passed}</span>
               </div>
               <div style={{ display: "flex", alignItems: "center" }}>
-                <span style={{ marginLeft: "16px", width: "10rem" }}>Failed</span>
+                <span style={{ marginLeft: "16px", width: "10rem" }}>
+                  Failed
+                </span>
                 <span>{gradeStats.failed}</span>
               </div>
               <div style={{ display: "flex", alignItems: "center" }}>
-                <span style={{ marginLeft: "16px", width: "10rem" }}>Incomplete</span>
+                <span style={{ marginLeft: "16px", width: "10rem" }}>
+                  Incomplete
+                </span>
                 <span>{gradeStats.incomplete}</span>
               </div>
               <div style={{ display: "flex", alignItems: "center" }}>
@@ -1869,36 +2642,83 @@ const GradingSheet = () => {
                 <span>{gradeStats.drop}</span>
               </div>
               <div style={{ display: "flex", alignItems: "center" }}>
-                <span style={{ marginLeft: "16px", width: "10rem" }}>No Grade</span>
+                <span style={{ marginLeft: "16px", width: "10rem" }}>
+                  No Grade
+                </span>
                 <span>{gradeStats.noGrade}</span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", borderTop: "1px solid black" }}>
-                <span style={{ marginLeft: "16px", width: "10rem" }}>Total # of Students</span>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  borderTop: "1px solid black",
+                }}
+              >
+                <span style={{ marginLeft: "16px", width: "10rem" }}>
+                  Total # of Students
+                </span>
                 <span>{filteredStudents.length}</span>
               </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "2rem", marginTop: "0.5rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", width: "450px" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "2rem",
+                marginTop: "0.5rem",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  width: "450px",
+                }}
+              >
                 <div style={{ textAlign: "center", width: "45%" }}>
-                  <div style={{ fontSize: "12px" }}>{profData.fname} {profData.mname[0] || ""}. {profData.lname}</div>
-                  <div style={{ borderTop: "solid 1px black", fontSize: "12px" }}>Instructor</div>
+                  <div style={{ fontSize: "12px" }}>
+                    {profData.fname} {profData.mname[0] || ""}. {profData.lname}
+                  </div>
+                  <div
+                    style={{ borderTop: "solid 1px black", fontSize: "12px" }}
+                  >
+                    Instructor
+                  </div>
                 </div>
 
                 <div style={{ textAlign: "center", width: "45%" }}>
                   <div>&nbsp;</div>
-                  <div style={{ borderTop: "solid 1px black", fontSize: "12px" }}>Department Chairperson</div>
+                  <div
+                    style={{ borderTop: "solid 1px black", fontSize: "12px" }}
+                  >
+                    Department Chairperson
+                  </div>
                 </div>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between", width: "450px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  width: "450px",
+                }}
+              >
                 <div style={{ textAlign: "center", width: "45%" }}>
                   <div>&nbsp;</div>
-                  <div style={{ borderTop: "solid 1px black", fontSize: "12px" }}>Dean, {filteredStudents[0]?.dprtmnt_name}</div>
+                  <div
+                    style={{ borderTop: "solid 1px black", fontSize: "12px" }}
+                  >
+                    Dean, {filteredStudents[0]?.dprtmnt_name}
+                  </div>
                 </div>
 
                 <div style={{ textAlign: "center", width: "45%" }}>
                   <div>&nbsp;</div>
-                  <div style={{ borderTop: "solid 1px black", fontSize: "12px" }}>Registrar</div>
+                  <div
+                    style={{ borderTop: "solid 1px black", fontSize: "12px" }}
+                  >
+                    Registrar
+                  </div>
                 </div>
               </div>
             </div>
@@ -1910,9 +2730,13 @@ const GradingSheet = () => {
         open={snack.open}
         autoHideDuration={3000}
         onClose={handleSnackClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert severity={snack.severity} onClose={handleSnackClose} sx={{ width: '100%' }}>
+        <Alert
+          severity={snack.severity}
+          onClose={handleSnackClose}
+          sx={{ width: "100%" }}
+        >
           {snack.message}
         </Alert>
       </Snackbar>

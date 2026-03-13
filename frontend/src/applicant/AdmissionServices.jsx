@@ -10,7 +10,7 @@ import { FcPrint } from "react-icons/fc";
 import axios from "axios";
 import API_BASE_URL from "../apiConfig";
 const AdmissionServices = () => {
-  const settings = useContext(SettingsContext);
+    const settings = useContext(SettingsContext);
 
     const [titleColor, setTitleColor] = useState("#000000");
     const [subtitleColor, setSubtitleColor] = useState("#555555");
@@ -18,7 +18,6 @@ const AdmissionServices = () => {
     const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
     const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
     const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
-
     const [fetchedLogo, setFetchedLogo] = useState(null);
     const [companyName, setCompanyName] = useState("");
     const [shortTerm, setShortTerm] = useState("");
@@ -69,10 +68,7 @@ const AdmissionServices = () => {
     const middleIndex = Math.ceil(words.length / 2);
     const firstLine = words.slice(0, middleIndex).join(" ");
     const secondLine = words.slice(middleIndex).join(" ");
-
-
     const [person, setPerson] = useState({
-
         profile_img: "",
         campus: "",
         academicProgram: "",
@@ -126,7 +122,6 @@ const AdmissionServices = () => {
         guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "",
     });
 
-
     useEffect(() => {
         if (!settings) return;
 
@@ -148,17 +143,14 @@ const AdmissionServices = () => {
         setCampusAddress(settings.address || "");
     }, [settings, branches, person?.campus]);
 
-
-    // ✅ Fetch person data from backend
     const fetchPersonData = async (id) => {
         try {
             const res = await axios.get(`${API_BASE_URL}/api/person/${id}`);
-            setPerson(res.data); // make sure backend returns the correct format
+            setPerson(res.data);
         } catch (error) {
             console.error("Failed to fetch person:", error);
         }
     };
-
 
     const [userID, setUserID] = useState("");
     const [user, setUser] = useState("");

@@ -546,12 +546,17 @@ const CertificateOfRegistration = forwardRef(
       fetchDepartments();
     }, []);
 
+    const toWholeUnit = (value) => {
+      const num = Number(value);
+      return Number.isFinite(num) ? Math.round(num) : 0;
+    };
+
     const totalCourseUnits = enrolled.reduce(
-      (sum, item) => sum + (parseFloat(item.course_unit) || 0),
+      (sum, item) => sum + toWholeUnit(item.course_unit),
       0,
     );
     const totalLabUnits = enrolled.reduce(
-      (sum, item) => sum + (parseFloat(item.lab_unit) || 0),
+      (sum, item) => sum + toWholeUnit(item.lab_unit),
       0,
     );
     const totalCombined = totalCourseUnits + totalLabUnits;
@@ -1639,7 +1644,11 @@ const CertificateOfRegistration = forwardRef(
                         <td colSpan={1} style={{ border: "1px solid black" }}>
                           <input
                             type="text"
-                            value={item.course_unit ?? ""}
+                            value={
+                              item.course_unit == null
+                                ? ""
+                                : toWholeUnit(item.course_unit)
+                            }
                             readOnly
                             style={{
                               width: "98%",
@@ -1653,7 +1662,11 @@ const CertificateOfRegistration = forwardRef(
                         <td colSpan={1} style={{ border: "1px solid black" }}>
                           <input
                             type="text"
-                            value={item.lab_unit ?? ""}
+                            value={
+                              item.lab_unit == null
+                                ? ""
+                                : toWholeUnit(item.lab_unit)
+                            }
                             readOnly
                             style={{
                               width: "98%",
@@ -1668,8 +1681,8 @@ const CertificateOfRegistration = forwardRef(
                           <input
                             type="text"
                             value={
-                              (parseFloat(item.course_unit ?? 0) || 0) +
-                              (parseFloat(item.lab_unit ?? 0) || 0)
+                              toWholeUnit(item.course_unit) +
+                              toWholeUnit(item.lab_unit)
                             }
                             style={{
                               width: "98%",
@@ -1686,8 +1699,8 @@ const CertificateOfRegistration = forwardRef(
                           <input
                             type="text"
                             value={
-                              (parseFloat(item.course_unit ?? 0) || 0) +
-                              (parseFloat(item.lab_unit ?? 0) || 0)
+                              toWholeUnit(item.course_unit) +
+                              toWholeUnit(item.lab_unit)
                             }
                             style={{
                               width: "98%",

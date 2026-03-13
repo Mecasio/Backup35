@@ -17,12 +17,12 @@ import {
   InputLabel,
   MenuItem,
   Button,
-  TextField
+  TextField,
 } from "@mui/material";
 import axios from "axios";
 import API_BASE_URL from "../apiConfig";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FcPrint } from "react-icons/fc"; 
+import { FcPrint } from "react-icons/fc";
 import SearchIcon from "@mui/icons-material/Search";
 
 const FacultyMasterList = () => {
@@ -152,7 +152,8 @@ const FacultyMasterList = () => {
     if (!selectedSchoolYear && !selectedSchoolSemester) return true;
 
     const matchesYear =
-      !selectedSchoolYear || String(course.year_id) === String(selectedSchoolYear);
+      !selectedSchoolYear ||
+      String(course.year_id) === String(selectedSchoolYear);
 
     const matchesSemester =
       !selectedSchoolSemester ||
@@ -168,9 +169,17 @@ const FacultyMasterList = () => {
   }, [course_id, section_id, school_year_id]);
 
   useEffect(() => {
-  if (!userID || !selectedCourse || !selectedSchoolYear || !selectedSchoolSemester) return;
+    if (
+      !userID ||
+      !selectedCourse ||
+      !selectedSchoolYear ||
+      !selectedSchoolSemester
+    )
+      return;
     axios
-      .get(`${API_BASE_URL}/api/section_assigned_to/${userID}/${selectedCourse}/${selectedSchoolYear}/${selectedSchoolSemester}`)
+      .get(
+        `${API_BASE_URL}/api/section_assigned_to/${userID}/${selectedCourse}/${selectedSchoolYear}/${selectedSchoolSemester}`,
+      )
       .then((res) => {
         setSectionAssignedTo(res.data);
 
@@ -190,14 +199,13 @@ const FacultyMasterList = () => {
       .then((res) => {
         const currentYear = new Date().getFullYear();
         const filteredYears = res.data.filter(
-          (yearObj) => Number(yearObj.current_year) <= currentYear
+          (yearObj) => Number(yearObj.current_year) <= currentYear,
         );
 
         setSchoolYears(filteredYears);
       })
       .catch((err) => console.error(err));
   }, []);
-
 
   useEffect(() => {
     axios
@@ -222,7 +230,7 @@ const FacultyMasterList = () => {
     if (selectedSchoolYear && selectedSchoolSemester) {
       axios
         .get(
-          `${API_BASE_URL}/get_selecterd_year/${selectedSchoolYear}/${selectedSchoolSemester}`
+          `${API_BASE_URL}/get_selecterd_year/${selectedSchoolYear}/${selectedSchoolSemester}`,
         )
         .then((res) => {
           if (res.data.length > 0) {
@@ -259,7 +267,7 @@ const FacultyMasterList = () => {
   };
 
   const [searchQuery, setSearchQuery] = useState("");
-   const findPastClass = async () => {
+  const findPastClass = async () => {
     try {
       if (!userID || !selectedSchoolYear || !selectedSchoolSemester) {
         setSnack({
@@ -269,53 +277,66 @@ const FacultyMasterList = () => {
         });
         return;
       }
-  
+
       // 1️⃣ Fetch courses assigned to the professor
       const courseRes = await axios.get(
-        `${API_BASE_URL}/course_assigned_to/${userID}/${selectedSchoolYear}/${selectedSchoolSemester}`
+        `${API_BASE_URL}/course_assigned_to/${userID}/${selectedSchoolYear}/${selectedSchoolSemester}`,
       );
       const courses = courseRes.data;
       setCoursesAssignedTo(courses);
-  
+
       if (courses.length === 0) {
         setSectionsHandle([]);
         setStudents([]);
-        setSnack({ open: true, message: "No courses found for this period.", severity: "info" });
+        setSnack({
+          open: true,
+          message: "No courses found for this period.",
+          severity: "info",
+        });
         return;
       }
-  
+
       // 2️⃣ Choose first course if none selected
       const courseId = selectedCourse || courses[0].course_id;
       setSelectedCourse(courseId);
-  
+
       // 3️⃣ Fetch sections for the selected course
       const sectionRes = await axios.get(
-        `${API_BASE_URL}/handle_section_of/${userID}/${courseId}/${selectedActiveSchoolYear}`
+        `${API_BASE_URL}/handle_section_of/${userID}/${courseId}/${selectedActiveSchoolYear}`,
       );
 
       const sections = sectionRes.data;
       if (sections.length > 0) {
-        setSelectedSection(selectedSection || sections[0].department_section_id);
+        setSelectedSection(
+          selectedSection || sections[0].department_section_id,
+        );
       } else {
         setSelectedSection("");
       }
-  
+
       if (sections.length === 0) {
         setStudents([]);
-        setSnack({ open: true, message: "No sections found for this course.", severity: "info" });
+        setSnack({
+          open: true,
+          message: "No sections found for this course.",
+          severity: "info",
+        });
         return;
       }
-  
+
       // 4️⃣ Choose first section if none selected
       const sectionId = selectedSection || sections[0].department_section_id;
       setSelectedSection(sectionId);
-  
+
       // 5️⃣ Fetch students for this section
       handleFetchStudents(sectionId);
-  
     } catch (err) {
       console.error("Error fetching past class data:", err);
-      setSnack({ open: true, message: "Failed to fetch data.", severity: "error" });
+      setSnack({
+        open: true,
+        message: "Failed to fetch data.",
+        severity: "error",
+      });
     }
   };
 
@@ -372,7 +393,6 @@ const FacultyMasterList = () => {
         : nameB.localeCompare(nameA);
     });
 
-
   const groupedStudents = filteredStudents.reduce((acc, student) => {
     const key = student.student_number;
 
@@ -398,7 +418,7 @@ const FacultyMasterList = () => {
 
   const paginatedStudents = filteredStudents.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   const divToPrintRef = useRef();
@@ -462,7 +482,6 @@ const FacultyMasterList = () => {
     document.body.removeChild(iframe);
   };
 
-
   // // 🔒 Disable right-click
   // document.addEventListener("contextmenu", (e) => e.preventDefault());
 
@@ -484,80 +503,88 @@ const FacultyMasterList = () => {
   // });
 
   return (
-     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      mb: 2,
-      width: "100%",
-    }}
-  >
-    {/* LEFT SIDE — TITLE */}
-    <Typography
-      variant="h4"
+    <Box
       sx={{
-        fontWeight: "bold",
-        color: titleColor,
-        fontSize: "36px",
+        height: "calc(100vh - 150px)",
+        overflowY: "auto",
+        paddingRight: 1,
+        backgroundColor: "transparent",
+        mt: 1,
+        padding: 2,
       }}
     >
-      CLASS LIST
-    </Typography>
-
-    {/* RIGHT SIDE — SEARCH + PRINT */}
-    <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-      <TextField
-        size="small"
-        placeholder="Search Student Number / Student Name"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+      <Box
         sx={{
-          width: 450,  // MATCHED WITH GRADING SHEET
-          backgroundColor: "#fff",
-          borderRadius: 1,
-          "& .MuiOutlinedInput-root": {
-            borderRadius: "10px",
-          },
-        }}
-        InputProps={{
-          startAdornment: <SearchIcon sx={{ mr: 1, color: "gray" }} />,
-        }}
-      />
-
-      <button
-        onClick={printDiv}
-        style={{
-          width: "308px",   // MATCHED WITH GRADING SHEET
-          padding: "10px 20px",
-          border: "2px solid black",
-          backgroundColor: "#f0f0f0",
-          color: "black",
-          borderRadius: "5px",
-          cursor: "pointer",
-          fontSize: "16px",
-          fontWeight: "bold",
-          marginRight: "30px",
-          transition: "background-color 0.3s, transform 0.2s",
           display: "flex",
+          justifyContent: "space-between",
           alignItems: "center",
-          justifyContent: "center",
-          gap: "8px",
+          mb: 2,
+          width: "100%",
         }}
-        onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
-        onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
-        onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
-        onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
       >
-        <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <FcPrint size={20} />
-          Print Class List
-        </span>
-      </button>
-    </Box>
-  </Box>
+        {/* LEFT SIDE — TITLE */}
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: "bold",
+            color: titleColor,
+            fontSize: "36px",
+          }}
+        >
+          CLASS LIST
+        </Typography>
 
+        {/* RIGHT SIDE — SEARCH + PRINT */}
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+          <TextField
+            size="small"
+            placeholder="Search Student Number / Student Name"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{
+              width: 450, // MATCHED WITH GRADING SHEET
+              backgroundColor: "#fff",
+              borderRadius: 1,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+              },
+            }}
+            InputProps={{
+              startAdornment: <SearchIcon sx={{ mr: 1, color: "gray" }} />,
+            }}
+          />
+
+          <button
+            onClick={printDiv}
+            style={{
+              width: "308px", // MATCHED WITH GRADING SHEET
+              padding: "10px 20px",
+              border: "2px solid black",
+              backgroundColor: "#f0f0f0",
+              color: "black",
+              borderRadius: "5px",
+              cursor: "pointer",
+              fontSize: "16px",
+              fontWeight: "bold",
+              marginRight: "30px",
+              transition: "background-color 0.3s, transform 0.2s",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+            }}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
+            onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
+            onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
+          >
+            <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <FcPrint size={20} />
+              Print Class List
+            </span>
+          </button>
+        </Box>
+      </Box>
 
       <hr style={{ border: "1px solid #ccc", width: "98%" }} />
 
@@ -742,7 +769,7 @@ const FacultyMasterList = () => {
                     <Button
                       onClick={() =>
                         setSortOrder((prev) =>
-                          prev === "asc" ? "desc" : "asc"
+                          prev === "asc" ? "desc" : "asc",
                         )
                       }
                       variant="outlined"
@@ -781,7 +808,7 @@ const FacultyMasterList = () => {
                           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                             borderColor: "white",
                           },
-                          "& svg": { color: "white" }
+                          "& svg": { color: "white" },
                         }}
                         MenuProps={{
                           PaperProps: {
@@ -799,7 +826,7 @@ const FacultyMasterList = () => {
 
                         {/* Loop through school years */}
                         {schoolYears.map((yearObj) => (
-                          <MenuItem 
+                          <MenuItem
                             key={yearObj.year_id}
                             value={yearObj.year_id}
                           >
@@ -808,11 +835,13 @@ const FacultyMasterList = () => {
                         ))}
                       </Select>
                     </FormControl>
-                    
+
                     <FormControl size="small" sx={{ minWidth: 140 }}>
                       <Select
                         value={selectedSchoolSemester}
-                        onChange={(e) => setSelectedSchoolSemester(e.target.value)}
+                        onChange={(e) =>
+                          setSelectedSchoolSemester(e.target.value)
+                        }
                         displayEmpty
                         sx={{
                           fontSize: "12px",
@@ -820,54 +849,60 @@ const FacultyMasterList = () => {
                           color: "white",
                           border: "1px solid white",
                           backgroundColor: "transparent",
-                          ".MuiOutlinedInput-notchedOutline": { borderColor: "white" },
-                          "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "white" },
-                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "white" },
-                          "& svg": { color: "white" }
+                          ".MuiOutlinedInput-notchedOutline": {
+                            borderColor: "white",
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "white",
+                          },
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "white",
+                          },
+                          "& svg": { color: "white" },
                         }}
-                          MenuProps={{
-                            PaperProps: {
-                              sx: { 
-                                maxHeight: 200, 
-                                backgroundColor: "#fff"
-                              },
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              maxHeight: 200,
+                              backgroundColor: "#fff",
                             },
-                          }}
-                        >
-                          {/* Placeholder */}
-                          <MenuItem value="" disabled>
-                            Select Semester
-                          </MenuItem>
-  
-                          {/* Loop through semester list */}
-                          {schoolSemester.map((sem) => (
-                            <MenuItem 
-                              key={sem.semester_id} 
-                              value={sem.semester_id}
-                            >
-                              {sem.semester_description}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-  
-                      <Button
-                        onClick={findPastClass}
-                        variant="outlined"
-                        size="small"
-                        sx={{
-                          minWidth: 100,
-                          color: "white",
-                          borderColor: "white",
-                          backgroundColor: "transparent",
-                          '&:hover': {
-                            borderColor: 'white',
-                            backgroundColor: 'rgba(255,255,255,0.1)',
                           },
                         }}
                       >
-                        FIND LAST GRADE
-                      </Button>
+                        {/* Placeholder */}
+                        <MenuItem value="" disabled>
+                          Select Semester
+                        </MenuItem>
+
+                        {/* Loop through semester list */}
+                        {schoolSemester.map((sem) => (
+                          <MenuItem
+                            key={sem.semester_id}
+                            value={sem.semester_id}
+                          >
+                            {sem.semester_description}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <Button
+                      onClick={findPastClass}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        minWidth: 100,
+                        color: "white",
+                        borderColor: "white",
+                        backgroundColor: "transparent",
+                        "&:hover": {
+                          borderColor: "white",
+                          backgroundColor: "rgba(255,255,255,0.1)",
+                        },
+                      }}
+                    >
+                      FIND LAST GRADE
+                    </Button>
                   </Box>
                 </Box>
               </TableCell>
@@ -893,9 +928,7 @@ const FacultyMasterList = () => {
               display="flex"
               alignItems="center"
               gap={1}
-              sx={{ minWidth: 400, 
-
-              }}
+              sx={{ minWidth: 400 }}
             >
               <Typography fontSize={13} sx={{ minWidth: "100px" }}>
                 Course:{" "}
@@ -910,8 +943,10 @@ const FacultyMasterList = () => {
                   label="Course"
                   onChange={handleSelectCourseChange}
                 >
-                  {(!courseAssignedTo || courseAssignedTo.length === 0) ? (
-                    <MenuItem disabled>No Course Assigned this Academic Year</MenuItem>
+                  {!courseAssignedTo || courseAssignedTo.length === 0 ? (
+                    <MenuItem disabled>
+                      No Course Assigned this Academic Year
+                    </MenuItem>
                   ) : filteredCourses.length > 0 ? (
                     filteredCourses.map((course) => (
                       <MenuItem key={course.course_id} value={course.course_id}>
@@ -919,16 +954,14 @@ const FacultyMasterList = () => {
                       </MenuItem>
                     ))
                   ) : (
-                    <MenuItem disabled>No Course Assigned this Academic Year</MenuItem>
+                    <MenuItem disabled>
+                      No Course Assigned this Academic Year
+                    </MenuItem>
                   )}
                 </Select>
               </FormControl>
             </Box>
-            <Box
-              display="flex"
-              gap={2}
-              sx={{ marginTop: "1rem" }}
-            >
+            <Box display="flex" gap={2} sx={{ marginTop: "1rem" }}>
               <Box
                 display="flex"
                 alignItems="center"
@@ -943,7 +976,7 @@ const FacultyMasterList = () => {
                   <Select
                     labelId="section-select-label"
                     id="section-select"
-                    label='Section'
+                    label="Section"
                     value={selectedSection}
                     onChange={(e) => {
                       setSelectedSection(e.target.value);
@@ -966,7 +999,10 @@ const FacultyMasterList = () => {
                       </MenuItem>
                     ) : sectionAssignedTo.length > 0 ? (
                       sectionAssignedTo.map((section) => (
-                        <MenuItem key={section.department_section_id} value={section.department_section_id}>
+                        <MenuItem
+                          key={section.department_section_id}
+                          value={section.department_section_id}
+                        >
                           {section.program_code}-{section.section_description}
                         </MenuItem>
                       ))
@@ -1014,13 +1050,13 @@ const FacultyMasterList = () => {
             gap={2}
             sx={{ minWidth: "350px" }}
           >
-            <Box sx={{
-              display: "flex",
-              gap: 2,
-              minWidth: "100px",
-            }}>
-
-            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                minWidth: "100px",
+              }}
+            ></Box>
           </Box>
         </Box>
       </TableContainer>
@@ -1161,9 +1197,11 @@ const FacultyMasterList = () => {
                       border: `2px solid ${borderColor}`,
                     }}
                   >
-                    {[...new Set(student.schedules.map((sch) => sch.room))].map((room, i) => (
-                      <div key={i}>{room}</div>
-                    ))}
+                    {[...new Set(student.schedules.map((sch) => sch.room))].map(
+                      (room, i) => (
+                        <div key={i}>{room}</div>
+                      ),
+                    )}
                   </TableCell>
                 </TableRow>
               ))
@@ -1212,20 +1250,38 @@ const FacultyMasterList = () => {
           >
             {/* Logo */}
             <div>
-
               <img
                 src={fetchedLogo}
                 alt="Logo"
-                style={{ width: "80px", height: "80px", objectFit: "contain", marginTop: "-10px" }}
+                style={{
+                  width: "80px",
+                  height: "80px",
+                  objectFit: "contain",
+                  marginTop: "-10px",
+                }}
               />
-
             </div>
 
             {/* School Info */}
-            <div style={{ textAlign: "center", flex: 1, marginLeft: "10px", marginRight: "10px" }}>
-              <span style={{ margin: 0, fontSize: "12px" }}>Republic of the Philippines</span>
-              <h2 style={{ margin: 0, fontSize: "20px", letterSpacing: "-1px" }}>{companyName}</h2>
-              <span style={{ margin: 0, fontSize: "12px" }}>{campusAddress || "Nagtahan St. Sampaloc, Manila"}</span>
+            <div
+              style={{
+                textAlign: "center",
+                flex: 1,
+                marginLeft: "10px",
+                marginRight: "10px",
+              }}
+            >
+              <span style={{ margin: 0, fontSize: "12px" }}>
+                Republic of the Philippines
+              </span>
+              <h2
+                style={{ margin: 0, fontSize: "20px", letterSpacing: "-1px" }}
+              >
+                {companyName}
+              </h2>
+              <span style={{ margin: 0, fontSize: "12px" }}>
+                {campusAddress || "Nagtahan St. Sampaloc, Manila"}
+              </span>
             </div>
 
             {/* Empty space or right-aligned info */}
@@ -1233,90 +1289,276 @@ const FacultyMasterList = () => {
           </div>
 
           {/* Document Title */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", lineSpacing: "-1px" }}>
-            <span style={{ fontSize: "20px" }}><b>{groupedList[0]?.course_description.toUpperCase() || ""}</b></span>
-            <span style={{ fontSize: "15px" }}>{groupedList[0]?.dprtmnt_name || ""}</span>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+              lineSpacing: "-1px",
+            }}
+          >
+            <span style={{ fontSize: "20px" }}>
+              <b>{groupedList[0]?.course_description.toUpperCase() || ""}</b>
+            </span>
+            <span style={{ fontSize: "15px" }}>
+              {groupedList[0]?.dprtmnt_name || ""}
+            </span>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", lineSpacing: "-1px", marginTop: "2rem", marginBottom: "1rem" }}>
-            <span style={{ fontSize: "20px" }}><b>OFFICIAL LIST OF ENROLLED STUDENTS</b></span>
-            <div style={{ display: "flex", alignItems: "end", justifyContent: "center" }}>
-              <span style={{ marginRight: "0.5rem", fontSize: "15px" }}>Academic Year</span>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+              lineSpacing: "-1px",
+              marginTop: "2rem",
+              marginBottom: "1rem",
+            }}
+          >
+            <span style={{ fontSize: "20px" }}>
+              <b>OFFICIAL LIST OF ENROLLED STUDENTS</b>
+            </span>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "end",
+                justifyContent: "center",
+              }}
+            >
+              <span style={{ marginRight: "0.5rem", fontSize: "15px" }}>
+                Academic Year
+              </span>
               <span style={{ fontSize: "15px" }}>
                 {groupedList[0]?.current_year || ""}-
                 {groupedList[0]?.next_year || ""},&nbsp;&nbsp;
-
                 {groupedList[0]?.semester_description || ""}
               </span>
             </div>
           </div>
 
           {/* School Info Table */}
-          <table style={{ borderCollapse: "collapse", fontSize: "12px", lineHeight: "1", padding: 0 }}>
+          <table
+            style={{
+              borderCollapse: "collapse",
+              fontSize: "12px",
+              lineHeight: "1",
+              padding: 0,
+            }}
+          >
             <thead>
               {/* spacer row to remove double borders */}
               <tr>
-                <td colSpan={1} style={{ width: "80px", borderRight: "none", borderBottom: "none" }}></td>
-                <td colSpan={5} style={{ borderRight: "none", borderBottom: "none" }}></td>
-                <td colSpan={1} style={{ borderLeft: "none", borderBottom: "none" }}></td>
-                <td colSpan={2} style={{ borderLeft: "none", borderBottom: "none" }}></td>
+                <td
+                  colSpan={1}
+                  style={{
+                    width: "80px",
+                    borderRight: "none",
+                    borderBottom: "none",
+                  }}
+                ></td>
+                <td
+                  colSpan={5}
+                  style={{ borderRight: "none", borderBottom: "none" }}
+                ></td>
+                <td
+                  colSpan={1}
+                  style={{ borderLeft: "none", borderBottom: "none" }}
+                ></td>
+                <td
+                  colSpan={2}
+                  style={{ borderLeft: "none", borderBottom: "none" }}
+                ></td>
               </tr>
 
               {/* Subject Code + Class Section */}
               <tr>
-                <td colSpan={1} style={{ width: "80px", borderTop: "none", padding: "0px 2px" }}>Subject Code:</td>
-                <td colSpan={5} style={{ borderRight: "none", borderTop: "none", padding: "0px 2px" }}>
+                <td
+                  colSpan={1}
+                  style={{
+                    width: "80px",
+                    borderTop: "none",
+                    padding: "0px 2px",
+                  }}
+                >
+                  Subject Code:
+                </td>
+                <td
+                  colSpan={5}
+                  style={{
+                    borderRight: "none",
+                    borderTop: "none",
+                    padding: "0px 2px",
+                  }}
+                >
                   {groupedList[0]?.course_code || ""}
                 </td>
 
-                <td colSpan={1} style={{ borderLeft: "none", borderTop: "none", padding: "0px 2px" }}>
-                  <div style={{ display: "flex", justifyContent: "end" }}>Class Section:</div>
+                <td
+                  colSpan={1}
+                  style={{
+                    borderLeft: "none",
+                    borderTop: "none",
+                    padding: "0px 2px",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "end" }}>
+                    Class Section:
+                  </div>
                 </td>
 
-                <td colSpan={2} style={{ borderTop: "none", padding: "0px 2px" }}>
-                  {groupedList[0]?.program_code || ""}-{groupedList[0]?.section_description || ""}
+                <td
+                  colSpan={2}
+                  style={{ borderTop: "none", padding: "0px 2px" }}
+                >
+                  {groupedList[0]?.program_code || ""}-
+                  {groupedList[0]?.section_description || ""}
                 </td>
               </tr>
 
               {/* Subject Title + Year Level */}
               <tr>
-                <td colSpan={1} style={{ width: "80px", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>Subject Title:</td>
+                <td
+                  colSpan={1}
+                  style={{
+                    width: "80px",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  Subject Title:
+                </td>
 
-                <td colSpan={5} style={{ borderRight: "none", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
+                <td
+                  colSpan={5}
+                  style={{
+                    borderRight: "none",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
                   {groupedList[0]?.course_description || ""}
                 </td>
 
-                <td colSpan={1} style={{ borderLeft: "none", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
-                  <div style={{ display: "flex", justifyContent: "end" }}>Year Level:</div>
+                <td
+                  colSpan={1}
+                  style={{
+                    borderLeft: "none",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "end" }}>
+                    Year Level:
+                  </div>
                 </td>
 
-                <td colSpan={2} style={{ paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
+                <td
+                  colSpan={2}
+                  style={{
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
                   {groupedList[0]?.year_level_description || ""}
                 </td>
               </tr>
 
               {/* Academic Units + Lab Units + Schedule */}
               <tr>
-                <td colSpan={1} style={{ width: "80px", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>Academic Units:</td>
+                <td
+                  colSpan={1}
+                  style={{
+                    width: "80px",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  Academic Units:
+                </td>
 
-                <td colSpan={1} style={{ paddingRight: "2px", textAlign: "center", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
+                <td
+                  colSpan={1}
+                  style={{
+                    paddingRight: "2px",
+                    textAlign: "center",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
                   {groupedList[0]?.course_unit || "0"}
                 </td>
 
-                <td colSpan={1} style={{ width: "80px", borderLeft: "none", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>Lab Units:</td>
+                <td
+                  colSpan={1}
+                  style={{
+                    width: "80px",
+                    borderLeft: "none",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  Lab Units:
+                </td>
 
-                <td colSpan={1} style={{ paddingRight: "2px", textAlign: "center", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
+                <td
+                  colSpan={1}
+                  style={{
+                    paddingRight: "2px",
+                    textAlign: "center",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
                   {groupedList[0]?.lab_unit || "0"}
                 </td>
 
-                <td colSpan={3} style={{ borderLeft: "none", borderTop: "none", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
-                  <div style={{ display: "flex", justifyContent: "end" }}>Schedule:</div>
+                <td
+                  colSpan={3}
+                  style={{
+                    borderLeft: "none",
+                    borderTop: "none",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "end" }}>
+                    Schedule:
+                  </div>
                 </td>
-                <td colSpan={2} style={{ paddingRight: "2px", paddingLeft: "2px", borderBottom: "none", paddingBottom: "1px", paddingTop: "6px" }}>
-                  {groupedList.length > 0 && groupedList[0].schedules.length > 0 ? (
+                <td
+                  colSpan={2}
+                  style={{
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    borderBottom: "none",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  {groupedList.length > 0 &&
+                  groupedList[0].schedules.length > 0 ? (
                     <div>
                       {groupedList[0].schedules[0].day}{" "}
-                      {groupedList[0].schedules[0].start} - {groupedList[0].schedules[0].end}
+                      {groupedList[0].schedules[0].start} -{" "}
+                      {groupedList[0].schedules[0].end}
                     </div>
                   ) : (
                     <div>TBA</div>
@@ -1326,68 +1568,299 @@ const FacultyMasterList = () => {
 
               {/* Credit Units + Lab Units */}
               <tr>
-                <td colSpan={1} style={{ width: "80px", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>Credit Units:</td>
+                <td
+                  colSpan={1}
+                  style={{
+                    width: "80px",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  Credit Units:
+                </td>
 
-                <td colSpan={1} style={{ paddingRight: "2px", textAlign: "center", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
+                <td
+                  colSpan={1}
+                  style={{
+                    paddingRight: "2px",
+                    textAlign: "center",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
                   {groupedList[0]?.course_unit || "0"}
                 </td>
 
-                <td colSpan={1} style={{ width: "80px", borderLeft: "none", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>Lab Units:</td>
+                <td
+                  colSpan={1}
+                  style={{
+                    width: "80px",
+                    borderLeft: "none",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
+                  Lab Units:
+                </td>
 
-                <td colSpan={1} style={{ paddingRight: "2px", textAlign: "center", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
+                <td
+                  colSpan={1}
+                  style={{
+                    paddingRight: "2px",
+                    textAlign: "center",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
                   {groupedList[0]?.lab_unit || "0"}
                 </td>
 
-                <td colSpan={3} style={{ borderLeft: "none", borderTop: "none", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", paddingTop: "6px" }}>
+                <td
+                  colSpan={3}
+                  style={{
+                    borderLeft: "none",
+                    borderTop: "none",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    paddingTop: "6px",
+                  }}
+                >
                   <div style={{ display: "flex", justifyContent: "end" }}></div>
                 </td>
-                <td colSpan={2} rowSpan={4} style={{ paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", borderTop: "none", paddingTop: "6px" }}>
-                </td>
+                <td
+                  colSpan={2}
+                  rowSpan={4}
+                  style={{
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    borderTop: "none",
+                    paddingTop: "6px",
+                  }}
+                ></td>
               </tr>
 
               {/* Mode */}
               <tr>
-                <td colSpan={1} style={{ width: "80px", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", borderTop: "none", paddingTop: "6px" }}>Mode:</td>
-                <td colSpan={6} style={{ paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", borderTop: "none", paddingTop: "6px" }}></td>
+                <td
+                  colSpan={1}
+                  style={{
+                    width: "80px",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    borderTop: "none",
+                    paddingTop: "6px",
+                  }}
+                >
+                  Mode:
+                </td>
+                <td
+                  colSpan={6}
+                  style={{
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    borderTop: "none",
+                    paddingTop: "6px",
+                  }}
+                ></td>
               </tr>
 
               {/* Faculty */}
               <tr>
-                <td colSpan={1} style={{ width: "80px", paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", borderTop: "none", paddingTop: "6px" }}>Faculty:</td>
-                <td colSpan={6} style={{ paddingRight: "2px", paddingLeft: "2px", paddingBottom: "1px", borderTop: "none", paddingTop: "6px" }}>{profData.fname} {profData.mname} {profData.lname}</td>
+                <td
+                  colSpan={1}
+                  style={{
+                    width: "80px",
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    borderTop: "none",
+                    paddingTop: "6px",
+                  }}
+                >
+                  Faculty:
+                </td>
+                <td
+                  colSpan={6}
+                  style={{
+                    paddingRight: "2px",
+                    paddingLeft: "2px",
+                    paddingBottom: "1px",
+                    borderTop: "none",
+                    paddingTop: "6px",
+                  }}
+                >
+                  {profData.fname} {profData.mname} {profData.lname}
+                </td>
               </tr>
             </thead>
           </table>
 
           {/* Students Table */}
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", marginTop: "0.5rem" }}>
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              fontSize: "13px",
+              marginTop: "0.5rem",
+            }}
+          >
             <thead>
               <tr>
-                <th style={{ border: "1px solid black", padding: "6px 0px", width: "30px", textAlign: "center" }}>#</th>
-                <th style={{ border: "1px solid black", padding: "6px 0px", width: "80px", textAlign: "center" }}>Student No.</th>
-                <th style={{ border: "1px solid black", padding: "6px", width: "280px", textAlign: "start" }}>Student Name</th>
-                <th style={{ border: "1px solid black", padding: "6px 0px", width: "50px", textAlign: "center" }}>Age</th>
-                <th style={{ border: "1px solid black", padding: "6px 0px", width: "50px", textAlign: "center" }}>Sex</th>
-                <th style={{ border: "1px solid black", padding: "6px 0px", width: "80px", textAlign: "center" }}>Year Level</th>
-                <th style={{ border: "1px solid black", padding: "6px 0px", width: "80px", textAlign: "center" }}>Status</th>
+                <th
+                  style={{
+                    border: "1px solid black",
+                    padding: "6px 0px",
+                    width: "30px",
+                    textAlign: "center",
+                  }}
+                >
+                  #
+                </th>
+                <th
+                  style={{
+                    border: "1px solid black",
+                    padding: "6px 0px",
+                    width: "80px",
+                    textAlign: "center",
+                  }}
+                >
+                  Student No.
+                </th>
+                <th
+                  style={{
+                    border: "1px solid black",
+                    padding: "6px",
+                    width: "280px",
+                    textAlign: "start",
+                  }}
+                >
+                  Student Name
+                </th>
+                <th
+                  style={{
+                    border: "1px solid black",
+                    padding: "6px 0px",
+                    width: "50px",
+                    textAlign: "center",
+                  }}
+                >
+                  Age
+                </th>
+                <th
+                  style={{
+                    border: "1px solid black",
+                    padding: "6px 0px",
+                    width: "50px",
+                    textAlign: "center",
+                  }}
+                >
+                  Sex
+                </th>
+                <th
+                  style={{
+                    border: "1px solid black",
+                    padding: "6px 0px",
+                    width: "80px",
+                    textAlign: "center",
+                  }}
+                >
+                  Year Level
+                </th>
+                <th
+                  style={{
+                    border: "1px solid black",
+                    padding: "6px 0px",
+                    width: "80px",
+                    textAlign: "center",
+                  }}
+                >
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody>
               {groupedList.length > 0 ? (
                 groupedList.map((s, index) => (
                   <tr key={s.student_number}>
-                    <td style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>{index + 1}</td>
-                    <td style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>{s.student_number}</td>
-                    <td style={{ border: "1px solid black", padding: "6px" }}>{`${s.last_name}, ${s.first_name} ${s.middle_name || ""}`}</td>
-                    <td style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>{s.age}</td>
-                    <td style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>{s.gender === 0 ? "Male" : "Female"}</td>
-                    <td style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>{s.year_level_description}</td>
-                    <td style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>{Number(s.status) === 1 ? "Regular" : "Irregular"}</td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        padding: "6px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {index + 1}
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        padding: "6px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {s.student_number}
+                    </td>
+                    <td
+                      style={{ border: "1px solid black", padding: "6px" }}
+                    >{`${s.last_name}, ${s.first_name} ${s.middle_name || ""}`}</td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        padding: "6px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {s.age}
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        padding: "6px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {s.gender === 0 ? "Male" : "Female"}
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        padding: "6px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {s.year_level_description}
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        padding: "6px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {Number(s.status) === 1 ? "Regular" : "Irregular"}
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} style={{ border: "1px solid black", padding: "6px", textAlign: "center" }}>
+                  <td
+                    colSpan={7}
+                    style={{
+                      border: "1px solid black",
+                      padding: "6px",
+                      textAlign: "center",
+                    }}
+                  >
                     No class details available
                   </td>
                 </tr>
@@ -1396,8 +1869,6 @@ const FacultyMasterList = () => {
           </table>
         </div>
       </div>
-
-
     </Box>
   );
 };

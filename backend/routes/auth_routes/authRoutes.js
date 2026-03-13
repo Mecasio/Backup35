@@ -1004,6 +1004,8 @@ router.get("/get-otp-setting/:type/:person_id", async (req, res) => {
 router.post("/update-otp-setting", async (req, res) => {
   const { type, person_id, require_otp } = req.body;
 
+  console.log("Role Types: ", type)
+
   if (!person_id || !type) return res.status(400).json({ message: "Missing parameters" });
 
   let table;
