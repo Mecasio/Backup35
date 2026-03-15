@@ -16,15 +16,20 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import ExamPermit from "../applicant/ExamPermit";
-import ListAltIcon from "@mui/icons-material/ListAlt";
-import DescriptionIcon from "@mui/icons-material/Description";
-import PsychologyIcon from "@mui/icons-material/Psychology";
-import HowToRegIcon from '@mui/icons-material/HowToReg';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import ClassIcon from "@mui/icons-material/Class";
+import SearchIcon from "@mui/icons-material/Search";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
+import GradeIcon from "@mui/icons-material/Grade";
 import API_BASE_URL from "../apiConfig";
-const MedicalDashboard2 = () => {
+
+import DescriptionIcon from "@mui/icons-material/Description";
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+const ReadmissionDashboard2 = () => {
 
     const settings = useContext(SettingsContext);
 
@@ -65,32 +70,19 @@ const MedicalDashboard2 = () => {
 
     }, [settings]);
 
-
-
     const stepsData = [
-        { label: "Medical Applicant List", to: "/medical_applicant_list", icon: <ListAltIcon /> },
-        { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
-        { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
-        { label: "Medical History", to: "/medical_requirements_form", icon: <PersonIcon /> },
-        { label: "Dental Assessment", to: "/dental_assessment", icon: <DescriptionIcon /> },
-        { label: "Physical and Neurological Examination", to: "/physical_neuro_exam", icon: <SchoolIcon /> },
+         { label: "Medical Applicant List", to: "/medical_applicant_list", icon: <ListAltIcon /> },
+    { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
+    { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
+    { label: "Medical History", to: "/medical_requirements_form", icon: <PersonIcon /> },
+    { label: "Dental Assessment", to: "/dental_assessment", icon: <DescriptionIcon /> },
+    { label: "Physical and Neurological Examination", to: "/physical_neuro_exam", icon: <SchoolIcon /> },
     ];
-
-
-    const handleNavigateStep = (index, to) => {
-        setCurrentStep(index);
-
-        const pid = sessionStorage.getItem("admin_edit_person_id");
-        if (pid) {
-            navigate(`${to}?person_id=${pid}`);
-        } else {
-            navigate(to);
-        }
-    };
-
 
     const [currentStep, setCurrentStep] = useState(1);
     const [visitedSteps, setVisitedSteps] = useState(Array(stepsData.length).fill(false));
+
+
 
 
     const navigate = useNavigate();
@@ -105,13 +97,22 @@ const MedicalDashboard2 = () => {
         guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "", annual_income: "",
     });
 
+    const handleNavigateStep = (index, to) => {
+        setCurrentStep(index);
 
+        const pid = sessionStorage.getItem("admin_edit_person_id");
+        if (pid) {
+            navigate(`${to}?person_id=${pid}`);
+        } else {
+            navigate(to);
+        }
+    };
 
     const [hasAccess, setHasAccess] = useState(null);
     const [loading, setLoading] = useState(false);
 
 
-    const pageId = 26;
+    const pageId = 39;
 
     const [employeeID, setEmployeeID] = useState("");
 
@@ -159,54 +160,74 @@ const MedicalDashboard2 = () => {
     };
 
 
-
     // do not alter
 
     const location = useLocation();
-
+ 
     const queryParams = new URLSearchParams(location.search);
     const queryPersonId = queryParams.get("person_id")?.trim() || "";
-
+  
     useEffect(() => {
-        const storedUser = localStorage.getItem("email");
-        const storedRole = localStorage.getItem("role");
-        const loggedInPersonId = localStorage.getItem("person_id");
-
-        if (!storedUser || !storedRole || !loggedInPersonId) {
-            window.location.href = "/login";
-            return;
-        }
-
-        setUser(storedUser);
-        setUserRole(storedRole);
-
-        const allowedRoles = ["registrar", "applicant", "superadmin"];
-        if (!allowedRoles.includes(storedRole)) {
-            window.location.href = "/login";
-            return;
-        }
-
-        const lastSelected = sessionStorage.getItem("admin_edit_person_id");
-
-        // ⭐ CASE 1: URL HAS ?person_id=
-        if (queryPersonId !== "") {
-            sessionStorage.setItem("admin_edit_person_id", queryPersonId);
-            setUserID(queryPersonId);
-            return;
-        }
-
-        // ⭐ CASE 2: URL has NO ID but we have a last selected student
-        if (lastSelected) {
-            setUserID(lastSelected);
-            return;
-        }
-
-        // ⭐ CASE 3: No URL ID and no last selected → start blank
-        setUserID("");
+      const storedUser = localStorage.getItem("email");
+      const storedRole = localStorage.getItem("role");
+      const loggedInPersonId = localStorage.getItem("person_id");
+  
+      if (!storedUser || !storedRole || !loggedInPersonId) {
+        window.location.href = "/login";
+        return;
+      }
+  
+      setUser(storedUser);
+      setUserRole(storedRole);
+  
+      const allowedRoles = ["registrar", "applicant", "superadmin"];
+      if (!allowedRoles.includes(storedRole)) {
+        window.location.href = "/login";
+        return;
+      }
+  
+      const lastSelected = sessionStorage.getItem("admin_edit_person_id");
+  
+      // ⭐ CASE 1: URL HAS ?person_id=
+      if (queryPersonId !== "") {
+        sessionStorage.setItem("admin_edit_person_id", queryPersonId);
+        setUserID(queryPersonId);
+        return;
+      }
+  
+      // ⭐ CASE 2: URL has NO ID but we have a last selected student
+      if (lastSelected) {
+        setUserID(lastSelected);
+        return;
+      }
+  
+      // ⭐ CASE 3: No URL ID and no last selected → start blank
+      setUserID("");
     }, [queryPersonId]);
-
-
-
+  
+    const [studentData, setStudentData] = useState(null);
+  
+    const params = new URLSearchParams(location.search);
+  
+    const person_id = params.get("person_id");
+    const student_number = params.get("student_number");
+  
+    useEffect(() => {
+      const fetchStudent = async () => {
+        try {
+          const res = await axios.get(`${API_BASE_URL}/api/student-info`, {
+            params: { person_id, student_number }
+          });
+          setStudentData(res.data);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+  
+      if (person_id || student_number) fetchStudent();
+    }, [person_id, student_number]);
+  
+  
     const [selectedPerson, setSelectedPerson] = useState(null);
 
 
@@ -228,192 +249,103 @@ const MedicalDashboard2 = () => {
     const [activeStep, setActiveStep] = useState(1);
     const [clickedSteps, setClickedSteps] = useState([]);
 
+    const steps = [
+        { label: "Personal Information", icon: <PersonIcon />, path: "/medical_dashboard1" },
+        { label: "Family Background", icon: <FamilyRestroomIcon />, path: "/medical_dashboard2" },
+        { label: "Educational Attainment", icon: <SchoolIcon />, path: "/medical_dashboard3" },
+        { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: "/medical_dashboard4" },
+        { label: "Other Information", icon: <InfoIcon />, path: "/medical_dashboard5" },
+    ];
+
+  const handleStepClick = (index) => {
+    setActiveStep(index);
+    const newClickedSteps = [...clickedSteps];
+    newClickedSteps[index] = true;
+    setClickedSteps(newClickedSteps);
+  };
+
+const handleGuardianChange = (e) => {
+  const { value } = e.target;
+
+  let updatedPerson = { ...person, guardian: value };
+
+  if (value === "Father") {
+    updatedPerson = {
+      ...updatedPerson,
+      guardian_family_name: person.father_family_name || "",
+      guardian_given_name: person.father_given_name || "",
+      guardian_middle_name: person.father_middle_name || "",
+      guardian_ext: person.father_ext || "",
+      guardian_nickname: person.father_nickname || "",
+      guardian_contact: person.father_contact || "",
+      guardian_email: person.father_email || "",
+    };
+  }
+
+  if (value === "Mother") {
+    updatedPerson = {
+      ...updatedPerson,
+      guardian_family_name: person.mother_family_name || "",
+      guardian_given_name: person.mother_given_name || "",
+      guardian_middle_name: person.mother_middle_name || "",
+      guardian_ext: person.mother_ext || "",
+      guardian_nickname: person.mother_nickname || "",
+      guardian_contact: person.mother_contact || "",
+      guardian_email: person.mother_email || "",
+    };
+  }
+
+  setPerson(updatedPerson);
+};
 
 
-    const steps = person.person_id
-        ? [
-            { label: "Personal Information", icon: <PersonIcon />, path: `/medical_dashboard1?person_id=${userID}` },
-            { label: "Family Background", icon: <FamilyRestroomIcon />, path: `/medical_dashboard2?person_id=${userID}` },
-            { label: "Educational Attainment", icon: <SchoolIcon />, path: `/medical_dashboard3?person_id=${userID}` },
-            { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: `/medical_dashboard4?person_id=${userID}` },
-            { label: "Other Information", icon: <InfoIcon />, path: `/medical_dashboard5?person_id=${userID}` },
-        ]
-        : [];
 
-
-
-    const handleStepClick = (index) => {
-        setActiveStep(index);
-        setClickedSteps((prev) => [...new Set([...prev, index])]);
-        navigate(steps[index].path); // Go to the clicked step’s page
+    // Do not alter
+    const handleUpdate = async (updatedPerson) => {
+        try {
+            // ✅ force the request to the enrollment route
+            await axios.put(`${API_BASE_URL}/api/enrollment/person/${userID}`, updatedPerson);
+            console.log("✅ Auto-saved to ENROLLMENT DB3");
+        } catch (error) {
+            console.error("❌ Auto-save failed:", error);
+        }
     };
 
-    const handleGuardianChange = (e) => {
-        const { value } = e.target;
+    // Real-time save on every character typed
+    const handleChange = (e) => {
+        const { name, type, checked, value } = e.target;
 
-        let updatedPerson = { ...person, guardian: value };
+        const updatedPerson = {
+            ...person,
+            [name]: type === "checkbox" ? (checked ? 1 : 0) : value,
+        };
 
-        if (value === "Father") {
-            updatedPerson = {
-                ...updatedPerson,
-                guardian_family_name: person.father_family_name || "",
-                guardian_given_name: person.father_given_name || "",
-                guardian_middle_name: person.father_middle_name || "",
-                guardian_ext: person.father_ext || "",
-                guardian_nickname: person.father_nickname || "",
-                guardian_contact: person.father_contact || "",
-                guardian_email: person.father_email || "",
-            };
-        }
+        // If updating either mother_income or father_income, calculate total and set annual_income
+        if (name === "mother_income" || name === "father_income") {
+            const motherIncome = parseFloat(name === "mother_income" ? value : updatedPerson.mother_income) || 0;
+            const fatherIncome = parseFloat(name === "father_income" ? value : updatedPerson.father_income) || 0;
+            const totalIncome = motherIncome + fatherIncome;
 
-        if (value === "Mother") {
-            updatedPerson = {
-                ...updatedPerson,
-                guardian_family_name: person.mother_family_name || "",
-                guardian_given_name: person.mother_given_name || "",
-                guardian_middle_name: person.mother_middle_name || "",
-                guardian_ext: person.mother_ext || "",
-                guardian_nickname: person.mother_nickname || "",
-                guardian_contact: person.mother_contact || "",
-                guardian_email: person.mother_email || "",
-            };
+            let annualIncomeBracket = "";
+            if (totalIncome <= 80000) {
+                annualIncomeBracket = "80,000 and below";
+            } else if (totalIncome <= 135000) {
+                annualIncomeBracket = "80,000 to 135,000";
+            } else if (totalIncome <= 250000) {
+                annualIncomeBracket = "135,000 to 250,000";
+            } else if (totalIncome <= 500000) {
+                annualIncomeBracket = "250,000 to 500,000";
+            } else if (totalIncome <= 1000000) {
+                annualIncomeBracket = "500,000 to 1,000,000";
+            } else {
+                annualIncomeBracket = "1,000,000 and above";
+            }
+
+            updatedPerson.annual_income = annualIncomeBracket;
         }
 
         setPerson(updatedPerson);
-    };
-
-
-
-
-    // ✅ Safe handleUpdate function (no DB errors, correct applicant update)
-    const handleUpdate = async (updatedData) => {
-        if (!person) return;
-
-        try {
-            // ✅ Get correct applicant ID
-            const targetId = selectedPerson?.person_id || queryPersonId || person.person_id;
-            if (!targetId) {
-                console.warn("⚠️ No valid applicant ID found — skipping update.");
-                return;
-            }
-
-            // ✅ Only include valid columns existing in person_table
-            const allowedFields = [
-                "person_id", "profile_img", "campus", "academicProgram", "classifiedAs", "applyingAs",
-                "program", "program2", "program3", "yearLevel",
-                "last_name", "first_name", "middle_name", "extension", "nickname",
-                "height", "weight", "lrnNumber", "nolrnNumber", "gender",
-                "pwdMember", "pwdType", "pwdId",
-                "birthOfDate", "age", "birthPlace", "languageDialectSpoken",
-                "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
-                "cellphoneNumber", "emailAddress",
-                "presentStreet", "presentBarangay", "presentZipCode", "presentRegion",
-                "presentProvince", "presentMunicipality", "presentDswdHouseholdNumber",
-                "sameAsPresentAddress",
-                "permanentStreet", "permanentBarangay", "permanentZipCode",
-                "permanentRegion", "permanentProvince", "permanentMunicipality",
-                "permanentDswdHouseholdNumber",
-                "solo_parent",
-                "father_deceased", "father_family_name", "father_given_name", "father_middle_name",
-                "father_ext", "father_nickname", "father_education", "father_education_level",
-                "father_last_school", "father_course", "father_year_graduated", "father_school_address",
-                "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
-                "mother_deceased", "mother_family_name", "mother_given_name", "mother_middle_name",
-                "mother_ext", "mother_nickname", "mother_education", "mother_education_level",
-                "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
-                "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
-                "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
-                "guardian_ext", "guardian_nickname", "guardian_address", "guardian_contact", "guardian_email",
-                "annual_income",
-                "schoolLevel", "schoolLastAttended", "schoolAddress", "courseProgram",
-                "honor", "generalAverage", "yearGraduated",
-                "schoolLevel1", "schoolLastAttended1", "schoolAddress1", "courseProgram1",
-                "honor1", "generalAverage1", "yearGraduated1",
-                "strand",
-                // 🩺 Health and medical
-                "cough", "colds", "fever", "asthma", "faintingSpells", "heartDisease",
-                "tuberculosis", "frequentHeadaches", "hernia", "chronicCough", "headNeckInjury",
-                "hiv", "highBloodPressure", "diabetesMellitus", "allergies", "cancer",
-                "smokingCigarette", "alcoholDrinking", "hospitalized", "hospitalizationDetails",
-                "medications",
-                // 🧬 Covid / Vaccination
-                "hadCovid", "covidDate",
-                "vaccine1Brand", "vaccine1Date", "vaccine2Brand", "vaccine2Date",
-                "booster1Brand", "booster1Date", "booster2Brand", "booster2Date",
-                // 🧪 Lab results / medical findings
-                "chestXray", "cbc", "urinalysis", "otherworkups",
-                // 🧍 Additional fields
-                "symptomsToday", "remarks",
-                // ✅ Agreement / Meta
-                "termsOfAgreement", "created_at", "current_step"
-            ];
-
-            // ✅ Clean the payload
-            const cleanedData = Object.fromEntries(
-                Object.entries(updatedData).filter(([key]) => allowedFields.includes(key))
-            );
-
-            if (Object.keys(cleanedData).length === 0) {
-                console.warn("⚠️ No valid fields to update — skipping request.");
-                return;
-            }
-
-            // ✅ Send update request
-            await axios.put(`${API_BASE_URL}/api/person/${targetId}`, cleanedData);
-
-            console.log(`✅ SuperAdmin updated person_id: ${targetId} successfully.`);
-        } catch (error) {
-            console.error("❌ SuperAdmin update failed:", {
-                message: error.message,
-                status: error.response?.status,
-                details: error.response?.data || error,
-            });
-        }
-    };
-
-
-
-    // Helper: parse "YYYY-MM-DD" safely (local date in Asia/Manila)
-    const parseISODate = (dateString) => {
-        if (!dateString) return null;
-        const [y, m, d] = dateString.split("-").map(Number);
-        if (!y || !m || !d) return null;
-        return new Date(y, m - 1, d);
-    };
-
-    // Helper: get current date in Asia/Manila (no time portion)
-    const getManilaDate = () => {
-        const now = new Date();
-        // Convert current UTC time to Manila time using locale
-        const manilaString = now.toLocaleString("en-PH", {
-            timeZone: "Asia/Manila",
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-        });
-
-        // manilaString format: "MM/DD/YYYY"
-        const [month, day, year] = manilaString.split("/");
-        return new Date(`${year}-${month}-${day}`);
-    };
-
-    // 🧮 Calculate age using Manila time
-    const calculateAge = (birthDateString) => {
-        const birthDate = parseISODate(birthDateString);
-        if (!birthDate) return "";
-
-        const today = getManilaDate();
-
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const monthDiff = today.getMonth() - birthDate.getMonth();
-        const dayDiff = today.getDate() - birthDate.getDate();
-
-        // 🎂 Subtract 1 if birthday hasn't occurred yet this year
-        if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-            age--;
-        }
-
-        return age < 0 ? "" : age;
+        handleUpdate(updatedPerson); // No delay, real-time save
     };
 
 
@@ -499,45 +431,6 @@ const MedicalDashboard2 = () => {
             });
         }
     };
-
-    // Real-time save on every character typed
-    const handleChange = (e) => {
-        const { name, type, checked, value } = e.target;
-
-        const updatedPerson = {
-            ...person,
-            [name]: type === "checkbox" ? (checked ? 1 : 0) : value,
-        };
-
-        // If updating either mother_income or father_income, calculate total and set annual_income
-        if (name === "mother_income" || name === "father_income") {
-            const motherIncome = parseFloat(name === "mother_income" ? value : updatedPerson.mother_income) || 0;
-            const fatherIncome = parseFloat(name === "father_income" ? value : updatedPerson.father_income) || 0;
-            const totalIncome = motherIncome + fatherIncome;
-
-            let annualIncomeBracket = "";
-            if (totalIncome <= 80000) {
-                annualIncomeBracket = "80,000 and below";
-            } else if (totalIncome <= 135000) {
-                annualIncomeBracket = "80,000 to 135,000";
-            } else if (totalIncome <= 250000) {
-                annualIncomeBracket = "135,000 to 250,000";
-            } else if (totalIncome <= 500000) {
-                annualIncomeBracket = "250,000 to 500,000";
-            } else if (totalIncome <= 1000000) {
-                annualIncomeBracket = "500,000 to 1,000,000";
-            } else {
-                annualIncomeBracket = "1,000,000 and above";
-            }
-
-            updatedPerson.annual_income = annualIncomeBracket;
-        }
-
-        setPerson(updatedPerson);
-        handleUpdate(updatedPerson); // No delay, real-time save
-    };
-
-
 
 
 
@@ -631,28 +524,28 @@ const MedicalDashboard2 = () => {
     };
 
 
+  
+ const links = [
+    {
+      to: userID ? `/admin_ecat_application_form?person_id=${userID}` : "/admin_ecat_application_form",
+      label: "ECAT Application Form",
+    },
+    {
+      to: userID ? `/admin_admission_form_process?person_id=${userID}` : "/admin_admission_form_process",
+      label: "Admission Form Process",
+    },
+    {
+      to: userID ? `/admin_personal_data_form?person_id=${userID}` : "/admin_personal_data_form",
+      label: "Personal Data Form",
+    },
+    {
+      to: userID ? `/admin_office_of_the_registrar?person_id=${userID}` : "/admin_office_of_the_registrar",
+      label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission`,
+    },
+    { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
+   
+  ];
 
-
-    const links = [
-        {
-            to: userID ? `/admin_ecat_application_form?person_id=${userID}` : "/admin_ecat_application_form",
-            label: "ECAT Application Form",
-        },
-        {
-            to: userID ? `/admin_admission_form_process?person_id=${userID}` : "/admin_admission_form_process",
-            label: "Admission Form Process",
-        },
-        {
-            to: userID ? `/admin_personal_data_form?person_id=${userID}` : "/admin_personal_data_form",
-            label: "Personal Data Form",
-        },
-        {
-            to: userID ? `/admin_office_of_the_registrar?person_id=${userID}` : "/admin_office_of_the_registrar",
-            label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission`,
-        },
-        { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
-
-    ];
 
 
 
@@ -685,7 +578,7 @@ const MedicalDashboard2 = () => {
 
     // Put this at the very bottom before the return 
     if (loading || hasAccess === null) {
-        return <LoadingOverlay open={loading} message="Loading..." />;
+       return <LoadingOverlay open={loading} message="Loading..." />;
     }
 
     if (!hasAccess) {
@@ -696,7 +589,7 @@ const MedicalDashboard2 = () => {
 
     // dot not alter
     return (
-        <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
+          <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
             {showPrintView && (
                 <div ref={divToPrintRef} style={{ display: "block" }}>
                     <ExamPermit personId={userID} />   {/* ✅ pass the searched person_id */}
@@ -723,15 +616,16 @@ const MedicalDashboard2 = () => {
                         fontSize: '36px',
                     }}
                 >
-                    MEDICAL - FAMILY BACKGROUND
+                
+                    APPLICANT FORM - FAMILY BACKGROUND
                 </Typography>
 
 
             </Box>
 
-            <hr style={{ border: "1px solid #ccc", width: "100%" }} />
-            <br />
-            <br />
+             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+      <br />
+      <br />
 
 
 
@@ -751,23 +645,23 @@ const MedicalDashboard2 = () => {
                         <Card
                             onClick={() => handleNavigateStep(index, step.to)}
                             sx={{
-                                flex: `1 1 ${100 / stepsData.length}%`, // evenly divide row
-                                height: 135,
+                                flex: `1 1 ${100 / stepsData.length}%`, // evenly divide width
+                                height: 120,
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
                                 cursor: "pointer",
                                 borderRadius: 2,
                                 border: `2px solid ${borderColor}`,
-                                backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
-                                color: activeStep === index ? "#fff" : "#000",
+                                backgroundColor: currentStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
+                                color: currentStep === index ? "#fff" : "#000",
                                 boxShadow:
-                                    activeStep === index
+                                    currentStep === index
                                         ? "0px 4px 10px rgba(0,0,0,0.3)"
                                         : "0px 2px 6px rgba(0,0,0,0.15)",
                                 transition: "0.3s ease",
                                 "&:hover": {
-                                    backgroundColor: activeStep === index ? "#000000" : "#f5d98f",
+                                    backgroundColor: currentStep === index ? "#000" : "#f5d98f",
                                 },
                             }}
                         >
@@ -808,7 +702,6 @@ const MedicalDashboard2 = () => {
 
 
 
-
             <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
                 <Table>
                     <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", border: `2px solid ${borderColor}`, }}>
@@ -842,76 +735,75 @@ const MedicalDashboard2 = () => {
 
 
 
+     
+  <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          width: "100%",
+          mt: 2,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            p: 2,
+            borderRadius: "10px",
+            backgroundColor: "#fffaf5",
+            border: "1px solid #6D2323",
+            boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
+            width: "100%",
+            overflow: "hidden",
+          }}
+        >
+          {/* Icon */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#800000",
+              borderRadius: "8px",
+              width: 60,
+              height: 60,
+              flexShrink: 0,
+            }}
+          >
+            <ErrorIcon sx={{ color: "white", fontSize: 40 }} />
+          </Box>
 
-            <Box
-                sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    width: "100%",
-                    mt: 2,
-                }}
-            >
-                <Box
-                    sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 2,
-                        p: 2,
-                        borderRadius: "10px",
-                        backgroundColor: "#fffaf5",
-                        border: "1px solid #6D2323",
-                        boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
-                        width: "100%",
-                        overflow: "hidden",
-                    }}
-                >
-                    {/* Icon */}
-                    <Box
-                        sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            backgroundColor: "#800000",
-                            borderRadius: "8px",
-                            width: 60,
-                            height: 60,
-                            flexShrink: 0,
-                        }}
-                    >
-                        <ErrorIcon sx={{ color: "white", fontSize: 40 }} />
-                    </Box>
+          {/* Text */}
+          <Typography
+            sx={{
+              fontSize: "20px",
+              fontFamily: "Arial",
+              color: "#3e3e3e",
+              lineHeight: 1.3, // slightly tighter to fit in fewer rows
+              whiteSpace: "normal",
+              overflow: "hidden",
+            }}
+          >
+            <strong style={{ color: "maroon" }}>Notice:</strong> &nbsp;
+            <strong></strong> <span style={{ fontSize: '1.2em', margin: '0 15px' }}>➔</span> Kindly type 'NA' in boxes where there are no possible answers to the information being requested. &nbsp;  &nbsp; <br />
+            <strong></strong> <span style={{ fontSize: '1.2em', margin: '0 15px', marginLeft: "100px", }}>➔</span> To make use of the letter 'Ñ', please press ALT while typing "165", while for 'ñ', please press ALT while typing "164"
 
-                    {/* Text */}
-                    <Typography
-                        sx={{
-                            fontSize: "20px",
-                            fontFamily: "Arial",
-                            color: "#3e3e3e",
-                            lineHeight: 1.3, // slightly tighter to fit in fewer rows
-                            whiteSpace: "normal",
-                            overflow: "hidden",
-                        }}
-                    >
-                        <strong style={{ color: "maroon" }}>Notice:</strong> &nbsp;
-                        <strong></strong> <span style={{ fontSize: '1.2em', margin: '0 15px' }}>➔</span> Kindly type 'NA' in boxes where there are no possible answers to the information being requested. &nbsp;  &nbsp; <br />
-                        <strong></strong> <span style={{ fontSize: '1.2em', margin: '0 15px', marginLeft: "100px", }}>➔</span> To make use of the letter 'Ñ', please press ALT while typing "165", while for 'ñ', please press ALT while typing "164"
+          </Typography>
+        </Box>
+      </Box>
 
-                    </Typography>
-                </Box>
-            </Box>
-
-            <h1
-                style={{
-                    fontSize: "30px",
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    color: "black",
-                    marginTop: "25px",
-                }}
-            >
-                LISTS OF ALL PRINTABLE FILES
-            </h1>
-
+      <h1
+        style={{
+          fontSize: "30px",
+          fontWeight: "bold",
+          textAlign: "center",
+          color: "black",
+          marginTop: "25px",
+        }}
+      >
+        LISTS OF ALL PRINTABLE FILES
+      </h1>
 
 
 
@@ -1002,7 +894,9 @@ const MedicalDashboard2 = () => {
 
 
 
+
             <Container>
+
 
                 <Container>
                     <h1
@@ -1032,8 +926,8 @@ const MedicalDashboard2 = () => {
 
                 </Container>
 
-
                 <br />
+
                 <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
                     {steps.map((step, index) => (
                         <React.Fragment key={index}>
@@ -1083,17 +977,18 @@ const MedicalDashboard2 = () => {
                             {index < steps.length - 1 && (
                                 <Box
                                     sx={{
-                                        height: "2px",
-                                        backgroundColor: mainButtonColor,
-                                        flex: 1,
-                                        alignSelf: "center",
-                                        mx: 2,
+                                           height: "2px",
+                    backgroundColor: mainButtonColor,
+                    flex: 1,
+                    alignSelf: "center",
+                    mx: 2,
                                     }}
                                 />
                             )}
                         </React.Fragment>
                     ))}
                 </Box>
+
                 <br />
 
                 <form>
@@ -1212,7 +1107,7 @@ const MedicalDashboard2 = () => {
                                         onBlur={handleBlur}
                                     />
                                 }
-                                label="Father Seperated / Deceased"
+                                label="Father / Seperated Deceased"
                             />
                             <br />
 
@@ -1414,7 +1309,7 @@ const MedicalDashboard2 = () => {
                                                 <Typography variant="subtitle2" mb={1}>Father Year Graduated</Typography>
                                                 <TextField
                                                     InputProps={{ readOnly: true }}
-                                                    type="number"
+ type="number"
                                                     fullWidth
                                                     size="small"
                                                     name="father_year_graduated"
@@ -1453,149 +1348,94 @@ const MedicalDashboard2 = () => {
                                     <hr style={{ border: '1px solid #ccc', width: '100%' }} />
                                     <br />
 
-                                    <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-
-                                        {/* Father Contact */}
-                                        <Box flex={1} display="flex" flexDirection="column">
+                                    <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                                        <Box sx={{ flex: 1 }}>
                                             <Typography variant="subtitle2" mb={0.5}>Father Contact</Typography>
-
-                                            <TextField
-
-
-                                                fullWidth
-                                                size="small"
-                                                name="father_contact"
-                                                placeholder="9XXXXXXXXX"
-                                                value={person.father_contact || ""}
-                                                onBlur={() => handleUpdate(person)}
-                                                onChange={(e) => {
-                                                    const onlyNumbers = e.target.value.replace(/\D/g, "");
-                                                    handleChange({
-                                                        target: {
-                                                            name: "father_contact",
-                                                            value: onlyNumbers,
-                                                        },
-                                                    });
-                                                }}
-                                                error={!!errors.father_contact}
-                                                helperText={errors.father_contact && "This field is required."}
-                                                InputProps={{
-                                                    readOnly: true,
-                                                    startAdornment: (
-                                                        <Typography sx={{ mr: 1, fontWeight: "bold" }}>+63</Typography>
-                                                    ),
-                                                }}
-                                            />
-                                        </Box>
-
-                                        {/* Father Occupation */}
-                                        <Box flex={1}>
-                                            <Typography variant="subtitle2" mb={0.5}>Father Occupation</Typography>
                                             <TextField
                                                 InputProps={{ readOnly: true }}
 
+                                                fullWidth
+                                                size="small"
+                                                required
+                                                name="father_contact"
+                                                placeholder="Enter Father Contact"
+                                                value={person.father_contact ?? ""}
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                error={errors.father_contact} helperText={errors.father_contact ? "This field is required." : ""}
+                                            />
+                                        </Box>
+                                        <Box sx={{ flex: 1 }}>
+                                            <Typography variant="subtitle2" mb={0.5}>Father Occupation</Typography>
+                                            <TextField
+                                                InputProps={{ readOnly: true }}
 
                                                 fullWidth
                                                 size="small"
                                                 required
                                                 name="father_occupation"
-                                                value={person.father_occupation || ""}
+                                                value={person.father_occupation ?? ""}
                                                 placeholder="Enter Father Occupation"
                                                 onChange={handleChange}
-                                                onBlur={() => handleUpdate(person)}
-                                                error={errors.father_occupation}
-                                                helperText={errors.father_occupation ? "This field is required." : ""}
+                                                onBlur={handleBlur}
+                                                error={errors.father_occupation} helperText={errors.father_occupation ? "This field is required." : ""}
                                             />
                                         </Box>
-
-                                        {/* Father Employer */}
-                                        <Box flex={1}>
+                                        <Box sx={{ flex: 1 }}>
                                             <Typography variant="subtitle2" mb={0.5}>Father Employer</Typography>
                                             <TextField
                                                 InputProps={{ readOnly: true }}
-
 
                                                 fullWidth
                                                 size="small"
                                                 required
                                                 name="father_employer"
                                                 placeholder="Enter Father Employer"
-                                                value={person.father_employer || ""}
+                                                value={person.father_employer ?? ""}
                                                 onChange={handleChange}
-                                                onBlur={() => handleUpdate(person)}
-                                                error={errors.father_employer}
-                                                helperText={errors.father_employer ? "This field is required." : ""}
+                                                onBlur={handleBlur}
+                                                error={errors.father_employer} helperText={errors.father_employer ? "This field is required." : ""}
                                             />
                                         </Box>
-
                                         {/* Father Income */}
-                                        <Box flex={1}>
+                                        <Box sx={{ flex: 1 }}>
                                             <Typography variant="subtitle2" mb={0.5}>Father Income</Typography>
                                             <TextField
                                                 InputProps={{ readOnly: true }}
-
 
                                                 fullWidth
                                                 size="small"
                                                 required
                                                 name="father_income"
                                                 placeholder="Enter Father Income"
-                                                value={person.father_income || ""}
-                                                onChange={(e) => {
-                                                    const onlyNumbers = e.target.value.replace(/\D/g, ""); // numbers only
-                                                    handleChange({
-                                                        target: {
-                                                            name: "father_income",
-                                                            value: onlyNumbers,
-                                                        },
-                                                    });
-                                                }}
-                                                onBlur={() => handleUpdate(person)}
+                                                value={person.father_income ?? ""}
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
                                                 error={errors.father_income}
                                                 helperText={errors.father_income ? "This field is required." : ""}
                                             />
                                         </Box>
-                                        {/* Father Email */}
-
                                     </Box>
 
-                                    <Box flex={1}>
-                                        <Typography variant="subtitle2" mb={0.5}>Father Email Address</Typography>
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="subtitle2" mb={1}>Father Email Address</Typography>
                                         <TextField
                                             InputProps={{ readOnly: true }}
-
 
                                             fullWidth
                                             size="small"
                                             required
                                             name="father_email"
-                                            placeholder="Enter Father Email Address"
-                                            value={person.father_email || ""}
-                                            onChange={(e) => {
-                                                const cleaned = e.target.value.replace(/\s/g, "");
-                                                handleChange({
-                                                    target: { name: "father_email", value: cleaned }
-                                                });
-                                            }}
-                                            onBlur={(e) => {
-                                                let value = e.target.value.trim();
-                                                if (value && !value.includes("@")) {
-                                                    value += "@gmail.com";
-                                                }
-                                                handleChange({
-                                                    target: { name: "father_email", value }
-                                                });
-                                                handleUpdate(person);
-                                            }}
-                                            error={errors.father_email}
-                                            helperText={errors.father_email ? "Please enter a valid email address." : ""}
+                                            placeholder="Enter your Father Email Address (e.g., username@gmail.com)"
+                                            value={person.father_email ?? ""}
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+
                                         />
                                     </Box>
-
                                 </>
                             )}
                         </Box>
-
 
 
                         <Typography style={{ fontSize: "20px", color: mainButtonColor, fontWeight: "bold" }}>Mother's Details</Typography>
@@ -1625,7 +1465,7 @@ const MedicalDashboard2 = () => {
                                         onBlur={handleBlur}
                                     />
                                 }
-                                label="Mother Seperated / Deceased"
+                                label="Mother Seperated /  Deceased"
                             />
                             <br />
 
@@ -1833,7 +1673,7 @@ const MedicalDashboard2 = () => {
                                                 <Typography variant="subtitle2" mb={1}>Mother Year Graduated</Typography>
                                                 <TextField
                                                     InputProps={{ readOnly: true }}
-                                                    type="number"
+ type="number"
                                                     fullWidth
                                                     size="small"
                                                     name="mother_year_graduated"
@@ -1977,25 +1817,25 @@ const MedicalDashboard2 = () => {
                                     name="guardian"
                                     value={person.guardian || ""}
                                     label="Guardian"
-                               onChange={handleGuardianChange}
+                                  onChange={handleGuardianChange}
                                     onBlur={handleBlur}
                                 >
-                                    <MenuItem value=""><em>Select Guardian</em></MenuItem>
-                                    <MenuItem value="Father">Father</MenuItem>
-                                    <MenuItem value="Mother">Mother</MenuItem>
-                                    <MenuItem value="Brother/Sister">Brother/Sister</MenuItem>
-                                    <MenuItem value="Uncle">Uncle</MenuItem>
-                                    <MenuItem value="Aunt">Aunt</MenuItem>
-                                    <MenuItem value="StepFather">Stepfather</MenuItem>
-                                    <MenuItem value="StepMother">Stepmother</MenuItem>
-                                    <MenuItem value="Cousin">Cousin</MenuItem>
-                                    <MenuItem value="Father in Law">Father-in-law</MenuItem>
-                                    <MenuItem value="Mother in Law">Mother-in-law</MenuItem>
-                                    <MenuItem value="Sister in Law">Sister-in-law</MenuItem>
-                                    <MenuItem value="GrandMother">GrandMother</MenuItem>
-                                    <MenuItem value="GrandFather">GrandFather</MenuItem>
-                                    <MenuItem value="Spouse">Spouse</MenuItem>
-                                    <MenuItem value="Others">Others</MenuItem>
+                                     <MenuItem value=""><em>Select Guardian</em></MenuItem>
+                                                    <MenuItem value="Father">Father</MenuItem>
+                                                    <MenuItem value="Mother">Mother</MenuItem>
+                                                    <MenuItem value="Brother/Sister">Brother/Sister</MenuItem>
+                                                    <MenuItem value="Uncle">Uncle</MenuItem>
+                                                    <MenuItem value="Aunt">Aunt</MenuItem>
+                                                    <MenuItem value="StepFather">Stepfather</MenuItem>
+                                                    <MenuItem value="StepMother">Stepmother</MenuItem>
+                                                    <MenuItem value="Cousin">Cousin</MenuItem>
+                                                    <MenuItem value="Father in Law">Father-in-law</MenuItem>
+                                                    <MenuItem value="Mother in Law">Mother-in-law</MenuItem>
+                                                    <MenuItem value="Sister in Law">Sister-in-law</MenuItem>
+                                                    <MenuItem value="GrandMother">GrandMother</MenuItem>
+                                                    <MenuItem value="GrandFather">GrandFather</MenuItem>
+                                                    <MenuItem value="Spouse">Spouse</MenuItem>
+                                                    <MenuItem value="Others">Others</MenuItem>
                                 </Select>
 
                             </FormControl>
@@ -2252,7 +2092,6 @@ const MedicalDashboard2 = () => {
                                 variant="contained"
                                 component={Link}
                                 to={`/medical_dashboard1?person_id=${userID}`}
-
                                 startIcon={
                                     <ArrowBackIcon
                                         sx={{
@@ -2283,7 +2122,6 @@ const MedicalDashboard2 = () => {
                                 onClick={() => {
 
                                     navigate(`/medical_dashboard3?person_id=${userID}`);
-
                                 }}
                                 endIcon={
                                     <ArrowForwardIcon
@@ -2294,7 +2132,6 @@ const MedicalDashboard2 = () => {
                                     />
                                 }
                                 sx={{
-
                                     backgroundColor: mainButtonColor,
                                     border: `2px solid ${borderColor}`,
                                     color: '#fff',
@@ -2320,4 +2157,4 @@ const MedicalDashboard2 = () => {
 };
 
 
-export default MedicalDashboard2;
+export default ReadmissionDashboard2;

@@ -930,6 +930,7 @@ th {
                 <th>Applicant ID</th>
                 <th>Applicant Name</th>
                 <th>Program</th>
+                <th>JHS GWA</th>
                 <th>SHS GWA</th>
                 <th>Date Applied</th>
                 <th>Status</th>
@@ -940,15 +941,9 @@ th {
                 .map(
                   (person) => `
                     <tr>
-                      <td>${person.applicant_number ?? "N/A"}</td>
-                      <td>${person.last_name}, ${person.first_name} ${person.middle_name ?? ""} ${person.extension ?? ""}</td>
-                      <td>${
-                        curriculumOptions.find(
-                          (item) =>
-                            item.curriculum_id?.toString() ===
-                            person.program?.toString(),
-                        )?.program_code ?? "N/A"
-                      }</td>
+                      <td>${person.applicant_number || ""}</td>
+                      <td>${person.last_name}, ${person.first_name} ${person.middle_name || ""} ${person.extension || ""}</td>
+                       <td>${person.program_code || ""}</td>
                       <td>${person.generalAverage || ""}</td>
                       <td>${person.generalAverage1 || ""}</td>
                       <td>${new Date(

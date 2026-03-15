@@ -520,7 +520,8 @@ const MedicalRequirements = () => {
 
 
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
-      <div style={{ height: "20px" }}></div>
+      <br />
+      <br />
       {/* 🔹 Top Navigation Tabs */}
       <Box
         sx={{

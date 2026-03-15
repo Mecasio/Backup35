@@ -524,7 +524,7 @@ const ReadmissionDashboard4 = () => {
                         fontSize: '36px',
                     }}
                 >
-                    READMISSION - HEALTH MEDICAL RECORDS
+                   APPLICANT FORM - HEALTH MEDICAL RECORDS
                 </Typography>
 
 
@@ -608,34 +608,34 @@ const ReadmissionDashboard4 = () => {
 
             <br />
 
-            <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
-                <Table>
-                    <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", border: `2px solid ${borderColor}`, }}>
-                        <TableRow>
-                            {/* Left cell: Student Number */}
-                            <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
-                                Student Number:&nbsp;
-                                <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
-                                    {person?.student_number || "N/A"}
-                                </span>
-                            </TableCell>
+           
+<TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
+        <Table>
+          <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", border: `2px solid ${borderColor}`, }}>
+            <TableRow>
+              {/* Left cell: Student Number */}
+              <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
+                Student Number:&nbsp;
+                <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
+                  {person?.student_number || "N/A"}
+                </span>
+              </TableCell>
 
-                            {/* Right cell: Student Name */}
-                            <TableCell
-                                align="right"
-                                sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}
-                            >
-                                Student Name:&nbsp;
-                                <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
-                                    {person?.last_name?.toUpperCase()}, {person?.first_name?.toUpperCase()}{" "}
-                                    {person?.middle_name?.toUpperCase()} {person?.extension?.toUpperCase() || ""}
-                                </span>
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
-                </Table>
-            </TableContainer>
-
+              {/* Right cell: Student Name */}
+              <TableCell
+                align="right"
+                sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}
+              >
+                Student Name:&nbsp;
+                <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
+                  {person?.last_name?.toUpperCase()}, {person?.first_name?.toUpperCase()}{" "}
+                  {person?.middle_name?.toUpperCase()} {person?.extension?.toUpperCase() || ""}
+                </span>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+        </Table>
+      </TableContainer>
 
             <Box
                 sx={{

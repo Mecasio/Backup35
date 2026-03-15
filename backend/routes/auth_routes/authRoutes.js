@@ -103,138 +103,178 @@ router.post("/register", async (req, res) => {
     birthday,
     academicProgram
   } = req.body;
-
   const normalizedEmail = email?.trim().toLowerCase();
 
-  try {
+  // 🔍 Check if applicant already exists by name + birthday
+  const [existingPerson] = await db.query(
+    `SELECT person_id 
+   FROM person_table
+   WHERE first_name = ?
+   AND last_name = ?
+   AND birthOfDate = ?
+   LIMIT 1`,
+    [firstName.trim(), lastName.trim(), birthday]
+  );
 
-    // 🔎 Check if same person already exists
-    const [existingPerson] = await db.query(
-      `SELECT person_id
-       FROM person_table
-       WHERE first_name = ?
-       AND last_name = ?
-       AND birthOfDate = ?`,
-      [firstName.trim(), lastName.trim(), birthday]
+  if (existingPerson.length > 0) {
+
+    const personId = existingPerson[0].person_id;
+
+    // Get applicant_number
+    const [applicant] = await db.query(
+      `SELECT applicant_number 
+     FROM applicant_numbering_table 
+     WHERE person_id = ? 
+     LIMIT 1`,
+      [personId]
     );
 
-    if (existingPerson.length > 0) {
+    if (applicant.length > 0) {
 
-      const personId = existingPerson[0].person_id;
+      const applicantNumber = applicant[0].applicant_number;
 
-      // Get applicant_number
-      const [applicant] = await db.query(
-        `SELECT applicant_number
-         FROM applicant_numbering_table
-         WHERE person_id = ?`,
-        [personId]
+      // 🔍 Check exam_applicants
+      const [exam] = await db.query(
+        `SELECT email_sent
+       FROM exam_applicants
+       WHERE applicant_id = ?
+       LIMIT 1`,
+        [applicantNumber]
       );
 
-      if (applicant.length > 0) {
+      // 🚫 If email already sent → block registration
+      if (exam.length > 0 && exam[0].email_sent === 1) {
 
-        const applicantNumber = applicant[0].applicant_number;
+        await insertAuditLog({
+          actorId: normalizedEmail || "unknown",
+          role: "applicant",
+          resourceType: "applicant",
+          resource: normalizedEmail || "unknown",
+          outcome: "FAILED",
+          reason: "Duplicate applicant already processed for exam",
+        });
 
-        // Check exam history
-        const [examRecord] = await db.query(
-          `SELECT email_sent
-           FROM exam_applicants
-           WHERE applicant_id = ?
-           LIMIT 1`,
-          [applicantNumber]
-        );
-
-        // 🚫 Block if exam email already sent
-        if (examRecord.length > 0 && examRecord[0].email_sent == 1) {
-
-          await insertAuditLog({
-            actorId: normalizedEmail || "unknown",
-            role: "applicant",
-            resourceType: "applicant",
-            resource: normalizedEmail || "unknown",
-            outcome: "FAILED",
-            reason: "Duplicate applicant detected (exam already scheduled)",
-          });
-
-          return res.status(400).json({
-            success: false,
-            message:
-              "You already applied before using the same name and birthdate. Multiple applications are not allowed."
-          });
-        }
+        return res.status(400).json({
+          success: false,
+          message:
+            "This applicant has already been processed for the examination. Multiple applications are not allowed.",
+        });
       }
+
     }
+  }
 
-    if (!normalizedEmail || !password) {
-      await insertAuditLog({
-        actorId: normalizedEmail || "unknown",
-        role: "applicant",
-        resourceType: "applicant",
-        resource: normalizedEmail || "unknown",
-        outcome: "FAILED",
-        reason: "Missing required fields",
-      });
+  if (existingPerson.length > 0) {
+    await insertAuditLog({
+      actorId: normalizedEmail || "unknown",
+      role: "applicant",
+      resourceType: "applicant",
+      resource: normalizedEmail || "unknown",
+      outcome: "FAILED",
+      messageOverride: `REGISTER FAILED - ${normalizedEmail || "unknown"}`,
+      reason: "Applicant already exists",
+    });
+    return res.status(400).json({
+      success: false,
+      message: "This applicant already exists in the system."
+    });
+  }
 
-      return res.json({
-        success: false,
-        message: "Please fill up all required fields"
-      });
-    }
+  if (!normalizedEmail || !password) {
+    await insertAuditLog({
+      actorId: normalizedEmail || "unknown",
+      role: "applicant",
+      resourceType: "applicant",
+      resource: normalizedEmail || "unknown",
+      outcome: "FAILED",
+      messageOverride: `REGISTER FAILED - ${normalizedEmail || "unknown"}`,
+      reason: "Missing required fields",
+    });
+    return res.json({ success: false, message: "Please fill up all required fields" });
+  }
 
-    // ⭐ OTP VALIDATION
-    const stored = otpStore[normalizedEmail];
-    const now = Date.now();
+  // ⭐⭐⭐ OTP VALIDATION ⭐⭐⭐
+  const stored = otpStore[normalizedEmail];
+  const now = Date.now();
 
-    if (!stored) {
-      return res.status(400).json({
-        success: false,
-        message: "No OTP request found for this email"
-      });
-    }
+  if (!stored) {
+    await insertAuditLog({
+      actorId: normalizedEmail || "unknown",
+      role: "applicant",
+      resourceType: "applicant",
+      resource: normalizedEmail || "unknown",
+      outcome: "FAILED",
+      messageOverride: `REGISTER FAILED - ${normalizedEmail || "unknown"}`,
+      reason: "No OTP request found",
+    });
+    return res.status(400).json({ success: false, message: "No OTP request found for this email" });
+  }
 
-    if (stored.expiresAt < now) {
-      delete otpStore[normalizedEmail];
-
-      return res.status(400).json({
-        success: false,
-        message: "OTP has expired. Please request a new one."
-      });
-    }
-
-    if (stored.otp !== otp.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid OTP"
-      });
-    }
-
+  if (stored.expiresAt < now) {
     delete otpStore[normalizedEmail];
+    await insertAuditLog({
+      actorId: normalizedEmail || "unknown",
+      role: "applicant",
+      resourceType: "applicant",
+      resource: normalizedEmail || "unknown",
+      outcome: "FAILED",
+      messageOverride: `REGISTER FAILED - ${normalizedEmail || "unknown"}`,
+      reason: "OTP expired",
+    });
+    return res.status(400).json({ success: false, message: "OTP has expired. Please request a new one." });
+  }
 
-    let person_id = null;
+  if (stored.otp !== otp.trim()) {
+    await insertAuditLog({
+      actorId: normalizedEmail || "unknown",
+      role: "applicant",
+      resourceType: "applicant",
+      resource: normalizedEmail || "unknown",
+      outcome: "FAILED",
+      messageOverride: `REGISTER FAILED - ${normalizedEmail || "unknown"}`,
+      reason: "Invalid OTP",
+    });
+    return res.status(400).json({ success: false, message: "Invalid OTP" });
+  }
+
+  delete otpStore[normalizedEmail];
+
+
+  let person_id = null;
+
+  try {
+    const [[company]] = await db.query(
+      "SELECT company_name FROM company_settings WHERE id = 1"
+    );
+    const companyName = company?.company_name || "Main Campus";
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 🔎 Check if email already registered
     const [existingUser] = await db.query(
       "SELECT * FROM user_accounts WHERE email = ?",
       [normalizedEmail]
     );
 
     if (existingUser.length > 0) {
-      return res.json({
-        success: false,
-        message: "Email is already registered"
+      await insertAuditLog({
+        actorId: normalizedEmail || "unknown",
+        role: "applicant",
+        resourceType: "applicant",
+        resource: normalizedEmail || "unknown",
+        outcome: "FAILED",
+        messageOverride: `REGISTER FAILED - ${normalizedEmail || "unknown"}`,
+        reason: "Email already registered",
       });
+      return res.json({ success: false, message: "Email is already registered" });
     }
 
+    // ⭐⭐⭐ FIX: STORE EMAIL INTO person_table.emailAddress ⭐⭐⭐
     const age = calculateAge(birthday);
 
-    // -------------------------
-    // INSERT PERSON
-    // -------------------------
     const [personResult] = await db.query(
-      `INSERT INTO person_table
-       (campus, emailAddress, first_name, middle_name, last_name, birthOfDate, age, academicProgram, termsOfAgreement, current_step)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 1)`,
+      `INSERT INTO person_table 
+(campus, emailAddress, first_name, middle_name, last_name, birthOfDate, age, academicProgram, termsOfAgreement, current_step)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 1)`,
       [
         campus,
         normalizedEmail,
@@ -249,18 +289,15 @@ router.post("/register", async (req, res) => {
 
     person_id = personResult.insertId;
 
-    // -------------------------
-    // INSERT USER ACCOUNT
-    // -------------------------
     await db.query(
       `INSERT INTO user_accounts (person_id, email, password, role, status)
        VALUES (?, ?, ?, 'applicant', ?)`,
       [person_id, normalizedEmail, hashedPassword, 1]
     );
 
-    // -------------------------
-    // APPLICANT NUMBERING
-    // -------------------------
+    // ------------------
+    // Applicant Numbering
+    // ------------------
     const [activeYearResult] = await db3.query(`
       SELECT yt.year_description, st.semester_code
       FROM active_school_year_table sy
@@ -289,14 +326,20 @@ router.post("/register", async (req, res) => {
       [applicant_number, person_id]
     );
 
-    // -------------------------
-    // QR CODE
-    // -------------------------
+    // QR Codes
     const qrData = `${process.env.DB_HOST_LOCAL}:5173/examination_profile/${applicant_number}`;
+    const qrData2 = `${process.env.DB_HOST_LOCAL}:5173/applicant_profile/${applicant_number}`;
     const qrFilename = `${applicant_number}_qrcode.png`;
+    const qrFilename2 = `${applicant_number}_qrcode2.png`;
     const qrPath = path.join(__dirname, "../../uploads/QrCodeGenerated", qrFilename);
+    const qrPath2 = path.join(__dirname, "../../uploads/QrCodeGenerated", qrFilename2);
 
     await QRCode.toFile(qrPath, qrData, {
+      color: { dark: "#000", light: "#FFF" },
+      width: 300,
+    });
+
+    await QRCode.toFile(qrPath2, qrData2, {
       color: { dark: "#000", light: "#FFF" },
       width: 300,
     });
@@ -306,23 +349,16 @@ router.post("/register", async (req, res) => {
       [qrFilename, applicant_number]
     );
 
-    // -------------------------
-    // PERSON STATUS
-    // -------------------------
     await db.query(
-      `INSERT INTO person_status_table
-       (person_id, applicant_id, exam_status, requirements, residency,
-        student_registration_status, exam_result, hs_ave, qualifying_result, interview_result)
+      `INSERT INTO person_status_table 
+       (person_id, applicant_id, exam_status, requirements, residency, student_registration_status, exam_result, hs_ave, qualifying_result, interview_result)
        VALUES (?, ?, 0, 0, 0, 0, 0, 0, 0, 0)`,
       [person_id, applicant_number]
     );
 
-    // -------------------------
-    // EXAM APPLICANT
-    // -------------------------
     await db.query(
-      `INSERT INTO exam_applicants (schedule_id, applicant_id, email_sent)
-       VALUES (?, ?, 0)`,
+      `INSERT INTO interview_applicants (schedule_id, applicant_id, email_sent, status)
+       VALUES (?, ?, 0, 'Waiting List')`,
       [null, applicant_number]
     );
 
@@ -331,31 +367,32 @@ router.post("/register", async (req, res) => {
       message: "Registered Successfully",
       person_id,
       applicant_number,
-      campus
+      campus: campus,
     });
-
-    await insertAuditLog({
-      actorId: normalizedEmail,
-      role: "applicant",
-      resourceType: "applicant",
-      resource: normalizedEmail,
-      outcome: "SUCCESS",
-      messageOverride: `REGISTER SUCCESS - ${normalizedEmail}`,
-    });
-
-  } catch (error) {
-
-    console.log(error);
 
     await insertAuditLog({
       actorId: normalizedEmail || "unknown",
       role: "applicant",
       resourceType: "applicant",
       resource: normalizedEmail || "unknown",
-      outcome: "FAILED",
-      reason: "Internal server error",
+      outcome: "SUCCESS",
+      messageOverride: `REGISTER SUCCESS - ${normalizedEmail || "unknown"}`,
     });
 
+  } catch (error) {
+    if (person_id) {
+      await db.query("DELETE FROM person_table WHERE person_id = ?", [person_id]);
+    }
+    console.log(error);
+    await insertAuditLog({
+      actorId: normalizedEmail || "unknown",
+      role: "applicant",
+      resourceType: "applicant",
+      resource: normalizedEmail || "unknown",
+      outcome: "FAILED",
+      messageOverride: `REGISTER FAILED - ${normalizedEmail || "unknown"} `,
+      reason: "Internal server error",
+    });
     res.json({
       success: false,
       message: "Internal Server Error",

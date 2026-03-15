@@ -517,7 +517,7 @@ const ReadmissionDashboard3 = () => {
             fontSize: '36px',
           }}
         >
-          READMISSION - EDUCATIONAL ATTAINMENT
+         APPLICANT FORM - EDUCATIONAL ATTAINMENT
         </Typography>
 
 
@@ -602,7 +602,7 @@ const ReadmissionDashboard3 = () => {
       <br />
 
 
-      <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
+<TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
         <Table>
           <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", border: `2px solid ${borderColor}`, }}>
             <TableRow>
@@ -629,8 +629,6 @@ const ReadmissionDashboard3 = () => {
           </TableHead>
         </Table>
       </TableContainer>
-
-
       <Box
         sx={{
           display: "flex",

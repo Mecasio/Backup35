@@ -854,19 +854,19 @@ th, td {
 
                     return `
                 <tr>
-                  <td>${person.applicant_number ?? "N/A"}</td>
-                  <td class="name-col">${person.last_name}, ${person.first_name} ${person.middle_name ?? ""} ${person.extension ?? ""}</td>
+                  <td>${person.applicant_number || ""}</td>
+                  <td class="name-col">${person.last_name}, ${person.first_name} ${person.middle_name || ""} ${person.extension || ""}</td>
                   <td>${curriculumOptions.find(
                         (item) =>
                             item.curriculum_id?.toString() === person.program?.toString()
-                    )?.program_code ?? "N/A"}</td>
+                    )?.program_code || ""}</td>
                   <td>${english}</td>
                   <td>${science}</td>
                   <td>${filipino}</td>
                   <td>${math}</td>
                   <td>${abstract}</td>
                   <td>${computedFinalRating.toFixed(2)}</td>
-                   <td>${person.status}</td>
+                   <td>${person.status || ""}</td>
                 </tr>`;
                 })
                 .join("")}

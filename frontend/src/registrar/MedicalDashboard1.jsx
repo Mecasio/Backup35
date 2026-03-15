@@ -25,21 +25,24 @@ import { FaFileExcel } from "react-icons/fa";
 import API_BASE_URL from "../apiConfig";
 import ExamPermit from "../applicant/ExamPermit";
 import { Snackbar, Alert } from '@mui/material';
-import ListAltIcon from "@mui/icons-material/ListAlt";
-import DescriptionIcon from "@mui/icons-material/Description";
-import PsychologyIcon from "@mui/icons-material/Psychology";
-import HowToRegIcon from '@mui/icons-material/HowToReg';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import ClassIcon from "@mui/icons-material/Class";
 import SearchIcon from "@mui/icons-material/Search";
-
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
+import GradeIcon from "@mui/icons-material/Grade";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import DescriptionIcon from "@mui/icons-material/Description";
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 
 
 
-const MedicalDashboard1 = () => {
+const ReadmissionDashboard1 = () => {
 
   const settings = useContext(SettingsContext);
 
@@ -185,12 +188,11 @@ const MedicalDashboard1 = () => {
     }
   };
 
-
   const [hasAccess, setHasAccess] = useState(null);
   const [loading, setLoading] = useState(false);
 
 
-  const pageId = 25;
+  const pageId = 38;
 
   const [employeeID, setEmployeeID] = useState("");
 
@@ -238,7 +240,6 @@ const MedicalDashboard1 = () => {
   };
 
 
-
   // do not alter
   const location = useLocation();
 
@@ -273,51 +274,21 @@ const MedicalDashboard1 = () => {
       return;
     }
 
-    // ⭐ CASE 2: URL has NO ID but we have a last selected student
-    if (lastSelected) {
-      setUserID(lastSelected);
-      return;
-    }
 
     // ⭐ CASE 3: No URL ID and no last selected → start blank
     setUserID("");
   }, [queryPersonId]);
 
-
-
-  const fetchByPersonId = async (personID) => {
-    try {
-      const res = await axios.get(`${API_BASE_URL}/api/person/${personID}`);
-      setPerson(res.data);
-      setSelectedPerson(res.data);
-      if (res.data?.applicant_number) {
-        // optional: whatever logic you want
-      }
-    } catch (err) {
-      console.error("❌ person (DB3) fetch failed:", err);
-    }
-  };
-
-
-
   const [activeStep, setActiveStep] = useState(0);
   const [clickedSteps, setClickedSteps] = useState([]);
 
-  const steps = person.person_id
-    ? [
-      { label: "Personal Information", icon: <PersonIcon />, path: `/medical_dashboard1?person_id=${userID}` },
-      { label: "Family Background", icon: <FamilyRestroomIcon />, path: `/medical_dashboard2?person_id=${userID}` },
-      { label: "Educational Attainment", icon: <SchoolIcon />, path: `/medical_dashboard3?person_id=${userID}` },
-      { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: `/medical_dashboard4?person_id=${userID}` },
-      { label: "Other Information", icon: <InfoIcon />, path: `/medical_dashboard5?person_id=${userID}` },
-    ]
-    : [];
-
-  const handleStepClick = (index) => {
-    setActiveStep(index);
-    setClickedSteps((prev) => [...new Set([...prev, index])]);
-    navigate(steps[index].path); // Go to the clicked step’s page
-  };
+  const steps = [
+    { label: "Personal Information", icon: <PersonIcon />, path: "/medical_dashboard1" },
+    { label: "Family Background", icon: <FamilyRestroomIcon />, path: "/medical_dashboard2" },
+    { label: "Educational Attainment", icon: <SchoolIcon />, path: "/medical_dashboard3" },
+    { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: "/medical_dashboard4" },
+    { label: "Other Information", icon: <InfoIcon />, path: "/medical_dashboard5" },
+  ];
 
 
 
@@ -453,6 +424,7 @@ const MedicalDashboard1 = () => {
   };
 
 
+
   // 🧩 Real-time handleChange with Manila-based age + filtering reset
   const handleChange = (e) => {
     const target = e && e.target ? e.target : {};
@@ -483,6 +455,9 @@ const MedicalDashboard1 = () => {
     setPerson(updatedPerson);
     handleUpdate(updatedPerson); // real-time save
   };
+
+
+
 
 
   // ✅ Safe handleBlur for SuperAdmin — updates correct applicant only
@@ -644,6 +619,7 @@ const MedicalDashboard1 = () => {
       });
     }
   };
+
 
   const [uploadedImage, setUploadedImage] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -905,7 +881,9 @@ const MedicalDashboard1 = () => {
     fetchCurriculums();
   }, []);
 
+
   const filteredCurriculum = curriculumOptions.filter((item) => {
+    // ✅ CAMPUS FILTER
 
 
     // ✅ ACADEMIC PROGRAM FILTER
@@ -920,7 +898,6 @@ const MedicalDashboard1 = () => {
 
     return true;
   });
-
 
 
   const [errors, setErrors] = useState({});
@@ -950,7 +927,7 @@ const MedicalDashboard1 = () => {
         setSearchError("");
       } catch (err) {
         console.error("Search failed:", err);
-        setSearchError("Applicant not found");
+        setSearchError("Student not found");
       }
     }, 500);
 
@@ -981,7 +958,7 @@ const MedicalDashboard1 = () => {
 
     // 🔹 Try to find a matching applicant from the list
     const match = persons.find((p) =>
-      `${p.first_name} ${p.middle_name} ${p.last_name} ${p.emailAddress} ${p.applicant_number || ''}`
+      `${p.first_name} ${p.middle_name} ${p.last_name} ${p.emailAddress} ${p.student_number || ''}`
         .toLowerCase()
         .includes(searchQuery.toLowerCase())
     );
@@ -1005,6 +982,118 @@ const MedicalDashboard1 = () => {
       });
     }
   }, [searchQuery, persons]);
+
+
+
+  const [studentData, setStudentData] = useState(null);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [studentDetails, setStudentDetails] = useState([]);
+
+  useEffect(() => {
+    if (!searchQuery || searchQuery.length < 9) {
+      setSelectedStudent(null);
+      setStudentData([]);
+      return;
+    }
+
+    const fetchStudent = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/program_evaluation/${searchQuery}`);
+        const data = await res.json();
+
+
+        if (data) {
+          setSelectedStudent(data);
+          setStudentData(data);
+
+          if (searchQuery) {
+            localStorage.setItem("admin_edit_person_id", searchQuery);
+          }
+
+          const detailsRes = await fetch(`${API_BASE_URL}/api/program_evaluation/details/${searchQuery}`);
+          const detailsData = await detailsRes.json();
+          if (Array.isArray(detailsData) && detailsData.length > 0) {
+            setStudentDetails(detailsData);
+          } else {
+            setStudentDetails([]);
+            setSnackbarMessage("No enrolled subjects found for this student.");
+            setOpenSnackbar(true);
+          }
+        } else {
+          setSelectedStudent(null);
+          setStudentData([]);
+          setStudentDetails([]);
+          setSnackbarMessage("No student data found.");
+          setOpenSnackbar(true);
+        }
+      } catch (err) {
+        console.error("Error fetching student", err);
+        setSnackbarMessage("Server error. Please try again.");
+        localStorage.removeItem("admin_edit_person_id");
+        setOpenSnackbar(true);
+      }
+    };
+
+    fetchStudent();
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const personIdFromUrl = queryParams.get("person_id");
+
+    if (!personIdFromUrl) return;
+
+    // fetch info of that person
+    axios
+      .get(`${API_BASE_URL}api/person_with_applicant/${personIdFromUrl}`)
+      .then((res) => {
+        if (res.data?.student_number) {
+
+          // AUTO-INSERT applicant_number into search bar
+          setSearchQuery(res.data.student_number);
+
+          // If you have a fetchUploads() or fetchExamScore() — call it
+          if (typeof fetchUploadsByApplicantNumber === "function") {
+            fetchUploadsByApplicantNumber(res.data.student_number);
+          }
+
+          if (typeof fetchApplicants === "function") {
+            fetchApplicants();
+          }
+        }
+      })
+      .catch((err) => console.error("Auto search failed:", err));
+  }, [location.search]);
+
+  const handleStepClick = (index, to) => {
+    setActiveStep(index);
+
+    const pid = sessionStorage.getItem("admin_edit_person_id");
+    if (pid) {
+      navigate(`${to}?person_id=${pid}`);
+    } else {
+      navigate(to);
+    }
+  };
+
+  useEffect(() => {
+    const storedId = sessionStorage.getItem("edit_student_number");
+
+    if (storedId) {
+      setSearchQuery(storedId);
+    }
+  }, []);
+
+  const [studentNumber, setStudentNumber] = useState(() => {
+    return localStorage.getItem("studentNumberForCOR") || localStorage.getItem("admin_edit_person_id") || "";
+  });
+
+  const [debouncedStudentNumber, setDebouncedStudentNumber] = useState("");
+
+
 
 
   // ✅ For Excel Import
@@ -1093,8 +1182,6 @@ const MedicalDashboard1 = () => {
 
 
 
-
-
   const [canPrintPermit, setCanPrintPermit] = useState(false);
 
   useEffect(() => {
@@ -1149,7 +1236,7 @@ const MedicalDashboard1 = () => {
             fontSize: "36px",
           }}
         >
-          MEDICAL - PERSONAL INFORMATION
+          APPLICANT FORM - PERSONAL INFORMATION
         </Typography>
 
         {/* ✅ Right side: Search + Excel Import side by side */}
@@ -1177,21 +1264,18 @@ const MedicalDashboard1 = () => {
       </Box>
 
       {searchError && <Typography color="error">{searchError}</Typography>}
-
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
       <br />
+
       <br />
-
-
-
-
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
+          alignItems: "center",
           flexWrap: "nowrap", // prevent wrapping
           width: "100%",
-          mt: 3,
+          mt: 2,
 
         }}
       >
@@ -1201,26 +1285,26 @@ const MedicalDashboard1 = () => {
             <Card
               onClick={() => handleNavigateStep(index, step.to)}
               sx={{
-                flex: `1 1 ${100 / stepsData.length}%`, // evenly divide row
-                height: 135,
+                flex: 1,
+                maxWidth: `${100 / stepsData.length}%`,
+                height: 140,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
                 borderRadius: 2,
                 border: `2px solid ${borderColor}`,
-                backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
-                color: activeStep === index ? "#fff" : "#000",
+                backgroundColor: currentStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
+                color: currentStep === index ? "#fff" : "#000",
                 boxShadow:
-                  activeStep === index
+                  currentStep === index
                     ? "0px 4px 10px rgba(0,0,0,0.3)"
                     : "0px 2px 6px rgba(0,0,0,0.15)",
                 transition: "0.3s ease",
                 "&:hover": {
-                  backgroundColor: activeStep === index ? "#000000" : "#f5d98f",
+                  backgroundColor: currentStep === index ? "#000000" : "#f5d98f",
                 },
               }}
-
             >
               <Box
                 sx={{
@@ -1229,7 +1313,7 @@ const MedicalDashboard1 = () => {
                   alignItems: "center",
                 }}
               >
-                <Box sx={{ fontSize: 40, mb: 1 }}>{step.icon}</Box>
+                <Box sx={{ fontSize: 32, mb: 0.5 }}>{step.icon}</Box>
                 <Typography
                   sx={{
                     fontSize: 14,
@@ -1246,7 +1330,7 @@ const MedicalDashboard1 = () => {
             {index < stepsData.length - 1 && (
               <Box
                 sx={{
-                  flex: 0.05,
+                  flex: 0.1,
                   mx: 1, // spacing between cards
                 }}
               />
@@ -1254,10 +1338,7 @@ const MedicalDashboard1 = () => {
           </React.Fragment>
         ))}
       </Box>
-
       <br />
-
-
       <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
         <Table>
           <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", border: `2px solid ${borderColor}`, }}>
@@ -1285,8 +1366,6 @@ const MedicalDashboard1 = () => {
           </TableHead>
         </Table>
       </TableContainer>
-
-
 
       <Box
         sx={{
@@ -1362,8 +1441,8 @@ const MedicalDashboard1 = () => {
 
 
 
-
       <Container>
+
 
 
         {/* Cards Section */}
@@ -1442,6 +1521,8 @@ const MedicalDashboard1 = () => {
             </motion.div>
           ))}
         </Box>
+
+
 
 
 
@@ -1567,6 +1648,24 @@ const MedicalDashboard1 = () => {
             <br />
 
 
+            <div className="flex items-center mb-4 gap-4">
+              <label className="w-40 font-medium">Student Number:</label>
+
+              <TextField
+                fullWidth
+                id="student-number"
+                label="Student Number"
+                size="small"
+                name="studentNumber"
+                placeholder="Enter your Student Number"
+                required
+                value={person.student_number ?? ""}
+                onBlur={handleBlur}
+                onChange={handleChange}
+                error={!!errors.student_number}
+                helperText={errors.student_number && "This field is required."}
+              />
+            </div>
 
 
 
@@ -1611,13 +1710,11 @@ const MedicalDashboard1 = () => {
                     </MenuItem>
                   ))}
                 </Select>
-
                 {errors.campus && (
                   <FormHelperText>This field is required.</FormHelperText>
                 )}
               </FormControl>
             </div>
-
 
 
             <div className="flex items-center mb-4 gap-4">
@@ -1640,7 +1737,6 @@ const MedicalDashboard1 = () => {
                   <MenuItem value="0">Undergraduate</MenuItem>
                   <MenuItem value="1">Graduate</MenuItem>
                   <MenuItem value="2">Techvoc</MenuItem>
-
                 </Select>
                 {errors.academicProgram && (
                   <FormHelperText>This field is required.</FormHelperText>
@@ -1714,6 +1810,8 @@ const MedicalDashboard1 = () => {
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <br />
 
+
+
             <Box display="flex" width="100%" gap={2}>
               {/* Left Side: TextFields with label beside each input */}
               <Box display="flex" flexDirection="column" sx={{ width: "75%" }}>
@@ -1744,6 +1842,7 @@ const MedicalDashboard1 = () => {
                           </MenuItem>
                         ))}
 
+
                       </Select>
                       {errors.program && (
                         <FormHelperText>This field is required.</FormHelperText>
@@ -1754,9 +1853,9 @@ const MedicalDashboard1 = () => {
 
 
                   {/* <Box display="flex" alignItems="center" gap={2} mb={1}>
-                           <label className="w-40 font-medium">Program 2:</label>
+                           <label className="w-40 font-medium">Course Applied:</label>
                            <FormControl fullWidth size="small" required error={!!errors.program2}>
-                             <InputLabel>Program 2</InputLabel>
+                             <InputLabel>Course Applied</InputLabel>
                              <Select
                                name="program2"
                                value={person.program2 || ""}
@@ -1787,9 +1886,9 @@ const MedicalDashboard1 = () => {
 
                   {/* Program 3 */}
                   {/* <Box display="flex" alignItems="center" gap={2}>
-                           <label className="w-40 font-medium">Program 3:</label>
+                           <label className="w-40 font-medium">Course Applied:</label>
                            <FormControl fullWidth size="small" required error={!!errors.program3}>
-                             <InputLabel>Program 3</InputLabel>
+                             <InputLabel>Course Applied</InputLabel>
                              <Select
                                name="program3"
                                value={person.program3 || ""}
@@ -1873,7 +1972,7 @@ const MedicalDashboard1 = () => {
               >
                 {person.profile_img && person.profile_img !== "" ? (
                   <img
-                    src={`${API_BASE_URL}/uploads/Applicant1by1/${person.profile_img}?t=${Date.now()}`}
+                    src={`${API_BASE_URL}/uploads/Student1by1/${person.profile_img}?t=${Date.now()}`}
                     alt="Profile"
                     style={{
                       width: "100%",
@@ -2011,21 +2110,22 @@ const MedicalDashboard1 = () => {
                 />
               </Box>
             </Box>
+
+
             <Box display="flex" gap={4} mb={2}>
               {/* Height Field */}
-              <Box display="flex" flexDirection="column" flex="0 0 24%">
+              <Box display="flex" flexDirection="column" flex="0 0 26%">
                 <Box display="flex" alignItems="center" gap={1}>
                   <Typography fontWeight="medium" minWidth="60px">
                     Height:
                   </Typography>
                   <TextField
-                    InputProps={{ readOnly: true }}
-
                     size="small"
+                    type="number"
                     name="height"
-                    value={person.height ?? ""}
+                    value={person.height || ""}
                     onChange={handleChange}
-                    onBlur={handleBlur}
+                    onBlur={() => handleUpdate(person)}
                     placeholder="Enter your Height"
                     error={!!errors.height}
                     fullWidth
@@ -2040,23 +2140,23 @@ const MedicalDashboard1 = () => {
               </Box>
 
               {/* Weight Field */}
-              <Box display="flex" flexDirection="column" flex="0 0 24%">
+              <Box display="flex" flexDirection="column" flex="0 0 26%">
                 <Box display="flex" alignItems="center" gap={1}>
                   <Typography fontWeight="medium" minWidth="60px">
                     Weight:
                   </Typography>
                   <TextField
-                    InputProps={{ readOnly: true }}
-
                     size="small"
+                    type="number"
                     name="weight"
-                    value={person.weight ?? ""}
+                    value={person.weight || ""}
                     onChange={handleChange}
-                    onBlur={handleBlur}
+                    onBlur={() => handleUpdate(person)}
                     placeholder="Enter your Weight"
                     error={!!errors.weight}
                     fullWidth
                   />
+
                   <Typography variant="body2">kg</Typography>
                 </Box>
                 {errors.weight && (
@@ -2067,12 +2167,18 @@ const MedicalDashboard1 = () => {
               </Box>
             </Box>
 
+
+
+
+
+
+
+
             <Box display="flex" alignItems="center" gap={2} flexWrap="nowrap" width="100%" mb={2}>
               {/* LRN Label */}
               <Typography fontWeight="medium" minWidth="180px">
                 Learning Reference Number:
               </Typography>
-
 
               {/* LRN Input */}
               <TextField
@@ -2101,7 +2207,6 @@ const MedicalDashboard1 = () => {
               />
 
 
-
               <FormControlLabel
                 control={
                   <Checkbox
@@ -2127,11 +2232,7 @@ const MedicalDashboard1 = () => {
               />
 
 
-
-
-
-
-              <Typography fontWeight="medium" >
+              <Typography fontWeight="medium">
                 Gender:
               </Typography>
               {/* Gender */}
@@ -2164,12 +2265,6 @@ const MedicalDashboard1 = () => {
                 <MenuItem value="0">MALE</MenuItem>
                 <MenuItem value="1">FEMALE</MenuItem>
               </TextField>
-
-
-
-
-
-
 
 
 
@@ -2275,9 +2370,6 @@ const MedicalDashboard1 = () => {
 
 
 
-
-
-
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
                   Birth of Date
@@ -2296,7 +2388,6 @@ const MedicalDashboard1 = () => {
                   helperText={errors.birthOfDate ? "This field is required." : ""}
                 />
               </Box>
-
               {/* 👤 Age (auto-filled, read-only) */}
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
@@ -2650,8 +2741,8 @@ const MedicalDashboard1 = () => {
 
                 <TextField
                   fullWidth
-                  size="small"
 
+                  size="small"
                   name="cellphoneNumber"
                   placeholder="9XXXXXXXXX"
                   value={person.cellphoneNumber || ""}
@@ -2684,7 +2775,6 @@ const MedicalDashboard1 = () => {
 
                 <TextField
                   fullWidth
-                  InputProps={{ readOnly: true }}
                   size="small"
                   name="emailAddress"
                   required
@@ -2712,8 +2802,6 @@ const MedicalDashboard1 = () => {
 
               </Box>
             </Box>
-
-
 
 
             <Typography style={{ fontSize: "20px", color: mainButtonColor, fontWeight: "bold" }}>Present Address:</Typography>
@@ -3201,6 +3289,8 @@ const MedicalDashboard1 = () => {
             </Box>
 
 
+
+
             <Modal open={open} onClose={handleClose}>
               <Box
                 sx={{
@@ -3238,7 +3328,7 @@ const MedicalDashboard1 = () => {
                       border: `2px solid ${borderColor}`,
 
                       "&:hover": {
-                        bgcolor: "#000",
+                        bgcolor: "#000000",
                       },
                     }}
                   >
@@ -3390,7 +3480,7 @@ const MedicalDashboard1 = () => {
                       color: "white",
                       fontWeight: "bold",
                       "&:hover": {
-                        backgroundColor: "#000",
+                        backgroundColor: "#000000",
                       },
                     }}
                   >
@@ -3399,7 +3489,6 @@ const MedicalDashboard1 = () => {
                 </Box>
               </Box>
             </Modal>
-
 
             <Modal
               open={examPermitModalOpen}
@@ -3452,6 +3541,7 @@ const MedicalDashboard1 = () => {
                 sx={{
                   backgroundColor: mainButtonColor,
                   border: `2px solid ${borderColor}`,
+
                   color: "#fff", // Set text color to white
                   marginRight: "5px", // Add margin between buttons
                   "&:hover": {
@@ -3469,7 +3559,6 @@ const MedicalDashboard1 = () => {
                 onClick={() => {
 
                   navigate(`/medical_dashboard2?person_id=${userID}`);
-
                 }}
                 endIcon={
                   <ArrowForwardIcon
@@ -3494,6 +3583,7 @@ const MedicalDashboard1 = () => {
                 }}
               >
 
+
                 Next Step
               </Button>
             </Box>
@@ -3517,4 +3607,4 @@ const MedicalDashboard1 = () => {
   );
 };
 
-export default MedicalDashboard1;
+export default ReadmissionDashboard1;

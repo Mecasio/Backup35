@@ -1237,7 +1237,7 @@ const ReadmissionDashboard1 = () => {
             fontSize: "36px",
           }}
         >
-          READMISSION - PERSONAL INFORMATION
+          APPLICANT FORM - PERSONAL INFORMATION
         </Typography>
 
         {/* ✅ Right side: Search + Excel Import side by side */}
@@ -1247,12 +1247,19 @@ const ReadmissionDashboard1 = () => {
             placeholder="Search Student Name / Email / Student Number"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              readOnly: false,   // 🔥 unlock the search bar
-              startAdornment: <Search sx={{ mr: 1 }} />,
+            sx={{
+              width: 450,
+              backgroundColor: "#fff",
+              borderRadius: 1,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+              },
             }}
-            sx={{ width: { xs: "100%", sm: "425px" } }}
+            InputProps={{
+              startAdornment: <SearchIcon sx={{ mr: 1, color: "gray" }} />,
+            }}
           />
+
 
         </Box>
       </Box>
@@ -1260,33 +1267,7 @@ const ReadmissionDashboard1 = () => {
       {searchError && <Typography color="error">{searchError}</Typography>}
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
       <br />
-      <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
-        <Table>
-          <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", border: `2px solid ${borderColor}`, }}>
-            <TableRow>
-              {/* Left cell: Student Number */}
-              <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
-                Student Number:&nbsp;
-                <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
-                  {person?.student_number || "N/A"}
-                </span>
-              </TableCell>
 
-              {/* Right cell: Student Name */}
-              <TableCell
-                align="right"
-                sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}
-              >
-                Student Name:&nbsp;
-                <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
-                  {person?.last_name?.toUpperCase()}, {person?.first_name?.toUpperCase()}{" "}
-                  {person?.middle_name?.toUpperCase()} {person?.extension?.toUpperCase() || ""}
-                </span>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-        </Table>
-      </TableContainer>
       <br />
       <Box
         sx={{
@@ -1359,6 +1340,33 @@ const ReadmissionDashboard1 = () => {
         ))}
       </Box>
       <br />
+      <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
+        <Table>
+          <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", border: `2px solid ${borderColor}`, }}>
+            <TableRow>
+              {/* Left cell: Student Number */}
+              <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
+                Student Number:&nbsp;
+                <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
+                  {person?.student_number || "N/A"}
+                </span>
+              </TableCell>
+
+              {/* Right cell: Student Name */}
+              <TableCell
+                align="right"
+                sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}
+              >
+                Student Name:&nbsp;
+                <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
+                  {person?.last_name?.toUpperCase()}, {person?.first_name?.toUpperCase()}{" "}
+                  {person?.middle_name?.toUpperCase()} {person?.extension?.toUpperCase() || ""}
+                </span>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+        </Table>
+      </TableContainer>
       <Box
         sx={{
           display: "flex",
@@ -1964,7 +1972,7 @@ const ReadmissionDashboard1 = () => {
               >
                 {person.profile_img && person.profile_img !== "" ? (
                   <img
-                    src={`${API_BASE_URL}/uploads/Applicant1by1/${person.profile_img}?t=${Date.now()}`}
+                    src={`${API_BASE_URL}/uploads/Student1by1/${person.profile_img}?t=${Date.now()}`}
                     alt="Profile"
                     style={{
                       width: "100%",

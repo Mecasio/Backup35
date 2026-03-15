@@ -608,7 +608,7 @@ const ExamPermit = ({ personId }) => {
                                     width: "100%",
                                 }}
                             >
-                                <div style={{ display: "flex", alignItems: "center", marginTop: "-145px" }}>
+                                <div style={{ display: "flex", alignItems: "center", marginTop: "-130px" }}>
                                     <label style={{ fontWeight: "bold", marginRight: "10px", width: "80px" }}>
                                         Room No.:
                                     </label>

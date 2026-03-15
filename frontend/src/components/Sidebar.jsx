@@ -457,6 +457,7 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
         { title: "Applicant List", link: "/applicant_list_admin", icon: ListAltOutlined, page_id: 7 },
         { title: "Applicant Form", link: "/admin_dashboard1", icon: AccountCircle, page_id: 1 },
         { title: "Documents Submitted", link: "/student_requirements", icon: Description, page_id: 61 },
+        { title: "Entrance Exam Scores", link: "/applicant_scoring", icon: Score, page_id: 8 },
         { title: "Room Registration", link: "/room_registration", icon: MeetingRoom, page_id: 52 },
         { title: "Verify Documents Schedule", link: "/verify_document_schedule", icon: People, page_id: 115 },
         { title: "Verify Documents", link: "/verify_schedule", icon: People, page_id: 118 },
@@ -465,7 +466,6 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
         { title: "Exam Schedule Mgmt", link: "/assign_schedule_applicant", icon: EditCalendar, page_id: 11 },
         { title: "Proctor's Applicant List", link: "/admission_schedule_room_list", icon: People, page_id: 33 },
         { title: "Examination Permit", link: "/registrar_examination_profile", icon: Badge, page_id: 48 },
-        { title: "Entrance Exam Scores", link: "/applicant_scoring", icon: Score, page_id: 8 },
         { title: "Announcement", link: "/announcement_for_admission", icon: Campaign, page_id: 98 },
         { title: "Program Slot Remaining", link: "/program_slot_limit", icon: People, page_id: 110 },
       ]
@@ -536,6 +536,7 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
         { title: "Department Section Panel", link: "/department_section_panel", icon: Apartment, page_id: 20 },
         { title: "Department Panel", link: "/department_registration", icon: Assignment, page_id: 21 },
         { title: "Department Room Panel", link: "/department_room", icon: MeetingRoom, page_id: 22 },
+        { title: "Slot Monitoring Panel", link: "/section_slot_monitoring", icon: MeetingRoom, page_id: 123 },
         { title: "Department Curriculum Panel", link: "/department_curriculum_panel", icon: MenuBook, page_id: 107 },
         { title: "College Schedule Plotting", link: "/college_schedule_plotting", icon: EventNote, page_id: 108 },
       ]
@@ -770,7 +771,7 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
               }}
             />
             <NavItem to="/requirements_uploader" icon={CloudUploadIcon} label="Upload Requirements" active={isActivePrefix("/requirements_uploader")} />
-          <div className="sb-section-label">Setting</div>
+            <div className="sb-section-label">Setting</div>
             <NavItem to="/applicant_reset_password" icon={LockResetIcon} label="Change Password" active={isActivePrefix("/applicant_reset_password")} />
           </>
         )}
@@ -784,7 +785,7 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
             <NavItem to="/faculty_masterlist" icon={ListAltIcon} label="Class List" active={isActive("/faculty_masterlist")} />
             <NavItem to="/grading_sheet" icon={AssignmentTurnedInIcon} label="Grading Management" active={isActive("/grading_sheet")} />
             <NavItem to="/faculty_evaluation" icon={SchoolIcon} label="Faculty Evaluation" active={isActive("/faculty_evaluation")} />
-            <div className="sb-divider" />
+            <div className="sb-section-label">Setting</div>
             <NavItem to="/faculty_reset_password" icon={Settings} label="Settings" active={isActive("/faculty_reset_password")} />
           </>
         )}
@@ -798,7 +799,7 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
             <NavItem to="/grades_page" icon={GradeIcon} label="Grades" active={isActive("/grades_page")} />
             <NavItem to="/student_faculty_evaluation" icon={AssignmentTurnedInIcon} label="Faculty Evaluation" active={isActive("/student_faculty_evaluation")} />
             <NavItem to="/student_dashboard1" icon={PersonIcon} label="Student Profile" active={/^\/student_dashboard[1-5]$/.test(loc)} />
-            <div className="sb-divider" />
+            <div className="sb-section-label">Setting</div>
             <NavItem to="/student_reset_password" icon={Settings} label="Settings" active={isActive("/student_reset_password")} />
           </>
         )}

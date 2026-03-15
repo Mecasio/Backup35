@@ -520,7 +520,7 @@ const ReadmissionDashboard5 = () => {
             fontSize: '36px',
           }}
         >
-          READMISSION - OTHER INFORMATION
+          APPLICANT FORM - OTHER INFORMATION
         </Typography>
 
 
@@ -603,7 +603,8 @@ const ReadmissionDashboard5 = () => {
 
       <br />
 
-      <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
+      
+<TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
         <Table>
           <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", border: `2px solid ${borderColor}`, }}>
             <TableRow>
@@ -630,7 +631,6 @@ const ReadmissionDashboard5 = () => {
           </TableHead>
         </Table>
       </TableContainer>
-
 
       <Box
         sx={{

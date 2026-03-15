@@ -1186,7 +1186,7 @@ const CertificateOfRegistrationForCollege = forwardRef(
                     margin: "0 auto", // Center the table inside the form
                     textAlign: "center",
                     tableLayout: "fixed",
-                    marginTop: "-20px"
+                    marginTop: "-40px"
                   }}
                 >
                   <style>
@@ -1841,7 +1841,7 @@ const CertificateOfRegistrationForCollege = forwardRef(
                       <td colSpan={6} style={{ fontSize: "40%" }}>
                         <input
                           type="text"
-                          value={savedUnifast ? "Unifast " : ""}
+                          value={savedUnifast ? "UNIFAST-FHE " : ""}
                           readOnly
                           style={{
                             fontFamily: "Arial, sans-serif",

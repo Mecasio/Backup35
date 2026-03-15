@@ -1186,7 +1186,7 @@ const CertificateOfRegistration = forwardRef(
                     margin: "0 auto", // Center the table inside the form
                     textAlign: "center",
                     tableLayout: "fixed",
-                    marginTop: "-20px"
+                     marginTop: "-40px"
                   }}
                 >
                   <style>

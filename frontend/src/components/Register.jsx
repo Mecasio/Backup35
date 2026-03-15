@@ -33,6 +33,7 @@ import {
 import { SettingsContext } from "../App"; // ✅ Access settings from context
 import API_BASE_URL from "../apiConfig";
 import AnnouncementSlider from "../components/AnnouncementSlider";
+import RedirectLoading from "../components/RedirectLoading";
 
 const Register = () => {
   const settings = useContext(SettingsContext);
@@ -199,6 +200,8 @@ const Register = () => {
     setLoadingOtp(false);
   };
 
+  const [redirectLoading, setRedirectLoading] = useState(false);
+
   const verifyOtp = async () => {
     setLoadingOtp(true);
     try {
@@ -222,18 +225,13 @@ const Register = () => {
         return;
       }
 
-      // Success message: highlight "one-time registration"
-      setSnack({
-        open: true,
-        message: "🎉 Congratulations! You just created an account. Note: you can only register once with this email.",
-        severity: "success",
-      });
-
       // Close OTP modal
       setShowOtpModal(false);
+      setRedirectLoading(true);
 
-      // Delay navigation so user can read snackbar
-      setTimeout(() => navigate("/login_applicant"), 3000);
+      setTimeout(() => {
+        navigate("/login_applicant");
+      }, 3000);
 
     } catch (err) {
       setSnack({
@@ -264,6 +262,10 @@ const Register = () => {
     ? `url(${API_BASE_URL}${settings.bg_image})`
     : "url(/default-bg.jpg)";
 
+
+  if (redirectLoading) {
+    return <RedirectLoading message="Account created! Redirecting to login..." />;
+  }
   return (
     <>
       <Box
@@ -382,7 +384,7 @@ const Register = () => {
               </div>
 
               <div className="TextField" style={{ position: "relative" }}>
-                <label>Middle Name</label>
+                <label>Middle Name (Full – e.g., De la Cruz)</label>
                 <input
                   type="text"
                   placeholder="Enter your middle name"
@@ -755,7 +757,7 @@ const Register = () => {
                   <Checkbox
                     checked={agreeChecked}
                     onChange={(e) => setAgreeChecked(e.target.checked)}
-                  
+
                   />
                 }
                 label={
@@ -778,7 +780,7 @@ const Register = () => {
                 minWidth: "220px",
               }}
             >
-               I Agree & Continue
+              I Agree & Continue
             </Button>
           </DialogActions>
         </Dialog>

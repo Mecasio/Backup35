@@ -5186,6 +5186,7 @@ WHERE proctor LIKE ?
   }
 
   // ---------------------- Assign Student Number ----------------------
+
   socket.on("assign-student-number", async (person_id) => {
     try {
       // ✅ Fetch person info
@@ -5256,7 +5257,7 @@ WHERE proctor LIKE ?
       );
 
       const personIdForStudent = studentFuturePI[0].latest_person_id;
-      
+
       // ✅ Save to student_numbering_table
       await db3.query(
         `INSERT INTO student_numbering_table (student_number, person_id) VALUES (?, ?)`,
@@ -5470,7 +5471,7 @@ WHERE proctor LIKE ?
 
       if (existingUser.length === 0) {
         await db3.query(
-          `INSERT INTO user_accounts (person_id, email, password, role) VALUES (?, ?, ?, 'student')`,
+          `INSERT INTO user_accounts (person_id, email, password, role, status) VALUES (?, ?, ?, 'student', 1)`,
           [personIdForStudent + 1, person_data.emailAddress, hashedPassword],
         );
       } else {
@@ -6009,7 +6010,7 @@ io.on("connection", (socket) => {
           await transporter.sendMail(mailOptions);
 
           try {
-           
+
 
             // Mark applicant email sent
             await db.query(
@@ -15166,7 +15167,7 @@ app.get("/api/person/student/:storedID", async (req, res) => {
     const [rows] = await db.query(sql, [personEmail])
     console.log("Person Data: ", rows)
 
-    res.status(200).json({ message: "Successfully  etch student record from admission", rows})
+    res.status(200).json({ message: "Successfully  etch student record from admission", rows })
   } catch (err) {
     console.error("Error fetching registrar count:", error);
     res.status(500).json({ message: "Server error while fetching registrar count" });
@@ -16694,38 +16695,57 @@ io.on("connection", (socket) => {
 });
 
 app.post("/api/generate-cor-pdf", async (req, res) => {
+  let browser;
+
   try {
     const { html } = req.body;
 
-    if (!html) {
+    if (!html || typeof html !== "string") {
       return res.status(400).json({ message: "No HTML received" });
     }
 
-    const browser = await puppeteer.launch({
-      headless: "new",
+    console.log("Received HTML length:", html.length);
+
+    browser = await puppeteer.launch({
+      headless: true,
+      executablePath:
+        process.env.PUPPETEER_EXECUTABLE_PATH ||
+        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     const page = await browser.newPage();
 
-    // Allow images, block heavy stuff
-    await page.setRequestInterception(true);
+    page.on("console", (msg) => {
+      console.log("PAGE LOG:", msg.text());
+    });
 
-    page.on("request", (req) => {
-      if (["font", "media"].includes(req.resourceType())) {
-        req.abort();
+    page.on("pageerror", (err) => {
+      console.log("PAGE ERROR:", err.message);
+    });
+
+    page.on("requestfailed", (request) => {
+      console.log(
+        "REQUEST FAILED:",
+        request.url(),
+        request.failure()?.errorText
+      );
+    });
+
+    await page.setRequestInterception(true);
+    page.on("request", (request) => {
+      if (request.resourceType() === "media") {
+        request.abort();
       } else {
-        req.continue();
+        request.continue();
       }
     });
 
-    // Load HTML
     await page.setContent(html, {
-      waitUntil: "domcontentloaded",
+      waitUntil: "networkidle0",
+      timeout: 60000,
     });
-    await page.waitForSelector("img");
 
-    // ✅ Wait for images
     await page.evaluate(async () => {
       const images = Array.from(document.images);
 
@@ -16745,28 +16765,44 @@ app.post("/api/generate-cor-pdf", async (req, res) => {
       format: "A4",
       printBackground: true,
       preferCSSPageSize: true,
-      scale: 0.91,
+      scale: 0.90,
+      margin: {
+     
+        right: "10mm",
+    
+        left: "10mm",
+      },
     });
 
-    await browser.close();
+    console.log("PDF buffer size:", pdfBuffer.length);
+
+    if (!pdfBuffer || pdfBuffer.length === 0) {
+      throw new Error("Generated PDF buffer is empty");
+    }
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
       "attachment; filename=certificate.pdf"
     );
+    res.setHeader("Content-Length", pdfBuffer.length);
 
-    res.end(pdfBuffer);
-
+    return res.end(pdfBuffer);
   } catch (err) {
     console.error("PDF ERROR:", err);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "PDF generation failed",
       error: err.message,
+      stack: err.stack,
     });
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
   }
 });
+
 
 app.get("/get_students_grouped", async (req, res) => {
   try {

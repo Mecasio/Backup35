@@ -1359,7 +1359,7 @@ const MedicalRequirements = () => {
                             }}
                         >
                             <img
-                                src={`${API_BASE_URL}/uploads/${person.profile_img}`}
+                                src={`${API_BASE_URL}/uploads/Student1by1/${person.profile_img}`}
                                 alt="Profile"
                                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
                             />

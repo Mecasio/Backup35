@@ -16,16 +16,19 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import ExamPermit from "../applicant/ExamPermit";
-import ListAltIcon from "@mui/icons-material/ListAlt";
-import DescriptionIcon from "@mui/icons-material/Description";
-import PsychologyIcon from "@mui/icons-material/Psychology";
-import HowToRegIcon from '@mui/icons-material/HowToReg';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import ClassIcon from "@mui/icons-material/Class";
+import SearchIcon from "@mui/icons-material/Search";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
+import GradeIcon from "@mui/icons-material/Grade";
 import API_BASE_URL from "../apiConfig";
-
-const MedicalDashboard5 = () => {
+import DescriptionIcon from "@mui/icons-material/Description";
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+const ReadmissionDashboard5 = () => {
 
   const settings = useContext(SettingsContext);
 
@@ -66,29 +69,19 @@ const MedicalDashboard5 = () => {
 
   }, [settings]);
 
-
-    const stepsData = [
-        { label: "Medical Applicant List", to: "/medical_applicant_list", icon: <ListAltIcon /> },
-        { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
-        { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
-        { label: "Medical History", to: "/medical_requirements_form", icon: <PersonIcon /> },
-        { label: "Dental Assessment", to: "/dental_assessment", icon: <DescriptionIcon /> },
-        { label: "Physical and Neurological Examination", to: "/physical_neuro_exam", icon: <SchoolIcon /> },
-    ];
-  const handleNavigateStep = (index, to) => {
-    setCurrentStep(index);
-
-    const pid = sessionStorage.getItem("admin_edit_person_id");
-    if (pid) {
-      navigate(`${to}?person_id=${pid}`);
-    } else {
-      navigate(to);
-    }
-  };
-
+  const stepsData = [
+     { label: "Medical Applicant List", to: "/medical_applicant_list", icon: <ListAltIcon /> },
+    { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
+    { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
+    { label: "Medical History", to: "/medical_requirements_form", icon: <PersonIcon /> },
+    { label: "Dental Assessment", to: "/dental_assessment", icon: <DescriptionIcon /> },
+    { label: "Physical and Neurological Examination", to: "/physical_neuro_exam", icon: <SchoolIcon /> },
+  ];
 
   const [currentStep, setCurrentStep] = useState(1);
   const [visitedSteps, setVisitedSteps] = useState(Array(stepsData.length).fill(false));
+
+
 
 
   const navigate = useNavigate();
@@ -100,23 +93,23 @@ const MedicalDashboard5 = () => {
     termsOfAgreement: "",
   });
 
-  const isFormValid = () => {
-    let newErrors = {};
-    let isValid = true;
 
-    if (person.termsOfAgreement !== 1) {
-      newErrors.termsOfAgreement = true;
-      isValid = false;
+  const handleNavigateStep = (index, to) => {
+    setCurrentStep(index);
+
+    const pid = sessionStorage.getItem("admin_edit_person_id");
+    if (pid) {
+      navigate(`${to}?person_id=${pid}`);
+    } else {
+      navigate(to);
     }
-
-    setErrors(newErrors);
-    return isValid;
   };
 
   const [hasAccess, setHasAccess] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const pageId = 29;
+
+  const pageId = 42;
 
   const [employeeID, setEmployeeID] = useState("");
 
@@ -165,11 +158,6 @@ const MedicalDashboard5 = () => {
 
 
 
-
-
-
-
-
   const location = useLocation();
 
   const queryParams = new URLSearchParams(location.search);
@@ -213,46 +201,50 @@ const MedicalDashboard5 = () => {
     setUserID("");
   }, [queryPersonId]);
 
+  const [studentData, setStudentData] = useState(null);
 
+  const params = new URLSearchParams(location.search);
+
+  const person_id = params.get("person_id");
+  const student_number = params.get("student_number");
+
+  useEffect(() => {
+    const fetchStudent = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/student-info`, {
+          params: { person_id, student_number }
+        });
+        setStudentData(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    if (person_id || student_number) fetchStudent();
+  }, [person_id, student_number]);
 
 
   const [selectedPerson, setSelectedPerson] = useState(null);
 
 
-  const fetchByPersonId = async (personID) => {
-    try {
-      const res = await axios.get(`${API_BASE_URL}/api/person/${personID}`);
-      setPerson(res.data);
-      setSelectedPerson(res.data);
-      if (res.data?.applicant_number) {
-        // optional: whatever logic you want
-      }
-    } catch (err) {
-      console.error("❌ person (DB3) fetch failed:", err);
-    }
-  };
 
 
   const [activeStep, setActiveStep] = useState(4);
   const [clickedSteps, setClickedSteps] = useState([]);
 
-  const steps = person.person_id
-    ? [
-      { label: "Personal Information", icon: <PersonIcon />, path: `/medical_dashboard1?person_id=${userID}` },
-      { label: "Family Background", icon: <FamilyRestroomIcon />, path: `/medical_dashboard2?person_id=${userID}` },
-      { label: "Educational Attainment", icon: <SchoolIcon />, path: `/medical_dashboard3?person_id=${userID}` },
-      { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: `/medical_dashboard4?person_id=${userID}` },
-      { label: "Other Information", icon: <InfoIcon />, path: `/medical_dashboard5?person_id=${userID}` },
-    ]
-    : [];
-
-
-
+  const steps = [
+    { label: "Personal Information", icon: <PersonIcon />, path: "/medical_dashboard1" },
+    { label: "Family Background", icon: <FamilyRestroomIcon />, path: "/medical_dashboard2" },
+    { label: "Educational Attainment", icon: <SchoolIcon />, path: "/medical_dashboard3" },
+    { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: "/medical_dashboard4" },
+    { label: "Other Information", icon: <InfoIcon />, path: "/medical_dashboard5" },
+  ];
 
   const handleStepClick = (index) => {
     setActiveStep(index);
-    setClickedSteps((prev) => [...new Set([...prev, index])]);
-    navigate(steps[index].path); // Go to the clicked step’s page
+    const newClickedSteps = [...clickedSteps];
+    newClickedSteps[index] = true;
+    setClickedSteps(newClickedSteps);
   };
 
 
@@ -375,6 +367,7 @@ const MedicalDashboard5 = () => {
     }
   };
 
+
   const [errors, setErrors] = useState({});
 
 
@@ -488,7 +481,7 @@ const MedicalDashboard5 = () => {
 
   // Put this at the very bottom before the return 
   if (loading || hasAccess === null) {
-    return <LoadingOverlay open={loading} message="Loading..." />;
+   return <LoadingOverlay open={loading} message="Loading..." />;
   }
 
   if (!hasAccess) {
@@ -500,7 +493,7 @@ const MedicalDashboard5 = () => {
 
   // dot not alter
   return (
-    <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
+     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
       {showPrintView && (
         <div ref={divToPrintRef} style={{ display: "block" }}>
           <ExamPermit personId={userID} />   {/* ✅ pass the searched person_id */}
@@ -529,16 +522,15 @@ const MedicalDashboard5 = () => {
             fontSize: '36px',
           }}
         >
-          MEDICAL - OTHER INFORMATION
+          APPLICANT FORM - OTHER INFORMATION
         </Typography>
 
 
       </Box>
 
-         <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
       <br />
       <br />
-
 
 
 
@@ -558,23 +550,23 @@ const MedicalDashboard5 = () => {
             <Card
               onClick={() => handleNavigateStep(index, step.to)}
               sx={{
-                flex: `1 1 ${100 / stepsData.length}%`, // evenly divide row
-                height: 135,
+                flex: `1 1 ${100 / stepsData.length}%`, // evenly divide width
+                height: 120,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
                 borderRadius: 2,
                 border: `2px solid ${borderColor}`,
-                backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
-                color: activeStep === index ? "#fff" : "#000",
+                backgroundColor: currentStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
+                color: currentStep === index ? "#fff" : "#000",
                 boxShadow:
-                  activeStep === index
+                  currentStep === index
                     ? "0px 4px 10px rgba(0,0,0,0.3)"
                     : "0px 2px 6px rgba(0,0,0,0.15)",
                 transition: "0.3s ease",
                 "&:hover": {
-                  backgroundColor: activeStep === index ? "#000000" : "#f5d98f",
+                  backgroundColor: currentStep === index ? "#000" : "#f5d98f",
                 },
               }}
             >
@@ -612,7 +604,6 @@ const MedicalDashboard5 = () => {
       </Box>
 
       <br />
-
 
       <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
         <Table>
@@ -796,12 +787,8 @@ const MedicalDashboard5 = () => {
 
 
 
-
-
-
-
-
       <Container maxWidth="lg">
+
 
         <Container>
           <h1
@@ -830,7 +817,6 @@ const MedicalDashboard5 = () => {
 
 
         </Container>
-
 
         <br />
         <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
@@ -882,7 +868,7 @@ const MedicalDashboard5 = () => {
               {index < steps.length - 1 && (
                 <Box
                   sx={{
-                        height: "2px",
+                    height: "2px",
                     backgroundColor: mainButtonColor,
                     flex: 1,
                     alignSelf: "center",
@@ -940,7 +926,6 @@ const MedicalDashboard5 = () => {
               the University.
             </Typography>
 
-
             <Typography style={{ fontSize: "12px", fontFamily: "Arial", textAlign: "Left" }}>
               4. In order to promote efficient management of the organization’s records, I authorize the University to manage my data for data sharing with industry partners, government agencies/embassies, other educational institutions, and other offices for the university for employment, statistics, immigration, transfer credentials, and other legal purposes that may serve me best.
             </Typography>
@@ -958,6 +943,7 @@ const MedicalDashboard5 = () => {
             <FormControl required error={!!errors.termsOfAgreement} component="fieldset" sx={{ mb: 2 }}>
               <FormControlLabel
                 control={
+
                   <Checkbox
                     disabled
                     name="termsOfAgreement"
@@ -1023,7 +1009,6 @@ const MedicalDashboard5 = () => {
                 variant="contained"
                 component={Link}
                 to={`/medical_dashboard4?person_id=${userID}`}
-
                 startIcon={
                   <ArrowBackIcon
                     sx={{
@@ -1036,9 +1021,11 @@ const MedicalDashboard5 = () => {
                   backgroundColor: subButtonColor,
                   border: `2px solid ${borderColor}`,
 
+
                   color: "#000",
                   "&:hover": {
                     backgroundColor: "#000000",
+
                     color: "#fff",
                     "& .MuiSvgIcon-root": {
                       color: "#fff",
@@ -1059,14 +1046,6 @@ const MedicalDashboard5 = () => {
                     await axios.post(`${API_BASE_URL}/api/notify-submission`, {
                       person_id: userID,
                     });
-
-                    handleUpdate(); // Save data
-
-                    if (isFormValid()) {
-                      navigate("/medical_requirements"); // Proceed only if valid
-                    } else {
-                      alert("Please complete all required fields before submitting.");
-                    }
 
                     setSnack({
                       open: true,
@@ -1133,4 +1112,4 @@ const MedicalDashboard5 = () => {
 };
 
 
-export default MedicalDashboard5;
+export default ReadmissionDashboard5;

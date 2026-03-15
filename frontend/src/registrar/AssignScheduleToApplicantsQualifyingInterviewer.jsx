@@ -1423,12 +1423,11 @@ Thank you and good luck!`
 
                         <Button
                             variant="contained"
-                            color="primary"
-
+                            color="success"
                             sx={{ minWidth: 150 }}
                             onClick={handleSendEmails}
                         >
-                            Send Email
+                            SEND ALL EMAIL
                         </Button>
 
                     </Box>
@@ -1882,11 +1881,11 @@ Thank you and good luck!`
                                                     </Button>
                                                     <Button
                                                         variant="contained"
-                                                        color="primary"
+                                                        color="success"
                                                         size="small"
                                                         onClick={() => handleSendEmailSingle(person)}
                                                     >
-                                                        Send Email
+                                                        SEND EMAIL
                                                     </Button>
                                                 </Box>
                                             )}
@@ -1984,8 +1983,9 @@ Thank you and good luck!`
 
                     <Button
                         onClick={confirmSendEmails}
-                        color="success"
                         variant="contained"
+                        color="success"
+                        size="small"
                         sx={{ minWidth: "140px", height: "40px" }}
                     >
                         Send Emails

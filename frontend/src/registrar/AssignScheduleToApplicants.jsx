@@ -106,7 +106,7 @@ const AssignScheduleToApplicants = () => {
 
 
 
- const tabs = [
+  const tabs = [
     { label: "Room Registration", to: "/room_registration", icon: <KeyIcon fontSize="large" /> },
     { label: "Verify Documents Room Assignment", to: "/verify_document_schedule", icon: <MeetingRoomIcon fontSize="large" /> },
     { label: "Verify Documents Schedule Management", to: "/verify_schedule", icon: <ScheduleIcon fontSize="large" /> },
@@ -983,8 +983,8 @@ Admission Office`;
         ))}
       </Box>
 
-      <br/>
-      <br/>
+      <br />
+      <br />
       <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, }}>
         <Table>
           <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2" }}>
@@ -1038,7 +1038,7 @@ Admission Office`;
                       key={s.schedule_id}
                       value={s.schedule_id}
                     >
-                        {s.branch} : {s.proctor} - {s.day_description} | {s.building_description} | {s.room_description} |{" "}
+                      {s.branch} : {s.proctor} - {s.day_description} | {s.building_description} | {s.room_description} |{" "}
                       {new Date(`1970-01-01T${s.start_time}`).toLocaleTimeString("en-US", {
                         hour: "numeric",
                         minute: "2-digit",
@@ -1240,10 +1240,11 @@ Admission Office`;
             <Button
               variant="contained"
               color="success"
+              size="small"
               onClick={handleSendEmails}
               sx={{ minWidth: 150 }}
             >
-              Send Emails
+              SEND ALL EMAIL
             </Button>
 
           </Box>
@@ -1671,7 +1672,7 @@ Admission Office`;
                           </Button>
                           <Button
                             variant="contained"
-                            color="primary"
+                            color="success"
                             size="small"
                             onClick={() => {
 
@@ -1742,7 +1743,7 @@ Admission Office`);
                               setConfirmOpen(true);
                             }}
                           >
-                            Send Email
+                            SEND EMAIL
                           </Button>
                         </Box>
                       )}
@@ -1834,11 +1835,12 @@ Admission Office`);
 
           <Button
             onClick={confirmSendEmails}
-            color="success"
             variant="contained"
+            color="success"
+            size="small"
             sx={{ minWidth: 140, height: 40 }}
           >
-            Send Emails
+            SEND EMAIL
           </Button>
 
         </DialogActions>

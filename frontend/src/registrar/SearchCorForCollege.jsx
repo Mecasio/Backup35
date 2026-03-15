@@ -236,9 +236,18 @@ const SearchCorForCollege = () => {
 
         try {
             const html = `
+      <!DOCTYPE html>
       <html>
         <head>
-          <link rel="stylesheet" href="${window.location.origin}/styles/Print.css" />
+          <meta charset="UTF-8" />
+          <title>Certificate of Registration</title>
+          <style>
+            body {
+              margin: 0;
+              padding: 20px;
+              font-family: Arial, sans-serif;
+            }
+          </style>
         </head>
         <body>
           ${divToPrintRef.current.innerHTML}
@@ -254,26 +263,42 @@ const SearchCorForCollege = () => {
                 body: JSON.stringify({ html }),
             });
 
-            if (!res.ok) throw new Error("PDF failed");
+            const contentType = res.headers.get("content-type");
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => null);
+                console.error("Backend error:", errorData);
+                throw new Error(errorData?.error || "PDF failed");
+            }
+
+            if (!contentType || !contentType.includes("application/pdf")) {
+                const text = await res.text();
+                console.error("Unexpected response:", text);
+                throw new Error("Server did not return a valid PDF");
+            }
 
             const blob = await res.blob();
 
-            const url = window.URL.createObjectURL(blob);
+            if (blob.size === 0) {
+                throw new Error("Generated PDF is empty");
+            }
 
+            const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
             a.download = "certificate_of_registration.pdf";
+            document.body.appendChild(a);
             a.click();
-
+            a.remove();
             window.URL.revokeObjectURL(url);
-
         } catch (err) {
-            console.error(err);
-            alert("PDF failed");
+            console.error("Generate PDF error:", err);
+            alert(err.message || "PDF failed");
+        } finally {
+            setPdfLoading(false);
         }
-
-        setPdfLoading(false);
     };
+
 
     useEffect(() => {
         const trimmed = studentNumber.trim();
