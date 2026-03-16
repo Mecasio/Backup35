@@ -17,7 +17,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import LockResetIcon from "@mui/icons-material/LockReset";
-import { Avatar, Tooltip, Typography } from "@mui/material";
+import { Avatar, Tooltip, Typography, Divider } from "@mui/material";
 import axios from "axios";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import GradeIcon from "@mui/icons-material/Grade";
@@ -37,6 +37,7 @@ function buildSidebarStyles(s = {}) {
   const accent = s.main_button_color || "#7c3aed";
   const border = s.border_color || "#e8e8e8";
   const titleColor = s.title_color || "#111111";
+  const mainButtonColor = s.main_button_color || "#111111";
   const subColor = s.subtitle_color || "#777777";
   const subBtnColor = s.sub_button_color || "#f5f5f5";
   const profileBg = s.header_color ? `${s.header_color}18` : "#f7f7f7";
@@ -129,7 +130,7 @@ function buildSidebarStyles(s = {}) {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .08em;
-    color: ${subColor};
+    color: #000;
     padding: 10px 8px 4px;
   }
 
@@ -157,9 +158,10 @@ function buildSidebarStyles(s = {}) {
     justify-content: center;
     flex-shrink: 0;
     opacity: .75;
-    color: ${titleColor}
+    color: ${mainButtonColor}
   }
-  .sb-item:hover { background: ${subBtnColor}; color: ${titleColor}; }
+  .sb-item:hover { background: ${mainButtonColor}; color: white; }
+   .sb-item:hover .sb-icon { background: ${mainButtonColor}; color: white; }
   .sb-item.active { background: ${accent}; color: #fff !important; }
   .sb-item.active:hover { background: ${accent}; }
   .sb-item.active .sb-icon { opacity: 1; color: #fff !important; }
@@ -187,8 +189,10 @@ function buildSidebarStyles(s = {}) {
     vertical-align: middle;
   }
   .sb-group-btn .sb-icon{color: ${titleColor};}
-  .sb-group-btn:hover { background: ${subBtnColor}; color: ${titleColor}; }
+  .sb-group-btn:hover { background: ${mainButtonColor}; color: white; }
+  .sb-group-btn:hover .sb-icon{color: white; }
   .sb-group-btn.open { color: ${accent}; background: ${subBtnColor} }
+  .sb-group-btn.open .sb-icon { color: ${titleColor} }
   .sb-group-label { flex: 1; }
   .sb-group-chevron { flex-shrink: 0; opacity: .5; }
   .sb-group-chevron svg { font-size: 16px !important; }
@@ -220,11 +224,11 @@ function buildSidebarStyles(s = {}) {
     cursor: pointer;
     font-size: 12.5px;
     font-weight: 500;
-    color: #e53e3e;
+    color: ${mainButtonColor};
     transition: background .15s;
   }
-  .sb-logout:hover { background: #fff5f5; }
-  .sb-logout .sb-icon { opacity: .8; }
+  .sb-footer .sb-logout:hover { background: ${mainButtonColor}; color: white;}
+  
   `;
 }
 
@@ -270,7 +274,7 @@ function GroupToggle({ label, icon: Icon, open, onToggle }) {
       className={`sb-group-btn ${open ? "open" : ""}`}
       onClick={onToggle}
     >
-      {Icon && <span className="sb-icon" style={{ opacity: .7, display: 'flex', alignItems: 'center' }}><Icon sx={{ fontSize: 18 }} /></span>}
+      {Icon && <span className="sb-icon" style={{ opacity: 1, display: 'flex', alignItems: 'center' }}><Icon sx={{ fontSize: 18 }} /></span>}
       <span className="sb-group-label">{label}</span>
       <span className="sb-group-chevron">
         {open ? <ExpandLess /> : <ExpandMore />}
@@ -456,6 +460,7 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
   const admissionMenuGroups = [
     {
       key: "admissionOffice", label: "Admission Office", icon: AdminPanelSettings, items: [
+        { title: "Admission Dashboard", link: "/admission_officer_dashboard", icon: DashboardIcon, page_id: 103 },
         { title: "Applicant List", link: "/applicant_list_admin", icon: ListAltOutlined, page_id: 7 },
         { title: "Applicant Form", link: "/admin_dashboard1", icon: AccountCircle, page_id: 1 },
         { title: "Documents Submitted", link: "/student_requirements", icon: Description, page_id: 61 },
@@ -472,8 +477,11 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
         { title: "Program Slot Remaining", link: "/program_slot_limit", icon: People, page_id: 110 },
       ]
     },
+  ];
+  const enrollmentMenuGroups = [
     {
       key: "enrollmentOfficer", label: "Enrollment Officer", icon: AssignmentIndIcon, items: [
+        { title: "Enrollment Dashboard", link: "/enrollment_officer_dashboard", icon: DashboardIcon, page_id: 103 },
         { title: "Applicant List", link: "/applicant_list", icon: ListAlt, page_id: 6 },
         { title: "Applicant Form", link: "/registrar_dashboard1", icon: AccountCircle, page_id: 43 },
         { title: "Documents Submitted", link: "/registrar_requirements", icon: FolderCopy, page_id: 49 },
@@ -487,8 +495,12 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
 
       ]
     },
+  ];
+
+  const medicalMenuGroups = [
     {
       key: "medicalDental", label: "Medical & Dental", icon: MedicalServices, items: [
+        { title: "Medical Dashboard", link: "/registrar_dashboard", icon: DashboardIcon, page_id: 101 },
         { title: "Applicant List", link: "/medical_applicant_list", icon: ListAltOutlined, page_id: 24 },
         { title: "Applicant Form", link: "/medical_dashboard1", icon: AccountCircle, page_id: 25 },
         { title: "Documents Submitted", link: "/medical_requirements", icon: Description, page_id: 30 },
@@ -499,8 +511,11 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
         { title: "Medical Certificate", link: "/medical_certificate", icon: MedicalServices },
       ]
     },
+  ];
+  const registrarMenuGroups = [
     {
       key: "registrarOffice", label: "Registrar's Office", icon: HistoryEdu, items: [
+        { title: "Registrar Dashboard", link: "/registrar_dashboard", icon: DashboardIcon, page_id: 101 },
         { title: "Applicant List", link: "/super_admin_applicant_list", icon: ListAltOutlined, page_id: 80 },
         { title: "Student Numbering Panel", link: "/student_numbering", icon: Numbers, page_id: 59 },
         { title: "Course Tagging", link: "/course_tagging", icon: Class, page_id: 17 },
@@ -628,6 +643,9 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
 
   const sectionMenus = {
     admission: admissionMenuGroups,
+    enrollment: enrollmentMenuGroups,
+    medical: medicalMenuGroups,
+    registrar: registrarMenuGroups,
     course: courseMenuGroups,
     department: departmentMenuGroups,
     system: systemMenuGroups,
@@ -636,6 +654,9 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
 
   const managementItems = [
     { key: "admission", title: "Admission Management", path: "/admission_dashboard", icon: Business, page_id: 92 },
+    { key: "enrollment", title: "Enrollment Management", path: "/admission_dashboard", icon: Business, page_id: 92 },
+    { key: "medical", title: "Medical Management", path: "/admission_dashboard", icon: Business, page_id: 92 },
+    { key: "registrar", title: "Registrar Management", path: "/admission_dashboard", icon: Business, page_id: 92 },
     { key: "course", title: "Course Management", path: "/course_management", icon: LibraryBooks, page_id: 93 },
     { key: "department", title: "Department Management", path: "/department_dashboard", icon: Apartment, page_id: 94 },
     { key: "system", title: "System Management", path: "/system_dashboard", icon: Settings, page_id: 95 },
@@ -710,8 +731,9 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
         {role === "registrar" && (
           <>
             <div className="sb-section-label">Navigation</div>
-            <NavItem to={registrarDashboard} icon={DashboardIcon} label="Dashboard" active={isActive(registrarDashboard)} />
 
+            <NavItem to={registrarDashboard} icon={DashboardIcon} label="Dashboard" active={isActive(registrarDashboard)} />
+            <Divider sx={{ bgcolor: "#4a4a4a", my: 1 }} />
             {managementItems.map((item) => {
               if (!userAccessList[item.page_id]) return null;
               const groups = sectionMenus[item.key];
@@ -745,7 +767,10 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
                   ) : (
                     <NavItem to={item.path} icon={item.icon} label={`Open ${item.title}`} active={isActive(item.path)} />
                   )}
+                  <Divider sx={{ bgcolor: "#4a4a4a", my: 1 }} />
+
                 </div>
+
               );
             })}
 
