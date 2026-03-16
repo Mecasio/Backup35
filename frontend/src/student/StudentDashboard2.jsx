@@ -679,7 +679,7 @@ const StudentDashboard2 = () => {
           marginTop: "25px",
         }}
       >
-        LISTS OF ALL PRINTABLE FILES
+        AVAILABLE PRINTABLE DOCUMENTS
       </h1>
 
       {/* Cards Section */}

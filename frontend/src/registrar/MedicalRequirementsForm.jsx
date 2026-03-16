@@ -23,7 +23,7 @@ import { motion } from "framer-motion";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import SaveIcon from '@mui/icons-material/Save';
 import SearchIcon from "@mui/icons-material/Search";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import SchoolIcon from '@mui/icons-material/School';
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import PersonIcon from "@mui/icons-material/Person";
@@ -84,8 +84,7 @@ const MedicalRequirements = () => {
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
-  const queryParams = new URLSearchParams(location.search);
-  const queryPersonId = queryParams.get("person_id")?.trim() || "";
+
   const [explicitSelection, setExplicitSelection] = useState(false);
 
   const [hasAccess, setHasAccess] = useState(null);
@@ -154,6 +153,48 @@ const MedicalRequirements = () => {
     }
   };
 
+  const location = useLocation();
+
+  const queryParams = new URLSearchParams(location.search);
+  const queryPersonId = queryParams.get("person_id")?.trim() || "";
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const loggedInPersonId = localStorage.getItem("person_id");
+
+    if (!storedUser || !storedRole || !loggedInPersonId) {
+      window.location.href = "/login";
+      return;
+    }
+
+    setUser(storedUser);
+    setUserRole(storedRole);
+
+    const allowedRoles = ["registrar", "applicant", "superadmin"];
+    if (!allowedRoles.includes(storedRole)) {
+      window.location.href = "/login";
+      return;
+    }
+
+    const lastSelected = sessionStorage.getItem("admin_edit_person_id");
+
+    // ⭐ CASE 1: URL HAS ?person_id=
+    if (queryPersonId !== "") {
+      sessionStorage.setItem("admin_edit_person_id", queryPersonId);
+      setUserID(queryPersonId);
+      return;
+    }
+
+
+
+    // ⭐ CASE 3: No URL ID and no last selected → start blank
+    setUserID("");
+  }, [queryPersonId]);
+
+
+
+
   useEffect(() => {
     let consumedFlag = false;
 
@@ -191,6 +232,28 @@ const MedicalRequirements = () => {
 
 
 
+  // Fetch person by ID (when navigating with ?person_id=... or sessionStorage)
+  useEffect(() => {
+    const fetchPersonById = async () => {
+      if (!userID) return;
+
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/person_with_applicant/${userID}`);
+        if (res.data) {
+          setPerson(res.data);
+          setSelectedPerson(res.data);
+        } else {
+          console.warn("⚠️ No person found for ID:", userID);
+        }
+      } catch (err) {
+        console.error("❌ Failed to fetch person by ID:", err);
+      }
+    };
+
+    fetchPersonById();
+  }, [userID]);
+
+
 
 
   const [form, setForm] = useState({
@@ -224,7 +287,7 @@ const MedicalRequirements = () => {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(3);
 
-  const tabs1 = [
+  const tabs = [
     { label: "Medical Applicant List", to: "/medical_applicant_list", icon: <ListAltIcon /> },
     { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
     { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
@@ -408,12 +471,70 @@ const MedicalRequirements = () => {
     }
   };
 
+  const handleRowClick = (person_id) => {
+    if (!person_id) return;
 
-  // 🧭 Tab Navigation
-  const handleStepClick = (index, path) => {
-    setActiveStep(index);
-    navigate(path);
+    sessionStorage.setItem("admin_edit_person_id", String(person_id));
+    sessionStorage.setItem("admin_edit_person_id_source", "applicant_list");
+    sessionStorage.setItem("admin_edit_person_id_ts", String(Date.now()));
+
+    // ✅ Always pass person_id in the URL
+    navigate(`/registrar_dashboard1?person_id=${person_id}`);
   };
+
+
+
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const personIdFromUrl = queryParams.get("person_id");
+
+    if (!personIdFromUrl) return;
+
+    // fetch info of that person
+    axios
+      .get(`${API_BASE_URL}api/person_with_applicant/${personIdFromUrl}`)
+      .then((res) => {
+        if (res.data?.student_number) {
+
+          // AUTO-INSERT applicant_number into search bar
+          setSearchQuery(res.data.student_number);
+
+          // If you have a fetchUploads() or fetchExamScore() — call it
+          if (typeof fetchUploadsByApplicantNumber === "function") {
+            fetchUploadsByApplicantNumber(res.data.student_number);
+          }
+
+          if (typeof fetchApplicants === "function") {
+            fetchApplicants();
+          }
+        }
+      })
+      .catch((err) => console.error("Auto search failed:", err));
+  }, [location.search]);
+
+  const handleStepClick = (index, to) => {
+    setActiveStep(index);
+    const pid = sessionStorage.getItem("edit_person_id");
+    const sn = sessionStorage.getItem("edit_student_number");
+
+    if (pid) {
+      navigate(`${to}?person_id=${pid}`);
+    } else if (sn) {
+      navigate(`${to}?student_number=${sn}`);
+    } else {
+      navigate(to); // no id → open without query
+    }
+  };
+
+  useEffect(() => {
+    const storedId = sessionStorage.getItem("edit_student_number");
+
+    if (storedId) {
+      setSearchQuery(storedId);
+    }
+  }, []);
+
 
   // 🔍 Auto search when studentNumber changes
   useEffect(() => {
@@ -527,18 +648,19 @@ const MedicalRequirements = () => {
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
+          flexWrap: "nowrap", // ❌ prevent wrapping
           width: "100%",
-          mb: 3,
+          mt: 2,
+
           gap: 2,
         }}
       >
-        {tabs1.map((tab, index) => (
+        {tabs.map((tab, index) => (
           <Card
             key={index}
             onClick={() => handleStepClick(index, tab.to)}
             sx={{
-              flex: `1 1 ${100 / tabs1.length}%`, // evenly divide row
+              flex: `1 1 ${100 / tabs.length}%`, // evenly divide row
               height: 135,
               display: "flex",
               alignItems: "center",
@@ -546,7 +668,10 @@ const MedicalRequirements = () => {
               cursor: "pointer",
               borderRadius: 2,
               border: `2px solid ${borderColor}`,
-              backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
+              backgroundColor:
+                activeStep === index
+                  ? settings?.header_color || "#1976d2"
+                  : "#E8C999",
               color: activeStep === index ? "#fff" : "#000",
               boxShadow:
                 activeStep === index
@@ -554,20 +679,28 @@ const MedicalRequirements = () => {
                   : "0px 2px 6px rgba(0,0,0,0.15)",
               transition: "0.3s ease",
               "&:hover": {
-                backgroundColor: activeStep === index ? "#000000" : "#f5d98f",
+                backgroundColor: activeStep === index ? "#000" : "#f5d98f",
               },
             }}
-
           >
-            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-              <Box sx={{ fontSize: 32, mb: 0.5 }}>{tab.icon}</Box>
-              <Typography sx={{ fontSize: 13, fontWeight: "bold", textAlign: "center" }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <Box sx={{ fontSize: 40, mb: 1 }}>{tab.icon}</Box>
+              <Typography
+                sx={{ fontSize: 14, fontWeight: "bold", textAlign: "center" }}
+              >
                 {tab.label}
               </Typography>
             </Box>
           </Card>
         ))}
       </Box>
+      <br />
 
       <TableContainer component={Paper} sx={{ width: '100%', }}>
         <Table>
@@ -597,13 +730,15 @@ const MedicalRequirements = () => {
           </TableHead>
         </Table>
       </TableContainer>
+
+
       <Container
         maxWidth="100%"
         sx={{
           backgroundColor: "#f1f1f1",
           border: "2px solid black",
           padding: 2,
-          borderRadius: 2,
+
           boxShadow: 3,
         }}
       >

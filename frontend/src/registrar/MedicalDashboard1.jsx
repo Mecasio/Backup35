@@ -39,10 +39,7 @@ import HowToRegIcon from '@mui/icons-material/HowToReg';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
-
-
-
-const ReadmissionDashboard1 = () => {
+const MedicalDashboard1 = () => {
 
   const settings = useContext(SettingsContext);
 
@@ -1040,7 +1037,7 @@ const ReadmissionDashboard1 = () => {
     fetchStudent();
   }, [searchQuery]);
 
-  useEffect(() => {
+   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const personIdFromUrl = queryParams.get("person_id");
 
@@ -1070,14 +1067,25 @@ const ReadmissionDashboard1 = () => {
 
   const handleStepClick = (index, to) => {
     setActiveStep(index);
+    const pid = sessionStorage.getItem("edit_person_id");
+    const sn = sessionStorage.getItem("edit_student_number");
 
-    const pid = sessionStorage.getItem("admin_edit_person_id");
     if (pid) {
       navigate(`${to}?person_id=${pid}`);
+    } else if (sn) {
+      navigate(`${to}?student_number=${sn}`);
     } else {
-      navigate(to);
+      navigate(to); // no id → open without query
     }
   };
+
+  useEffect(() => {
+    const storedId = sessionStorage.getItem("edit_student_number");
+
+    if (storedId) {
+      setSearchQuery(storedId);
+    }
+  }, []);
 
   useEffect(() => {
     const storedId = sessionStorage.getItem("edit_student_number");
@@ -3607,4 +3615,4 @@ const ReadmissionDashboard1 = () => {
   );
 };
 
-export default ReadmissionDashboard1;
+export default MedicalDashboard1;

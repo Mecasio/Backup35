@@ -466,7 +466,7 @@ const Dashboard3 = (props) => {
           marginTop: "25px",
         }}
       >
-        LISTS OF ALL PRINTABLE FILES
+        AVAILABLE PRINTABLE DOCUMENTS
       </h1>
 
       <Box

@@ -29,7 +29,7 @@ import API_BASE_URL from "../apiConfig";
 import DescriptionIcon from "@mui/icons-material/Description";
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-const ReadmissionDashboard2 = () => {
+const MedicalDashboard2 = () => {
 
     const settings = useContext(SettingsContext);
 
@@ -71,12 +71,12 @@ const ReadmissionDashboard2 = () => {
     }, [settings]);
 
     const stepsData = [
-         { label: "Medical Applicant List", to: "/medical_applicant_list", icon: <ListAltIcon /> },
-    { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
-    { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
-    { label: "Medical History", to: "/medical_requirements_form", icon: <PersonIcon /> },
-    { label: "Dental Assessment", to: "/dental_assessment", icon: <DescriptionIcon /> },
-    { label: "Physical and Neurological Examination", to: "/physical_neuro_exam", icon: <SchoolIcon /> },
+        { label: "Medical Applicant List", to: "/medical_applicant_list", icon: <ListAltIcon /> },
+        { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
+        { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
+        { label: "Medical History", to: "/medical_requirements_form", icon: <PersonIcon /> },
+        { label: "Dental Assessment", to: "/dental_assessment", icon: <DescriptionIcon /> },
+        { label: "Physical and Neurological Examination", to: "/physical_neuro_exam", icon: <SchoolIcon /> },
     ];
 
     const [currentStep, setCurrentStep] = useState(1);
@@ -163,71 +163,71 @@ const ReadmissionDashboard2 = () => {
     // do not alter
 
     const location = useLocation();
- 
+
     const queryParams = new URLSearchParams(location.search);
     const queryPersonId = queryParams.get("person_id")?.trim() || "";
-  
+
     useEffect(() => {
-      const storedUser = localStorage.getItem("email");
-      const storedRole = localStorage.getItem("role");
-      const loggedInPersonId = localStorage.getItem("person_id");
-  
-      if (!storedUser || !storedRole || !loggedInPersonId) {
-        window.location.href = "/login";
-        return;
-      }
-  
-      setUser(storedUser);
-      setUserRole(storedRole);
-  
-      const allowedRoles = ["registrar", "applicant", "superadmin"];
-      if (!allowedRoles.includes(storedRole)) {
-        window.location.href = "/login";
-        return;
-      }
-  
-      const lastSelected = sessionStorage.getItem("admin_edit_person_id");
-  
-      // ⭐ CASE 1: URL HAS ?person_id=
-      if (queryPersonId !== "") {
-        sessionStorage.setItem("admin_edit_person_id", queryPersonId);
-        setUserID(queryPersonId);
-        return;
-      }
-  
-      // ⭐ CASE 2: URL has NO ID but we have a last selected student
-      if (lastSelected) {
-        setUserID(lastSelected);
-        return;
-      }
-  
-      // ⭐ CASE 3: No URL ID and no last selected → start blank
-      setUserID("");
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const loggedInPersonId = localStorage.getItem("person_id");
+
+        if (!storedUser || !storedRole || !loggedInPersonId) {
+            window.location.href = "/login";
+            return;
+        }
+
+        setUser(storedUser);
+        setUserRole(storedRole);
+
+        const allowedRoles = ["registrar", "applicant", "superadmin"];
+        if (!allowedRoles.includes(storedRole)) {
+            window.location.href = "/login";
+            return;
+        }
+
+        const lastSelected = sessionStorage.getItem("admin_edit_person_id");
+
+        // ⭐ CASE 1: URL HAS ?person_id=
+        if (queryPersonId !== "") {
+            sessionStorage.setItem("admin_edit_person_id", queryPersonId);
+            setUserID(queryPersonId);
+            return;
+        }
+
+        // ⭐ CASE 2: URL has NO ID but we have a last selected student
+        if (lastSelected) {
+            setUserID(lastSelected);
+            return;
+        }
+
+        // ⭐ CASE 3: No URL ID and no last selected → start blank
+        setUserID("");
     }, [queryPersonId]);
-  
+
     const [studentData, setStudentData] = useState(null);
-  
+
     const params = new URLSearchParams(location.search);
-  
+
     const person_id = params.get("person_id");
     const student_number = params.get("student_number");
-  
+
     useEffect(() => {
-      const fetchStudent = async () => {
-        try {
-          const res = await axios.get(`${API_BASE_URL}/api/student-info`, {
-            params: { person_id, student_number }
-          });
-          setStudentData(res.data);
-        } catch (err) {
-          console.error(err);
-        }
-      };
-  
-      if (person_id || student_number) fetchStudent();
+        const fetchStudent = async () => {
+            try {
+                const res = await axios.get(`${API_BASE_URL}/api/student-info`, {
+                    params: { person_id, student_number }
+                });
+                setStudentData(res.data);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        if (person_id || student_number) fetchStudent();
     }, [person_id, student_number]);
-  
-  
+
+
     const [selectedPerson, setSelectedPerson] = useState(null);
 
 
@@ -257,46 +257,89 @@ const ReadmissionDashboard2 = () => {
         { label: "Other Information", icon: <InfoIcon />, path: "/medical_dashboard5" },
     ];
 
-  const handleStepClick = (index) => {
-    setActiveStep(index);
-    const newClickedSteps = [...clickedSteps];
-    newClickedSteps[index] = true;
-    setClickedSteps(newClickedSteps);
-  };
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const personIdFromUrl = queryParams.get("person_id");
 
-const handleGuardianChange = (e) => {
-  const { value } = e.target;
+        if (!personIdFromUrl) return;
 
-  let updatedPerson = { ...person, guardian: value };
+        // fetch info of that person
+        axios
+            .get(`${API_BASE_URL}api/person_with_applicant/${personIdFromUrl}`)
+            .then((res) => {
+                if (res.data?.student_number) {
 
-  if (value === "Father") {
-    updatedPerson = {
-      ...updatedPerson,
-      guardian_family_name: person.father_family_name || "",
-      guardian_given_name: person.father_given_name || "",
-      guardian_middle_name: person.father_middle_name || "",
-      guardian_ext: person.father_ext || "",
-      guardian_nickname: person.father_nickname || "",
-      guardian_contact: person.father_contact || "",
-      guardian_email: person.father_email || "",
+                    // AUTO-INSERT applicant_number into search bar
+                    setSearchQuery(res.data.student_number);
+
+                    // If you have a fetchUploads() or fetchExamScore() — call it
+                    if (typeof fetchUploadsByApplicantNumber === "function") {
+                        fetchUploadsByApplicantNumber(res.data.student_number);
+                    }
+
+                    if (typeof fetchApplicants === "function") {
+                        fetchApplicants();
+                    }
+                }
+            })
+            .catch((err) => console.error("Auto search failed:", err));
+    }, [location.search]);
+
+    const handleStepClick = (index, to) => {
+        setActiveStep(index);
+        const pid = sessionStorage.getItem("edit_person_id");
+        const sn = sessionStorage.getItem("edit_student_number");
+
+        if (pid) {
+            navigate(`${to}?person_id=${pid}`);
+        } else if (sn) {
+            navigate(`${to}?student_number=${sn}`);
+        } else {
+            navigate(to); // no id → open without query
+        }
     };
-  }
 
-  if (value === "Mother") {
-    updatedPerson = {
-      ...updatedPerson,
-      guardian_family_name: person.mother_family_name || "",
-      guardian_given_name: person.mother_given_name || "",
-      guardian_middle_name: person.mother_middle_name || "",
-      guardian_ext: person.mother_ext || "",
-      guardian_nickname: person.mother_nickname || "",
-      guardian_contact: person.mother_contact || "",
-      guardian_email: person.mother_email || "",
+    useEffect(() => {
+        const storedId = sessionStorage.getItem("edit_student_number");
+
+        if (storedId) {
+            setSearchQuery(storedId);
+        }
+    }, []);
+
+    const handleGuardianChange = (e) => {
+        const { value } = e.target;
+
+        let updatedPerson = { ...person, guardian: value };
+
+        if (value === "Father") {
+            updatedPerson = {
+                ...updatedPerson,
+                guardian_family_name: person.father_family_name || "",
+                guardian_given_name: person.father_given_name || "",
+                guardian_middle_name: person.father_middle_name || "",
+                guardian_ext: person.father_ext || "",
+                guardian_nickname: person.father_nickname || "",
+                guardian_contact: person.father_contact || "",
+                guardian_email: person.father_email || "",
+            };
+        }
+
+        if (value === "Mother") {
+            updatedPerson = {
+                ...updatedPerson,
+                guardian_family_name: person.mother_family_name || "",
+                guardian_given_name: person.mother_given_name || "",
+                guardian_middle_name: person.mother_middle_name || "",
+                guardian_ext: person.mother_ext || "",
+                guardian_nickname: person.mother_nickname || "",
+                guardian_contact: person.mother_contact || "",
+                guardian_email: person.mother_email || "",
+            };
+        }
+
+        setPerson(updatedPerson);
     };
-  }
-
-  setPerson(updatedPerson);
-};
 
 
 
@@ -524,27 +567,27 @@ const handleGuardianChange = (e) => {
     };
 
 
-  
- const links = [
-    {
-      to: userID ? `/admin_ecat_application_form?person_id=${userID}` : "/admin_ecat_application_form",
-      label: "ECAT Application Form",
-    },
-    {
-      to: userID ? `/admin_admission_form_process?person_id=${userID}` : "/admin_admission_form_process",
-      label: "Admission Form Process",
-    },
-    {
-      to: userID ? `/admin_personal_data_form?person_id=${userID}` : "/admin_personal_data_form",
-      label: "Personal Data Form",
-    },
-    {
-      to: userID ? `/admin_office_of_the_registrar?person_id=${userID}` : "/admin_office_of_the_registrar",
-      label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission`,
-    },
-    { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
-   
-  ];
+
+    const links = [
+        {
+            to: userID ? `/admin_ecat_application_form?person_id=${userID}` : "/admin_ecat_application_form",
+            label: "ECAT Application Form",
+        },
+        {
+            to: userID ? `/admin_admission_form_process?person_id=${userID}` : "/admin_admission_form_process",
+            label: "Admission Form Process",
+        },
+        {
+            to: userID ? `/admin_personal_data_form?person_id=${userID}` : "/admin_personal_data_form",
+            label: "Personal Data Form",
+        },
+        {
+            to: userID ? `/admin_office_of_the_registrar?person_id=${userID}` : "/admin_office_of_the_registrar",
+            label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission`,
+        },
+        { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
+
+    ];
 
 
 
@@ -578,7 +621,7 @@ const handleGuardianChange = (e) => {
 
     // Put this at the very bottom before the return 
     if (loading || hasAccess === null) {
-       return <LoadingOverlay open={loading} message="Loading..." />;
+        return <LoadingOverlay open={loading} message="Loading..." />;
     }
 
     if (!hasAccess) {
@@ -589,7 +632,7 @@ const handleGuardianChange = (e) => {
 
     // dot not alter
     return (
-          <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
+        <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
             {showPrintView && (
                 <div ref={divToPrintRef} style={{ display: "block" }}>
                     <ExamPermit personId={userID} />   {/* ✅ pass the searched person_id */}
@@ -616,16 +659,16 @@ const handleGuardianChange = (e) => {
                         fontSize: '36px',
                     }}
                 >
-                
+
                     APPLICANT FORM - FAMILY BACKGROUND
                 </Typography>
 
 
             </Box>
 
-             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
-      <br />
-      <br />
+            <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+            <br />
+            <br />
 
 
 
@@ -735,75 +778,75 @@ const handleGuardianChange = (e) => {
 
 
 
-     
-  <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          width: "100%",
-          mt: 2,
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-            p: 2,
-            borderRadius: "10px",
-            backgroundColor: "#fffaf5",
-            border: "1px solid #6D2323",
-            boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
-            width: "100%",
-            overflow: "hidden",
-          }}
-        >
-          {/* Icon */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "#800000",
-              borderRadius: "8px",
-              width: 60,
-              height: 60,
-              flexShrink: 0,
-            }}
-          >
-            <ErrorIcon sx={{ color: "white", fontSize: 40 }} />
-          </Box>
 
-          {/* Text */}
-          <Typography
-            sx={{
-              fontSize: "20px",
-              fontFamily: "Arial",
-              color: "#3e3e3e",
-              lineHeight: 1.3, // slightly tighter to fit in fewer rows
-              whiteSpace: "normal",
-              overflow: "hidden",
-            }}
-          >
-            <strong style={{ color: "maroon" }}>Notice:</strong> &nbsp;
-            <strong></strong> <span style={{ fontSize: '1.2em', margin: '0 15px' }}>➔</span> Kindly type 'NA' in boxes where there are no possible answers to the information being requested. &nbsp;  &nbsp; <br />
-            <strong></strong> <span style={{ fontSize: '1.2em', margin: '0 15px', marginLeft: "100px", }}>➔</span> To make use of the letter 'Ñ', please press ALT while typing "165", while for 'ñ', please press ALT while typing "164"
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    width: "100%",
+                    mt: 2,
+                }}
+            >
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 2,
+                        p: 2,
+                        borderRadius: "10px",
+                        backgroundColor: "#fffaf5",
+                        border: "1px solid #6D2323",
+                        boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
+                        width: "100%",
+                        overflow: "hidden",
+                    }}
+                >
+                    {/* Icon */}
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "#800000",
+                            borderRadius: "8px",
+                            width: 60,
+                            height: 60,
+                            flexShrink: 0,
+                        }}
+                    >
+                        <ErrorIcon sx={{ color: "white", fontSize: 40 }} />
+                    </Box>
 
-          </Typography>
-        </Box>
-      </Box>
+                    {/* Text */}
+                    <Typography
+                        sx={{
+                            fontSize: "20px",
+                            fontFamily: "Arial",
+                            color: "#3e3e3e",
+                            lineHeight: 1.3, // slightly tighter to fit in fewer rows
+                            whiteSpace: "normal",
+                            overflow: "hidden",
+                        }}
+                    >
+                        <strong style={{ color: "maroon" }}>Notice:</strong> &nbsp;
+                        <strong></strong> <span style={{ fontSize: '1.2em', margin: '0 15px' }}>➔</span> Kindly type 'NA' in boxes where there are no possible answers to the information being requested. &nbsp;  &nbsp; <br />
+                        <strong></strong> <span style={{ fontSize: '1.2em', margin: '0 15px', marginLeft: "100px", }}>➔</span> To make use of the letter 'Ñ', please press ALT while typing "165", while for 'ñ', please press ALT while typing "164"
 
-      <h1
-        style={{
-          fontSize: "30px",
-          fontWeight: "bold",
-          textAlign: "center",
-          color: "black",
-          marginTop: "25px",
-        }}
-      >
-        LISTS OF ALL PRINTABLE FILES
-      </h1>
+                    </Typography>
+                </Box>
+            </Box>
+
+            <h1
+                style={{
+                    fontSize: "30px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    color: "black",
+                    marginTop: "25px",
+                }}
+            >
+                LISTS OF ALL PRINTABLE FILES
+            </h1>
 
 
 
@@ -977,11 +1020,11 @@ const handleGuardianChange = (e) => {
                             {index < steps.length - 1 && (
                                 <Box
                                     sx={{
-                                           height: "2px",
-                    backgroundColor: mainButtonColor,
-                    flex: 1,
-                    alignSelf: "center",
-                    mx: 2,
+                                        height: "2px",
+                                        backgroundColor: mainButtonColor,
+                                        flex: 1,
+                                        alignSelf: "center",
+                                        mx: 2,
                                     }}
                                 />
                             )}
@@ -1309,7 +1352,7 @@ const handleGuardianChange = (e) => {
                                                 <Typography variant="subtitle2" mb={1}>Father Year Graduated</Typography>
                                                 <TextField
                                                     InputProps={{ readOnly: true }}
- type="number"
+                                                    type="number"
                                                     fullWidth
                                                     size="small"
                                                     name="father_year_graduated"
@@ -1673,7 +1716,7 @@ const handleGuardianChange = (e) => {
                                                 <Typography variant="subtitle2" mb={1}>Mother Year Graduated</Typography>
                                                 <TextField
                                                     InputProps={{ readOnly: true }}
- type="number"
+                                                    type="number"
                                                     fullWidth
                                                     size="small"
                                                     name="mother_year_graduated"
@@ -1817,25 +1860,25 @@ const handleGuardianChange = (e) => {
                                     name="guardian"
                                     value={person.guardian || ""}
                                     label="Guardian"
-                                  onChange={handleGuardianChange}
+                                    onChange={handleGuardianChange}
                                     onBlur={handleBlur}
                                 >
-                                     <MenuItem value=""><em>Select Guardian</em></MenuItem>
-                                                    <MenuItem value="Father">Father</MenuItem>
-                                                    <MenuItem value="Mother">Mother</MenuItem>
-                                                    <MenuItem value="Brother/Sister">Brother/Sister</MenuItem>
-                                                    <MenuItem value="Uncle">Uncle</MenuItem>
-                                                    <MenuItem value="Aunt">Aunt</MenuItem>
-                                                    <MenuItem value="StepFather">Stepfather</MenuItem>
-                                                    <MenuItem value="StepMother">Stepmother</MenuItem>
-                                                    <MenuItem value="Cousin">Cousin</MenuItem>
-                                                    <MenuItem value="Father in Law">Father-in-law</MenuItem>
-                                                    <MenuItem value="Mother in Law">Mother-in-law</MenuItem>
-                                                    <MenuItem value="Sister in Law">Sister-in-law</MenuItem>
-                                                    <MenuItem value="GrandMother">GrandMother</MenuItem>
-                                                    <MenuItem value="GrandFather">GrandFather</MenuItem>
-                                                    <MenuItem value="Spouse">Spouse</MenuItem>
-                                                    <MenuItem value="Others">Others</MenuItem>
+                                    <MenuItem value=""><em>Select Guardian</em></MenuItem>
+                                    <MenuItem value="Father">Father</MenuItem>
+                                    <MenuItem value="Mother">Mother</MenuItem>
+                                    <MenuItem value="Brother/Sister">Brother/Sister</MenuItem>
+                                    <MenuItem value="Uncle">Uncle</MenuItem>
+                                    <MenuItem value="Aunt">Aunt</MenuItem>
+                                    <MenuItem value="StepFather">Stepfather</MenuItem>
+                                    <MenuItem value="StepMother">Stepmother</MenuItem>
+                                    <MenuItem value="Cousin">Cousin</MenuItem>
+                                    <MenuItem value="Father in Law">Father-in-law</MenuItem>
+                                    <MenuItem value="Mother in Law">Mother-in-law</MenuItem>
+                                    <MenuItem value="Sister in Law">Sister-in-law</MenuItem>
+                                    <MenuItem value="GrandMother">GrandMother</MenuItem>
+                                    <MenuItem value="GrandFather">GrandFather</MenuItem>
+                                    <MenuItem value="Spouse">Spouse</MenuItem>
+                                    <MenuItem value="Others">Others</MenuItem>
                                 </Select>
 
                             </FormControl>
@@ -2157,4 +2200,4 @@ const handleGuardianChange = (e) => {
 };
 
 
-export default ReadmissionDashboard2;
+export default MedicalDashboard2;

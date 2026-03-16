@@ -27,7 +27,7 @@ import API_BASE_URL from "../apiConfig";
 import DescriptionIcon from "@mui/icons-material/Description";
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-const ReadmissionDashboard3 = () => {
+const MedicalDashboard3 = () => {
 
   const settings = useContext(SettingsContext);
 
@@ -373,14 +373,57 @@ const ReadmissionDashboard3 = () => {
     { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: "/medical_dashboard4" },
     { label: "Other Information", icon: <InfoIcon />, path: "/medical_dashboard5" },
   ];
-  const handleStepClick = (index) => {
+
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const personIdFromUrl = queryParams.get("person_id");
+
+    if (!personIdFromUrl) return;
+
+    // fetch info of that person
+    axios
+      .get(`${API_BASE_URL}api/person_with_applicant/${personIdFromUrl}`)
+      .then((res) => {
+        if (res.data?.student_number) {
+
+          // AUTO-INSERT applicant_number into search bar
+          setSearchQuery(res.data.student_number);
+
+          // If you have a fetchUploads() or fetchExamScore() — call it
+          if (typeof fetchUploadsByApplicantNumber === "function") {
+            fetchUploadsByApplicantNumber(res.data.student_number);
+          }
+
+          if (typeof fetchApplicants === "function") {
+            fetchApplicants();
+          }
+        }
+      })
+      .catch((err) => console.error("Auto search failed:", err));
+  }, [location.search]);
+
+  const handleStepClick = (index, to) => {
     setActiveStep(index);
-    const newClickedSteps = [...clickedSteps];
-    newClickedSteps[index] = true;
-    setClickedSteps(newClickedSteps);
+    const pid = sessionStorage.getItem("edit_person_id");
+    const sn = sessionStorage.getItem("edit_student_number");
+
+    if (pid) {
+      navigate(`${to}?person_id=${pid}`);
+    } else if (sn) {
+      navigate(`${to}?student_number=${sn}`);
+    } else {
+      navigate(to); // no id → open without query
+    }
   };
 
+  useEffect(() => {
+    const storedId = sessionStorage.getItem("edit_student_number");
 
+    if (storedId) {
+      setSearchQuery(storedId);
+    }
+  }, []);
 
   const [errors, setErrors] = useState({});
 
@@ -493,7 +536,7 @@ const ReadmissionDashboard3 = () => {
   }, []);
 
   return (
-       <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
+    <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
       {showPrintView && (
         <div ref={divToPrintRef} style={{ display: "block" }}>
           <ExamPermit personId={userID} />   {/* ✅ pass the searched person_id */}
@@ -526,7 +569,7 @@ const ReadmissionDashboard3 = () => {
 
       </Box>
 
-        <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+      <hr style={{ border: "1px solid #ccc", width: "100%" }} />
       <br />
       <br />
 
@@ -877,7 +920,7 @@ const ReadmissionDashboard3 = () => {
               {index < steps.length - 1 && (
                 <Box
                   sx={{
-                     height: "2px",
+                    height: "2px",
                     backgroundColor: mainButtonColor,
                     flex: 1,
                     alignSelf: "center",
@@ -914,385 +957,385 @@ const ReadmissionDashboard3 = () => {
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <br />
 
-             <Box
-                                      sx={{
-                                        display: "flex",
-                                        flexWrap: "nowrap",   // 🔥 forces one row only
-                                        gap: 2,
-                                        mb: 2,
-                                      }}
-                                    >
-                                      {/* Educational Attainment */}
-                                      <Box sx={{ flex: "1" }}>
-                                        <Typography variant="subtitle1" mb={1} sx={{ minHeight: "32px" }}>
-                                          Educational Attainment
-                                        </Typography>
-                        
-                                        <FormControl fullWidth size="small" required error={!!errors.schoolLevel}>
-                                          <InputLabel id="schoolLevel-label">Educational Attainment</InputLabel>
-                                          <Select
-                                          readOnly
-                                            labelId="schoolLevel-label"
-                                            id="schoolLevel"
-                                            name="schoolLevel"
-                                            value={person.schoolLevel ?? ""}
-                                            label="Educational Attainment"
-                                            onChange={handleChange}
-                                            onBlur={() => handleUpdate(person)}
-                                          >
-                                            <MenuItem value="">
-                                              <em>Select School Level</em>
-                                            </MenuItem>
-                                            <MenuItem value="High School/Junior High School">
-                                              High School/Junior High School
-                                            </MenuItem>
-                                            <MenuItem value="ALS">ALS</MenuItem>
-                                          </Select>
-                                          {errors.schoolLevel && (
-                                            <FormHelperText>This field is required.</FormHelperText>
-                                          )}
-                                        </FormControl>
-                                      </Box>
-                        
-                                      {/* School Last Attended */}
-                                      <Box sx={{ flex: "1" }}>
-                                        <Typography variant="subtitle1" mb={1} sx={{ minHeight: "32px" }}>
-                                          School Last Attended
-                                        </Typography>
-                        
-                                        <TextField
-                                                   InputProps={{ readOnly: true }}
-           
-                                          fullWidth
-                                          size="small"
-                                          required
-                                          name="schoolLastAttended"
-                                          placeholder="Enter School Last Attended"
-                                          value={person.schoolLastAttended || ""}
-                                          onChange={handleChange}
-                                          onBlur={() => handleUpdate(person)}
-                                          error={errors.schoolLastAttended}
-                                          helperText={
-                                            errors.schoolLastAttended ? "This field is required." : ""
-                                          }
-                                        />
-                                      </Box>
-                        
-                                      {/* School Address */}
-                                      <Box sx={{ flex: "1" }}>
-                                        <Typography
-                                          variant="subtitle1"
-                                          mb={1}
-                                          sx={{ minHeight: "32px", fontSize: "12.5px" }}
-                                        >
-                                          School Full Address (Street / BRGY / City)
-                                        </Typography>
-                        
-                                        <TextField
-                                                   InputProps={{ readOnly: true }}
-           
-                                          fullWidth
-                                          size="small"
-                                          required
-                                          name="schoolAddress"
-                                          placeholder="Enter your School Address"
-                                          value={person.schoolAddress || ""}
-                                          onChange={handleChange}
-                                          onBlur={() => handleUpdate(person)}
-                                          error={errors.schoolAddress}
-                                          helperText={errors.schoolAddress ? "This field is required." : ""}
-                                        />
-                                      </Box>
-                        
-                                      {/* Course Program */}
-                                      <Box sx={{ flex: "1" }}>
-                                        <Typography variant="subtitle1" mb={1} sx={{ minHeight: "32px" }}>
-                                          Course Program
-                                        </Typography>
-                        
-                                        <TextField
-                                                   InputProps={{ readOnly: true }}
-           
-                                          fullWidth
-                                          size="small"
-                                          required
-                                          name="courseProgram"
-                                          placeholder="Enter your Course Program"
-                                          value={person.courseProgram || ""}
-                                          onChange={handleChange}
-                                          onBlur={() => handleUpdate(person)}
-                                          error={errors.courseProgram}
-                                          helperText={errors.courseProgram ? "This field is required." : ""}
-                                        />
-                                      </Box>
-                                    </Box>
-                        
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        gap: 2,
-                                        mb: 2,
-                                      }}
-                                    >
-                                      <Box sx={{ flex: "1 1 33%" }}>
-                                        <Typography variant="subtitle1" mb={1}>
-                                          Recognition / Awards
-                                        </Typography>
-                                        <TextField
-                                                   InputProps={{ readOnly: true }}
-           
-                                          fullWidth
-                                          size="small"
-                                          name="honor"
-                                          required
-                                          value={person.honor || ""}
-                                          placeholder="Enter your Honor"
-                                          onChange={handleChange}
-                                          onBlur={() => handleUpdate(person)}
-                        
-                                          error={errors.honor}
-                                          helperText={errors.honor ? "This field is required." : ""}
-                                        />
-                                      </Box>
-                        
-                                      <Box sx={{ flex: "1 1 33%" }}>
-                                        <Typography variant="subtitle1" mb={1}>
-                                          General Average
-                                        </Typography>
-                                        <TextField
-                                                   InputProps={{ readOnly: true }}
-           
-                                          fullWidth
-                                          size="small"
-                                          required
-                                          name="generalAverage"
-                                          value={person.generalAverage || ""}
-                                          placeholder="Enter your General Average"
-                                          onChange={handleChange}
-                                          onBlur={() => handleUpdate(person)}
-                        
-                                          error={errors.generalAverage}
-                                          helperText={errors.generalAverage ? "This field is required." : ""}
-                                        />
-                                      </Box>
-                        
-                                      <Box sx={{ flex: "1 1 33%" }}>
-                                        <Typography variant="subtitle1" mb={1}>
-                                          Year Graduated
-                                        </Typography>
-                                        <TextField
-                                                   InputProps={{ readOnly: true }}
-           
-                                          fullWidth
-                                          size="small"
-                                          required
-                                          name="yearGraduated"
-                                          placeholder="Enter your Year Graduated"
-                                          value={person.yearGraduated || ""}
-                                          onChange={handleChange}
-                                          onBlur={() => handleUpdate(person)}
-                        
-                                          error={errors.yearGraduated}
-                                          helperText={errors.yearGraduated ? "This field is required." : ""}
-                                        />
-                                      </Box>
-                                    </Box>
-                        
-           
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "nowrap",   // 🔥 forces one row only
+                gap: 2,
+                mb: 2,
+              }}
+            >
+              {/* Educational Attainment */}
+              <Box sx={{ flex: "1" }}>
+                <Typography variant="subtitle1" mb={1} sx={{ minHeight: "32px" }}>
+                  Educational Attainment
+                </Typography>
+
+                <FormControl fullWidth size="small" required error={!!errors.schoolLevel}>
+                  <InputLabel id="schoolLevel-label">Educational Attainment</InputLabel>
+                  <Select
+                    readOnly
+                    labelId="schoolLevel-label"
+                    id="schoolLevel"
+                    name="schoolLevel"
+                    value={person.schoolLevel ?? ""}
+                    label="Educational Attainment"
+                    onChange={handleChange}
+                    onBlur={() => handleUpdate(person)}
+                  >
+                    <MenuItem value="">
+                      <em>Select School Level</em>
+                    </MenuItem>
+                    <MenuItem value="High School/Junior High School">
+                      High School/Junior High School
+                    </MenuItem>
+                    <MenuItem value="ALS">ALS</MenuItem>
+                  </Select>
+                  {errors.schoolLevel && (
+                    <FormHelperText>This field is required.</FormHelperText>
+                  )}
+                </FormControl>
+              </Box>
+
+              {/* School Last Attended */}
+              <Box sx={{ flex: "1" }}>
+                <Typography variant="subtitle1" mb={1} sx={{ minHeight: "32px" }}>
+                  School Last Attended
+                </Typography>
+
+                <TextField
+                  InputProps={{ readOnly: true }}
+
+                  fullWidth
+                  size="small"
+                  required
+                  name="schoolLastAttended"
+                  placeholder="Enter School Last Attended"
+                  value={person.schoolLastAttended || ""}
+                  onChange={handleChange}
+                  onBlur={() => handleUpdate(person)}
+                  error={errors.schoolLastAttended}
+                  helperText={
+                    errors.schoolLastAttended ? "This field is required." : ""
+                  }
+                />
+              </Box>
+
+              {/* School Address */}
+              <Box sx={{ flex: "1" }}>
+                <Typography
+                  variant="subtitle1"
+                  mb={1}
+                  sx={{ minHeight: "32px", fontSize: "12.5px" }}
+                >
+                  School Full Address (Street / BRGY / City)
+                </Typography>
+
+                <TextField
+                  InputProps={{ readOnly: true }}
+
+                  fullWidth
+                  size="small"
+                  required
+                  name="schoolAddress"
+                  placeholder="Enter your School Address"
+                  value={person.schoolAddress || ""}
+                  onChange={handleChange}
+                  onBlur={() => handleUpdate(person)}
+                  error={errors.schoolAddress}
+                  helperText={errors.schoolAddress ? "This field is required." : ""}
+                />
+              </Box>
+
+              {/* Course Program */}
+              <Box sx={{ flex: "1" }}>
+                <Typography variant="subtitle1" mb={1} sx={{ minHeight: "32px" }}>
+                  Course Program
+                </Typography>
+
+                <TextField
+                  InputProps={{ readOnly: true }}
+
+                  fullWidth
+                  size="small"
+                  required
+                  name="courseProgram"
+                  placeholder="Enter your Course Program"
+                  value={person.courseProgram || ""}
+                  onChange={handleChange}
+                  onBlur={() => handleUpdate(person)}
+                  error={errors.courseProgram}
+                  helperText={errors.courseProgram ? "This field is required." : ""}
+                />
+              </Box>
+            </Box>
+
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                mb: 2,
+              }}
+            >
+              <Box sx={{ flex: "1 1 33%" }}>
+                <Typography variant="subtitle1" mb={1}>
+                  Recognition / Awards
+                </Typography>
+                <TextField
+                  InputProps={{ readOnly: true }}
+
+                  fullWidth
+                  size="small"
+                  name="honor"
+                  required
+                  value={person.honor || ""}
+                  placeholder="Enter your Honor"
+                  onChange={handleChange}
+                  onBlur={() => handleUpdate(person)}
+
+                  error={errors.honor}
+                  helperText={errors.honor ? "This field is required." : ""}
+                />
+              </Box>
+
+              <Box sx={{ flex: "1 1 33%" }}>
+                <Typography variant="subtitle1" mb={1}>
+                  General Average
+                </Typography>
+                <TextField
+                  InputProps={{ readOnly: true }}
+
+                  fullWidth
+                  size="small"
+                  required
+                  name="generalAverage"
+                  value={person.generalAverage || ""}
+                  placeholder="Enter your General Average"
+                  onChange={handleChange}
+                  onBlur={() => handleUpdate(person)}
+
+                  error={errors.generalAverage}
+                  helperText={errors.generalAverage ? "This field is required." : ""}
+                />
+              </Box>
+
+              <Box sx={{ flex: "1 1 33%" }}>
+                <Typography variant="subtitle1" mb={1}>
+                  Year Graduated
+                </Typography>
+                <TextField
+                  InputProps={{ readOnly: true }}
+
+                  fullWidth
+                  size="small"
+                  required
+                  name="yearGraduated"
+                  placeholder="Enter your Year Graduated"
+                  value={person.yearGraduated || ""}
+                  onChange={handleChange}
+                  onBlur={() => handleUpdate(person)}
+
+                  error={errors.yearGraduated}
+                  helperText={errors.yearGraduated ? "This field is required." : ""}
+                />
+              </Box>
+            </Box>
+
+
 
 
             <Typography style={{ fontSize: "20px", color: mainButtonColor, fontWeight: "bold" }}>Senior High School - Background:</Typography>
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <br />
 
-           
-                       <Box
-                                 sx={{
-                                   display: "flex",
-                                   flexWrap: "nowrap",
-                                   gap: 2,
-                                   mb: 2,
-                                 }}
-                               >
-                                 {/* School Level 1 */}
-                                 <Box sx={{ flex: "1" }}>
-                                   <Typography variant="subtitle1" mb={1} sx={{ minHeight: "32px" }}>
-                                     Educational Attainment
-                                   </Typography>
-                   
-                                   <FormControl fullWidth size="small" required error={!!errors.schoolLevel1}>
-                                     <InputLabel id="schoolLevel1-label">Educational Attainment</InputLabel>
-                                     <Select
-                                     readOnly
-                                       labelId="schoolLevel1-label"
-                                       id="schoolLevel1"
-                                       name="schoolLevel1"
-                                       value={person.schoolLevel1 ?? ""}
-                                       label="Educational Attainment"
-                                       onChange={handleChange}
-                                       onBlur={() => handleUpdate(person)}
-                                     >
-                                       <MenuItem value="">
-                                         <em>Select School Level</em>
-                                       </MenuItem>
-                                       <MenuItem value="Senior High School">Senior High School</MenuItem>
-                                       <MenuItem value="Undergraduate">Undergraduate</MenuItem>
-                                       <MenuItem value="Graduate">Graduate</MenuItem>
-                                       <MenuItem value="ALS">ALS</MenuItem>
-                                     </Select>
-                   
-                                     {errors.schoolLevel1 && (
-                                       <FormHelperText>This field is required.</FormHelperText>
-                                     )}
-                                   </FormControl>
-                                 </Box>
-                   
-                                 {/* School Last Attended 1 */}
-                                 <Box sx={{ flex: "1" }}>
-                                   <Typography variant="subtitle1" mb={1} sx={{ minHeight: "32px" }}>
-                                     School Last Attended
-                                   </Typography>
-                   
-                                   <TextField
-                                            InputProps={{ readOnly: true }}
-           
-                                     fullWidth
-                                     size="small"
-                                     required
-                                     name="schoolLastAttended1"
-                                     placeholder="Enter School Last Attended"
-                                     value={person.schoolLastAttended1 || ""}
-                                     onChange={handleChange}
-                                     onBlur={() => handleUpdate(person)}
-                                     error={errors.schoolLastAttended1}
-                                     helperText={errors.schoolLastAttended1 ? "This field is required." : ""}
-                                   />
-                                 </Box>
-                   
-                                 {/* School Address 1 */}
-                                 <Box sx={{ flex: "1" }}>
-                                   <Typography
-                                     variant="subtitle1"
-                                     mb={1}
-                                     sx={{ minHeight: "32px", fontSize: "12.5px" }}
-                                   >
-                                     School Full Address (Street / BRGY / City)
-                                   </Typography>
-                   
-                                   <TextField
-                                            InputProps={{ readOnly: true }}
-           
-                                     fullWidth
-                                     size="small"
-                                     required
-                                     name="schoolAddress1"
-                                     placeholder="Enter your School Address"
-                                     value={person.schoolAddress1 || ""}
-                                     onChange={handleChange}
-                                     onBlur={() => handleUpdate(person)}
-                                     error={errors.schoolAddress1}
-                                     helperText={errors.schoolAddress1 ? "This field is required." : ""}
-                                   />
-                                 </Box>
-                   
-                                 {/* Course Program 1 */}
-                                 <Box sx={{ flex: "1" }}>
-                                   <Typography variant="subtitle1" mb={1} sx={{ minHeight: "32px" }}>
-                                     Course Program
-                                   </Typography>
-                   
-                                   <TextField
-                                            InputProps={{ readOnly: true }}
-           
-                                     fullWidth
-                                     size="small"
-                                     required
-                                     name="courseProgram1"
-                                     placeholder="Enter your Course Program"
-                                     value={person.courseProgram1 || ""}
-                                     onChange={handleChange}
-                                     onBlur={() => handleUpdate(person)}
-                                     error={errors.courseProgram1}
-                                     helperText={errors.courseProgram1 ? "This field is required." : ""}
-                                   />
-                                 </Box>
-                               </Box>
-                   
-                   
-                               <Box
-                                 sx={{
-                                   display: "flex",
-                                   gap: 2,
-                                   mb: 2,
-                                 }}
-                               >
-                                 {/* Honor 1 */}
-                                 <Box sx={{ flex: "1 1 33%" }}>
-                                   <Typography variant="subtitle1" mb={1}>
-                                     Recognition / Awards
-                                   </Typography>
-                                   <TextField
-                                            InputProps={{ readOnly: true }}
-           
-                                     fullWidth
-                                     size="small"
-                                     required
-                                     name="honor1"
-                                     placeholder="Enter your Honor"
-                                     value={person.honor1 || ""}
-                                     onChange={handleChange}
-                                     onBlur={() => handleUpdate(person)}
-                   
-                                     error={errors.honor1}
-                                     helperText={errors.honor1 ? "This field is required." : ""}
-                                   />
-                                 </Box>
-                   
-                                 {/* General Average 1 */}
-                                 <Box sx={{ flex: "1 1 33%" }}>
-                                   <Typography variant="subtitle1" mb={1}>
-                                     General Average
-                                   </Typography>
-                                   <TextField
-                                            InputProps={{ readOnly: true }}
-           
-                                     fullWidth
-                                     size="small"
-                                     required
-                                     name="generalAverage1"
-                                     placeholder="Enter your General Average"
-                                     value={person.generalAverage1 || ""}
-                                     onChange={handleChange}
-                                     onBlur={() => handleUpdate(person)}
-                   
-                                     error={errors.generalAverage1}
-                                     helperText={errors.generalAverage1 ? "This field is required." : ""}
-                                   />
-                                 </Box>
-                   
-                                 {/* Year Graduated 1 */}
-                                 <Box sx={{ flex: "1 1 33%" }}>
-                                   <Typography variant="subtitle1" mb={1}>
-                                     Year Graduated
-                                   </Typography>
-                                   <TextField
-                                            InputProps={{ readOnly: true }}
-           
-                                     fullWidth
-                                     size="small"
-                                     required
-                                     name="yearGraduated1"
-                                     placeholder="Enter your Year Graduated"
-                                     value={person.yearGraduated1 || ""}
-                                     onChange={handleChange}
-                                     onBlur={() => handleUpdate(person)}
-                   
-                                     error={errors.yearGraduated1}
-                                     helperText={errors.yearGraduated1 ? "This field is required." : ""}
-                                   />
-                                 </Box>
-                               </Box>
-                   
+
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "nowrap",
+                gap: 2,
+                mb: 2,
+              }}
+            >
+              {/* School Level 1 */}
+              <Box sx={{ flex: "1" }}>
+                <Typography variant="subtitle1" mb={1} sx={{ minHeight: "32px" }}>
+                  Educational Attainment
+                </Typography>
+
+                <FormControl fullWidth size="small" required error={!!errors.schoolLevel1}>
+                  <InputLabel id="schoolLevel1-label">Educational Attainment</InputLabel>
+                  <Select
+                    readOnly
+                    labelId="schoolLevel1-label"
+                    id="schoolLevel1"
+                    name="schoolLevel1"
+                    value={person.schoolLevel1 ?? ""}
+                    label="Educational Attainment"
+                    onChange={handleChange}
+                    onBlur={() => handleUpdate(person)}
+                  >
+                    <MenuItem value="">
+                      <em>Select School Level</em>
+                    </MenuItem>
+                    <MenuItem value="Senior High School">Senior High School</MenuItem>
+                    <MenuItem value="Undergraduate">Undergraduate</MenuItem>
+                    <MenuItem value="Graduate">Graduate</MenuItem>
+                    <MenuItem value="ALS">ALS</MenuItem>
+                  </Select>
+
+                  {errors.schoolLevel1 && (
+                    <FormHelperText>This field is required.</FormHelperText>
+                  )}
+                </FormControl>
+              </Box>
+
+              {/* School Last Attended 1 */}
+              <Box sx={{ flex: "1" }}>
+                <Typography variant="subtitle1" mb={1} sx={{ minHeight: "32px" }}>
+                  School Last Attended
+                </Typography>
+
+                <TextField
+                  InputProps={{ readOnly: true }}
+
+                  fullWidth
+                  size="small"
+                  required
+                  name="schoolLastAttended1"
+                  placeholder="Enter School Last Attended"
+                  value={person.schoolLastAttended1 || ""}
+                  onChange={handleChange}
+                  onBlur={() => handleUpdate(person)}
+                  error={errors.schoolLastAttended1}
+                  helperText={errors.schoolLastAttended1 ? "This field is required." : ""}
+                />
+              </Box>
+
+              {/* School Address 1 */}
+              <Box sx={{ flex: "1" }}>
+                <Typography
+                  variant="subtitle1"
+                  mb={1}
+                  sx={{ minHeight: "32px", fontSize: "12.5px" }}
+                >
+                  School Full Address (Street / BRGY / City)
+                </Typography>
+
+                <TextField
+                  InputProps={{ readOnly: true }}
+
+                  fullWidth
+                  size="small"
+                  required
+                  name="schoolAddress1"
+                  placeholder="Enter your School Address"
+                  value={person.schoolAddress1 || ""}
+                  onChange={handleChange}
+                  onBlur={() => handleUpdate(person)}
+                  error={errors.schoolAddress1}
+                  helperText={errors.schoolAddress1 ? "This field is required." : ""}
+                />
+              </Box>
+
+              {/* Course Program 1 */}
+              <Box sx={{ flex: "1" }}>
+                <Typography variant="subtitle1" mb={1} sx={{ minHeight: "32px" }}>
+                  Course Program
+                </Typography>
+
+                <TextField
+                  InputProps={{ readOnly: true }}
+
+                  fullWidth
+                  size="small"
+                  required
+                  name="courseProgram1"
+                  placeholder="Enter your Course Program"
+                  value={person.courseProgram1 || ""}
+                  onChange={handleChange}
+                  onBlur={() => handleUpdate(person)}
+                  error={errors.courseProgram1}
+                  helperText={errors.courseProgram1 ? "This field is required." : ""}
+                />
+              </Box>
+            </Box>
+
+
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                mb: 2,
+              }}
+            >
+              {/* Honor 1 */}
+              <Box sx={{ flex: "1 1 33%" }}>
+                <Typography variant="subtitle1" mb={1}>
+                  Recognition / Awards
+                </Typography>
+                <TextField
+                  InputProps={{ readOnly: true }}
+
+                  fullWidth
+                  size="small"
+                  required
+                  name="honor1"
+                  placeholder="Enter your Honor"
+                  value={person.honor1 || ""}
+                  onChange={handleChange}
+                  onBlur={() => handleUpdate(person)}
+
+                  error={errors.honor1}
+                  helperText={errors.honor1 ? "This field is required." : ""}
+                />
+              </Box>
+
+              {/* General Average 1 */}
+              <Box sx={{ flex: "1 1 33%" }}>
+                <Typography variant="subtitle1" mb={1}>
+                  General Average
+                </Typography>
+                <TextField
+                  InputProps={{ readOnly: true }}
+
+                  fullWidth
+                  size="small"
+                  required
+                  name="generalAverage1"
+                  placeholder="Enter your General Average"
+                  value={person.generalAverage1 || ""}
+                  onChange={handleChange}
+                  onBlur={() => handleUpdate(person)}
+
+                  error={errors.generalAverage1}
+                  helperText={errors.generalAverage1 ? "This field is required." : ""}
+                />
+              </Box>
+
+              {/* Year Graduated 1 */}
+              <Box sx={{ flex: "1 1 33%" }}>
+                <Typography variant="subtitle1" mb={1}>
+                  Year Graduated
+                </Typography>
+                <TextField
+                  InputProps={{ readOnly: true }}
+
+                  fullWidth
+                  size="small"
+                  required
+                  name="yearGraduated1"
+                  placeholder="Enter your Year Graduated"
+                  value={person.yearGraduated1 || ""}
+                  onChange={handleChange}
+                  onBlur={() => handleUpdate(person)}
+
+                  error={errors.yearGraduated1}
+                  helperText={errors.yearGraduated1 ? "This field is required." : ""}
+                />
+              </Box>
+            </Box>
+
             <Typography style={{ fontSize: "20px", color: mainButtonColor, fontWeight: "bold" }}>
               Strand (For Senior High School)
             </Typography>
@@ -1458,4 +1501,4 @@ const ReadmissionDashboard3 = () => {
 };
 
 
-export default ReadmissionDashboard3;
+export default MedicalDashboard3;

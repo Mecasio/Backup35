@@ -134,6 +134,34 @@ const RequirementUploader = () => {
   };
 
 
+  const checkAllRequiredUploads = () => {
+
+    const requiredDocs = requirements.filter(
+      (r) => r.category === "Regular"
+    );
+
+    const uploadedIds = uploads.map((u) => Number(u.requirements_id));
+
+    const missingDocs = requiredDocs.filter(
+      (doc) => !uploadedIds.includes(Number(doc.id))
+    );
+
+    if (missingDocs.length > 0) {
+
+      const missingNames = missingDocs.map(d => d.description).join(", ");
+
+      setSnack({
+        open: true,
+        severity: "error",
+        message: `Please upload all required documents: ${missingNames}`,
+      });
+
+      return false;
+    }
+
+    return true;
+  };
+
   const [totalRequirements, setTotalRequirements] = useState(0);
 
 
@@ -200,9 +228,8 @@ const RequirementUploader = () => {
   };
 
   const renderRow = (doc) => {
-    const uploaded = uploads.find((u) =>
-      u.description && u.description.toLowerCase().includes(doc.label.toLowerCase())
-
+    const uploaded = uploads.find(
+      (u) => Number(u.requirements_id) === Number(doc.id)
     );
 
 
@@ -210,7 +237,13 @@ const RequirementUploader = () => {
 
     return (
       <TableRow key={doc.id}>
-        <TableCell sx={{ fontWeight: 'bold', width: '25%', border: `2px solid ${borderColor}` }}>{doc.label}</TableCell>
+        <TableCell sx={{ fontWeight: 'bold', width: '25%', border: `2px solid ${borderColor}` }}>
+          {doc.label}
+
+          {doc.is_required === 1 && (
+            <span style={{ color: "red", marginLeft: 5 }}>*</span>
+          )}
+        </TableCell>
         <TableCell sx={{ width: '25%', border: `2px solid ${borderColor}`, textAlign: "Center" }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
             <Box sx={{ width: '220px', flexShrink: 0, textAlign: "center" }}>
@@ -384,7 +417,7 @@ const RequirementUploader = () => {
             variant="contained"
             onClick={() => setOpenModal(false)}
             sx={{
-          
+
               fontWeight: "bold",
               textTransform: "none",
               minWidth: "120px",
@@ -436,21 +469,18 @@ const RequirementUploader = () => {
           mt: 2,
         }}
       >
-
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
-            justifyContent: "center", // ✅ Center content inside full-width box
+            alignItems: "flex-start",
+            justifyContent: "center",
             gap: 2,
-            width: "100%", // ✅ Still takes full width
-            textAlign: "center",
+            width: "100%",
             p: 2,
             borderRadius: "10px",
             backgroundColor: "#fffaf5",
             border: "1px solid #6D2323",
             boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
-            whiteSpace: "nowrap",
           }}
         >
           {/* Icon */}
@@ -466,115 +496,149 @@ const RequirementUploader = () => {
               flexShrink: 0,
             }}
           >
-            <ErrorIcon sx={{ color: "white", fontSize: 40 }} />
+            <ErrorIcon sx={{ color: "white", fontSize: 36 }} />
           </Box>
 
           {/* Text */}
           <Typography
             sx={{
-              fontSize: "20px",
+              fontSize: "16px",
               fontFamily: "Arial",
               color: "#3e3e3e",
-              textAlign: "center",
-              letterSpacing: "2px"
+              lineHeight: 1.6,
             }}
           >
-            <strong style={{ color: "maroon" }}>Notice:</strong> &nbsp;
-            <strong>
-              PLEASE NOTE: ONLY JPG, JPEG, PNG or PDF WITH MAXIMUM OF FILE SIZE OF 4MB ARE ALLOWED
-            </strong>
+            <strong style={{ color: "#6D2323" }}>Notice:</strong>{" "}
+            Only files in <strong>JPG, JPEG, PNG, or PDF</strong> format are allowed for
+            upload. Please make sure that the file you are submitting does not exceed
+            the <strong>maximum file size of 4 MB</strong>. Any file that goes beyond
+            the allowed size limit or is not in the required format will not be accepted
+            by the system.
+            <br />
+            <br />
+            To avoid delays in the processing of your application, kindly review and
+            verify the file’s format and size before uploading. Thank you for your
+            cooperation.
           </Typography>
         </Box>
-      </Box>
+        </Box>
 
 
-      <Box sx={{ px: 2, marginLeft: "-10px" }}>
-        {Object.entries(
-          requirements.reduce((acc, r) => {
-            const cat = r.category || "Regular";
-            if (!acc[cat]) acc[cat] = [];
-            acc[cat].push(r);
-            return acc;
-          }, {})
-        ).map(([category, docs]) => (
-          <Box key={category} sx={{ mt: 4 }}>
-            <Container>
-              <h1
-                style={{
-                  fontSize: "45px",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  color: subtitleColor,
-                  marginTop: "25px",
-                }}
-              >
-                {category === "Medical"
-                  ? "UPLOAD MEDICAL DOCUMENTS"
-                  : category === "Others"
-                    ? "OTHER REQUIREMENTS"
-                    : "UPLOAD DOCUMENTS"}
-              </h1>
-
-              {/* 📝 Show message only below UPLOAD DOCUMENTS title */}
-              {category !== "Medical" && category !== "Others" && (
-                <div
+        <Box sx={{ px: 2, marginLeft: "-10px" }}>
+          {Object.entries(
+            requirements.reduce((acc, r) => {
+              const cat = r.category || "Regular";
+              if (!acc[cat]) acc[cat] = [];
+              acc[cat].push(r);
+              return acc;
+            }, {})
+          ).map(([category, docs]) => (
+            <Box key={category} sx={{ mt: 4 }}>
+              <Container>
+                <h1
                   style={{
+                    fontSize: "45px",
+                    fontWeight: "bold",
                     textAlign: "center",
-                    fontSize: "18px",
-                    marginTop: "10px",
-                    marginBottom: "30px",
-                    color: "#333",
+                    color: subtitleColor,
+                    marginTop: "25px",
                   }}
                 >
-                  <div style={{ textAlign: "center" }}>
-                    Complete the applicant form to secure your place for the upcoming academic year at{" "}
-                    {shortTerm ? (
-                      <>
-                        <strong>{shortTerm.toUpperCase()}</strong> <br />
-                        {companyName || ""}
-                      </>
-                    ) : (
-                      companyName || ""
-                    )}
-                    .
+                  {category === "Medical"
+                    ? "UPLOAD MEDICAL DOCUMENTS"
+                    : category === "Others"
+                      ? "OTHER REQUIREMENTS"
+                      : "UPLOAD DOCUMENTS"}
+                </h1>
+
+                {/* 📝 Show message only below UPLOAD DOCUMENTS title */}
+                {category !== "Medical" && category !== "Others" && (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      fontSize: "18px",
+                      marginTop: "10px",
+                      marginBottom: "30px",
+                      color: "#333",
+                    }}
+                  >
+                    <div style={{ textAlign: "center" }}>
+                      Complete the applicant form to secure your place for the upcoming academic year at{" "}
+                      {shortTerm ? (
+                        <>
+                          <strong>{shortTerm.toUpperCase()}</strong> <br />
+                          {companyName || ""}
+                        </>
+                      ) : (
+                        companyName || ""
+                      )}
+                      .
+                    </div>
                   </div>
-                </div>
-              )}
-            </Container>
+                )}
+              </Container>
 
-            <TableContainer
-              component={Paper}
-              sx={{ width: "95%", mt: 2, border: `2px solid ${borderColor}` }}
-            >
-              <Table>
-                <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", border: `2px solid ${borderColor}` }}>
-                  <TableRow>
-                    <TableCell sx={{ color: "white", border: `2px solid ${borderColor}` }}>Document</TableCell>
-                    <TableCell sx={{ color: "white", border: `2px solid ${borderColor}` }}>Upload</TableCell>
-                    <TableCell sx={{ color: "white", border: `2px solid ${borderColor}` }}>Remarks</TableCell>
-                    <TableCell sx={{ color: "white", border: `2px solid ${borderColor}` }}>Preview</TableCell>
-                    <TableCell sx={{ color: "white", border: `2px solid ${borderColor}` }}>Delete</TableCell>
-                  </TableRow>
-                </TableHead>
+              <TableContainer
+                component={Paper}
+                sx={{ width: "95%", mt: 2, border: `2px solid ${borderColor}` }}
+              >
+                <Table>
+                  <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", border: `2px solid ${borderColor}` }}>
+                    <TableRow>
+                      <TableCell sx={{ color: "white", border: `2px solid ${borderColor}` }}>Document</TableCell>
+                      <TableCell sx={{ color: "white", border: `2px solid ${borderColor}` }}>Upload</TableCell>
+                      <TableCell sx={{ color: "white", border: `2px solid ${borderColor}` }}>Remarks</TableCell>
+                      <TableCell sx={{ color: "white", border: `2px solid ${borderColor}` }}>Preview</TableCell>
+                      <TableCell sx={{ color: "white", border: `2px solid ${borderColor}` }}>Delete</TableCell>
+                    </TableRow>
+                  </TableHead>
 
-                <TableBody>
-                  {docs.map((doc) =>
-                    renderRow({
-                      id: doc.id,
-                      label: doc.description,
-                    })
-                  )}
+                  <TableBody>
+                    {docs.map((doc) =>
+                      renderRow({
+                        id: doc.id,
+                        label: doc.description,
+                        is_required: doc.is_required
+                      })
+                    )}
 
-                </TableBody>
+                  </TableBody>
 
-              </Table>
-            </TableContainer>
-          </Box>
-        ))}
+                </Table>
+              </TableContainer>
+            </Box>
+          ))}
+        </Box>
+
+        <Box sx={{ mt: 4, textAlign: "center" }}>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => {
+              if (!checkAllRequiredUploads()) return;
+
+              setSnack({
+                open: true,
+                severity: "success",
+                message: "All required documents uploaded successfully.",
+              });
+
+              // example redirect
+              window.location.href = "/applicant_dashboard";
+            }}
+            sx={{
+
+              fontWeight: "bold",
+              padding: "12px 40px",
+              fontSize: "18px",
+            }}
+          >
+            Submit Requirements
+          </Button>
+        </Box>
+
       </Box>
-
-    </Box>
-  );
+      );
 };
 
-export default RequirementUploader;
+      export default RequirementUploader;

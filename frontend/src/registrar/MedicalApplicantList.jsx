@@ -118,29 +118,125 @@ const MedicalApplicantList = () => {
     const firstLine = words.slice(0, middle).join(" ");
     const secondLine = words.slice(middle).join(" ");
 
-    const documentOptions = [
-        { label: 'PSA Birth Certificate', key: 'BirthCertificate' },
-        { label: 'Form 138 (4th Quarter / No failing Grades)', key: 'Form138' },
-        { label: 'Certificate of Good Moral Character', key: 'GoodMoralCharacter' },
-        { label: 'Certificate Belonging to Graduating Class', key: 'CertificateOfGraduatingClass' },
-        { label: 'Copy of Vaccine Card (1st and 2nd Dose)', key: 'VaccineCard' }
-    ];
-
 
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const queryPersonId = (queryParams.get("person_id") || "").trim();
 
-    const handleRowClick = (person_id) => {
-        if (!person_id) return;
+    const handleRowClick = (person) => {
+        if (!person) return;
 
-        sessionStorage.setItem("admin_edit_person_id", String(person_id));
-        sessionStorage.setItem("admin_edit_person_id_source", "applicant_list");
-        sessionStorage.setItem("admin_edit_person_id_ts", String(Date.now()));
+        sessionStorage.setItem("edit_person_id", person.person_id || "");
+        sessionStorage.setItem("edit_student_number", person.student_number || "");
 
-        // ✅ Always pass person_id in the URL
-        navigate(`/medical_dashboard1?person_id=${person_id}`);
+        navigate(
+            person.person_id
+                ? `/medical_dashboard1?person_id=${person.person_id}`
+                : `/medical_dashboard1?student_number=${person.student_number}`
+        );
     };
+
+
+
+    const [userID, setUserID] = useState("");
+    useEffect(() => {
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const loggedInPersonId = localStorage.getItem("person_id");
+
+        if (!storedUser || !storedRole || !loggedInPersonId) {
+            window.location.href = "/login";
+            return;
+        }
+
+        setUser(storedUser);
+        setUserRole(storedRole);
+
+        const allowedRoles = ["registrar", "applicant", "superadmin"];
+        if (!allowedRoles.includes(storedRole)) {
+            window.location.href = "/login";
+            return;
+        }
+
+        const lastSelected = sessionStorage.getItem("admin_edit_person_id");
+
+        // ⭐ CASE 1: URL HAS ?person_id=
+        if (queryPersonId !== "") {
+            sessionStorage.setItem("admin_edit_person_id", queryPersonId);
+            setUserID(queryPersonId);
+            return;
+        }
+
+
+
+        // ⭐ CASE 3: No URL ID and no last selected → start blank
+        setUserID("");
+    }, [queryPersonId]);
+
+
+
+
+    useEffect(() => {
+        let consumedFlag = false;
+
+        const tryLoad = async () => {
+            if (queryPersonId) {
+                await fetchByPersonId(queryPersonId);
+                setExplicitSelection(true);
+                consumedFlag = true;
+                return;
+            }
+
+            // fallback only if it's a fresh selection from Applicant List
+            const source = sessionStorage.getItem("admin_edit_person_id_source");
+            const tsStr = sessionStorage.getItem("admin_edit_person_id_ts");
+            const id = sessionStorage.getItem("admin_edit_person_id");
+            const ts = tsStr ? parseInt(tsStr, 10) : 0;
+            const isFresh = source === "medical_applicant_list" && Date.now() - ts < 5 * 60 * 1000;
+
+            if (id && isFresh) {
+                await fetchByPersonId(id);
+                setExplicitSelection(true);
+                consumedFlag = true;
+            }
+        };
+
+        tryLoad().finally(() => {
+            // consume the freshness so it won't auto-load again later
+            if (consumedFlag) {
+                sessionStorage.removeItem("admin_edit_person_id_source");
+                sessionStorage.removeItem("admin_edit_person_id_ts");
+            }
+        });
+    }, [queryPersonId]);
+
+
+
+
+    // Fetch person by ID (when navigating with ?person_id=... or sessionStorage)
+    useEffect(() => {
+        const fetchPersonById = async () => {
+            if (!userID) return;
+
+            try {
+                const res = await axios.get(`${API_BASE_URL}/api/person_with_applicant/${userID}`);
+                if (res.data) {
+                    setPerson(res.data);
+                    setSelectedPerson(res.data);
+                } else {
+                    console.warn("⚠️ No person found for ID:", userID);
+                }
+            } catch (err) {
+                console.error("❌ Failed to fetch person by ID:", err);
+            }
+        };
+
+        fetchPersonById();
+    }, [userID]);
+
+
+
+
 
     const tabs1 = [
         { label: "Medical Applicant List", to: "/medical_applicant_list", icon: <ListAltIcon /> },
@@ -158,14 +254,24 @@ const MedicalApplicantList = () => {
 
     const handleStepClick = (index, to) => {
         setActiveStep(index);
-        const pid = sessionStorage.getItem("admin_edit_person_id");
+        const pid = sessionStorage.getItem("edit_person_id");
+        const sn = sessionStorage.getItem("edit_student_number");
 
-        if (pid && to !== "/medical_applicant_list") {
+        if (pid) {
             navigate(`${to}?person_id=${pid}`);
+        } else if (sn) {
+            navigate(`${to}?student_number=${sn}`);
         } else {
-            navigate(to);
+            navigate(to); // no id → open without query
         }
     };
+
+
+    useEffect(() => {
+        if (location.search.includes("person_id")) {
+            navigate("/medical_applicant_list", { replace: true });
+        }
+    }, [location, navigate]);
 
 
     const [hasAccess, setHasAccess] = useState(null);
@@ -173,6 +279,37 @@ const MedicalApplicantList = () => {
     const pageId = 24;
 
     const [employeeID, setEmployeeID] = useState("");
+
+
+    const [user, setUser] = useState("");
+    const [userRole, setUserRole] = useState("");
+    const [adminData, setAdminData] = useState({ dprtmnt_id: "" });
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const loggedInPersonId = localStorage.getItem("person_id");
+        const searchedPersonId = sessionStorage.getItem("admin_edit_person_id");
+
+        if (!storedUser || !storedRole || !loggedInPersonId) {
+            window.location.href = "/login";
+            return;
+        }
+
+        setUser(storedUser);
+        setUserRole(storedRole);
+
+        const allowedRoles = ["registrar", "applicant", "superadmin"];
+        if (allowedRoles.includes(storedRole)) {
+            const targetId = queryPersonId || searchedPersonId || loggedInPersonId;
+            sessionStorage.setItem("admin_edit_person_id", targetId);
+            setUserID(targetId);
+            return;
+        }
+
+        window.location.href = "/login";
+    }, [queryPersonId]);
+
 
     useEffect(() => {
 
@@ -218,45 +355,11 @@ const MedicalApplicantList = () => {
     };
 
 
-    useEffect(() => {
-        if (location.search.includes("person_id")) {
-            navigate("/medical_applicant_list", { replace: true });
-        }
-    }, [location, navigate]);
 
     const [persons, setPersons] = useState([]);
 
     const [selectedPerson, setSelectedPerson] = useState(null);
     const [assignedNumber, setAssignedNumber] = useState('');
-    const [userID, setUserID] = useState("");
-    const [user, setUser] = useState("");
-    const [userRole, setUserRole] = useState("");
-    const [adminData, setAdminData] = useState({ dprtmnt_id: "" });
-
-    useEffect(() => {
-        const storedUser = localStorage.getItem("email");
-        const storedRole = localStorage.getItem("role");
-        const loggedInPersonId = localStorage.getItem("person_id");
-        const searchedPersonId = sessionStorage.getItem("admin_edit_person_id");
-
-        if (!storedUser || !storedRole || !loggedInPersonId) {
-            window.location.href = "/login";
-            return;
-        }
-
-        setUser(storedUser);
-        setUserRole(storedRole);
-
-        const allowedRoles = ["registrar", "applicant", "superadmin"];
-        if (allowedRoles.includes(storedRole)) {
-            const targetId = queryPersonId || searchedPersonId || loggedInPersonId;
-            sessionStorage.setItem("admin_edit_person_id", targetId);
-            setUserID(targetId);
-            return;
-        }
-
-        window.location.href = "/login";
-    }, [queryPersonId]);
 
     const fetchPersonData = async () => {
         try {
@@ -930,7 +1033,10 @@ const MedicalApplicantList = () => {
                             cursor: "pointer",
                             borderRadius: 2,
                             border: `2px solid ${borderColor}`,
-                            backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
+                            backgroundColor:
+                                activeStep === index
+                                    ? settings?.header_color || "#1976d2"
+                                    : "#E8C999",
                             color: activeStep === index ? "#fff" : "#000",
                             boxShadow:
                                 activeStep === index
@@ -941,11 +1047,18 @@ const MedicalApplicantList = () => {
                                 backgroundColor: activeStep === index ? "#000000" : "#f5d98f",
                             },
                         }}
-
                     >
-                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                        <Box
+                            sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                            }}
+                        >
                             <Box sx={{ fontSize: 40, mb: 1 }}>{tab.icon}</Box>
-                            <Typography sx={{ fontSize: 14, fontWeight: "bold", textAlign: "center" }}>
+                            <Typography
+                                sx={{ fontSize: 14, fontWeight: "bold", textAlign: "center" }}
+                            >
                                 {tab.label}
                             </Typography>
                         </Box>
@@ -1484,7 +1597,7 @@ const MedicalApplicantList = () => {
                                         color: "blue",
                                         cursor: "pointer",
                                     }}
-                                    onClick={() => handleRowClick(person.person_id)}
+                                    onClick={() => handleRowClick(person)}
                                 >
                                     {person.student_number ?? "N/A"}
                                 </TableCell>
@@ -1497,7 +1610,7 @@ const MedicalApplicantList = () => {
                                         color: "blue",
                                         cursor: "pointer",
                                     }}
-                                    onClick={() => handleRowClick(person.person_id)}
+                                 onClick={() => handleRowClick(person)}
                                 >
                                     {`${person.last_name}, ${person.first_name} ${person.middle_name ?? ""} ${person.extension ?? ""}`}
                                 </TableCell>

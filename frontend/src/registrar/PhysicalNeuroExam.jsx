@@ -21,7 +21,7 @@ import {
     Alert,      // ✅ ADD
 } from "@mui/material";
 import API_BASE_URL from "../apiConfig";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import SaveIcon from '@mui/icons-material/Save';
 import { motion } from "framer-motion";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
@@ -87,8 +87,7 @@ const PhysicalNeuroExam = () => {
     const [userID, setUserID] = useState("");
     const [user, setUser] = useState("");
     const [userRole, setUserRole] = useState("");
-    const queryParams = new URLSearchParams(location.search);
-    const queryPersonId = queryParams.get("person_id")?.trim() || "";
+
     const [explicitSelection, setExplicitSelection] = useState(false);
 
 
@@ -144,41 +143,107 @@ const PhysicalNeuroExam = () => {
     };
 
 
+    const location = useLocation();
 
+    const queryParams = new URLSearchParams(location.search);
+    const queryPersonId = queryParams.get("person_id")?.trim() || "";
 
-    const [searchQuery, setSearchQuery] = useState("");
-    const [searchError, setSearchError] = useState("");
     useEffect(() => {
-        const delayDebounce = setTimeout(async () => {
-            if (searchQuery.trim() === "") return;
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const loggedInPersonId = localStorage.getItem("person_id");
+
+        if (!storedUser || !storedRole || !loggedInPersonId) {
+            window.location.href = "/login";
+            return;
+        }
+
+        setUser(storedUser);
+        setUserRole(storedRole);
+
+        const allowedRoles = ["registrar", "applicant", "superadmin"];
+        if (!allowedRoles.includes(storedRole)) {
+            window.location.href = "/login";
+            return;
+        }
+
+        const lastSelected = sessionStorage.getItem("admin_edit_person_id");
+
+        // ⭐ CASE 1: URL HAS ?person_id=
+        if (queryPersonId !== "") {
+            sessionStorage.setItem("admin_edit_person_id", queryPersonId);
+            setUserID(queryPersonId);
+            return;
+        }
+
+
+
+        // ⭐ CASE 3: No URL ID and no last selected → start blank
+        setUserID("");
+    }, [queryPersonId]);
+
+
+
+
+    useEffect(() => {
+        let consumedFlag = false;
+
+        const tryLoad = async () => {
+            if (queryPersonId) {
+                await fetchByPersonId(queryPersonId);
+                setExplicitSelection(true);
+                consumedFlag = true;
+                return;
+            }
+
+            // fallback only if it's a fresh selection from Applicant List
+            const source = sessionStorage.getItem("admin_edit_person_id_source");
+            const tsStr = sessionStorage.getItem("admin_edit_person_id_ts");
+            const id = sessionStorage.getItem("admin_edit_person_id");
+            const ts = tsStr ? parseInt(tsStr, 10) : 0;
+            const isFresh = source === "applicant_list" && Date.now() - ts < 5 * 60 * 1000;
+
+            if (id && isFresh) {
+                await fetchByPersonId(id);
+                setExplicitSelection(true);
+                consumedFlag = true;
+            }
+        };
+
+        tryLoad().finally(() => {
+            // consume the freshness so it won't auto-load again later
+            if (consumedFlag) {
+                sessionStorage.removeItem("admin_edit_person_id_source");
+                sessionStorage.removeItem("admin_edit_person_id_ts");
+            }
+        });
+    }, [queryPersonId]);
+
+
+
+
+    // Fetch person by ID (when navigating with ?person_id=... or sessionStorage)
+    useEffect(() => {
+        const fetchPersonById = async () => {
+            if (!userID) return;
 
             try {
-                const res = await axios.get(`${API_BASE_URL}/api/search-person-student`, {
-                    params: { query: searchQuery }
-                });
-
-                console.log("Search result data:", res.data);
-                setPerson(res.data);
-
-                const idToStore = res.data.person_id || res.data.id;
-                if (!idToStore) {
-                    setSearchError("Invalid search result");
-                    return;
+                const res = await axios.get(`${API_BASE_URL}/api/person_with_applicant/${userID}`);
+                if (res.data) {
+                    setPerson(res.data);
+                    setSelectedPerson(res.data);
+                } else {
+                    console.warn("⚠️ No person found for ID:", userID);
                 }
-
-                sessionStorage.setItem("admin_edit_person_id", idToStore);
-                sessionStorage.setItem("admin_edit_person_data", JSON.stringify(res.data)); // ✅ added
-                setUserID(idToStore);
-                setSearchError("");
             } catch (err) {
-                console.error("Search failed:", err);
-                setSearchError("Applicant not found");
+                console.error("❌ Failed to fetch person by ID:", err);
             }
-        }, 500);
+        };
 
-        return () => clearTimeout(delayDebounce);
-    }, [searchQuery]);
+        fetchPersonById();
+    }, [userID]);
 
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         if (!searchQuery.trim()) {
@@ -287,7 +352,7 @@ const PhysicalNeuroExam = () => {
 
 
 
-    const tabs1 = [
+    const tabs = [
         { label: "Medical Applicant List", to: "/medical_applicant_list", icon: <ListAltIcon /> },
         { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
         { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
@@ -376,10 +441,58 @@ const PhysicalNeuroExam = () => {
         { label: "Reflexes", check: "pne_reflexes_check", text: "pne_reflexes_text" },
     ];
 
-    const handleStepClick = (index, path) => {
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const personIdFromUrl = queryParams.get("person_id");
+
+        if (!personIdFromUrl) return;
+
+        // fetch info of that person
+        axios
+            .get(`${API_BASE_URL}api/person_with_applicant/${personIdFromUrl}`)
+            .then((res) => {
+                if (res.data?.student_number) {
+
+                    // AUTO-INSERT applicant_number into search bar
+                    setSearchQuery(res.data.student_number);
+
+                    // If you have a fetchUploads() or fetchExamScore() — call it
+                    if (typeof fetchUploadsByApplicantNumber === "function") {
+                        fetchUploadsByApplicantNumber(res.data.student_number);
+                    }
+
+                    if (typeof fetchApplicants === "function") {
+                        fetchApplicants();
+                    }
+                }
+            })
+            .catch((err) => console.error("Auto search failed:", err));
+    }, [location.search]);
+
+    const handleStepClick = (index, to) => {
         setActiveStep(index);
-        navigate(path);
+        const pid = sessionStorage.getItem("edit_person_id");
+        const sn = sessionStorage.getItem("edit_student_number");
+
+        if (pid) {
+            navigate(`${to}?person_id=${pid}`);
+        } else if (sn) {
+            navigate(`${to}?student_number=${sn}`);
+        } else {
+            navigate(to); // no id → open without query
+        }
     };
+
+    useEffect(() => {
+        const storedId = sessionStorage.getItem("edit_student_number");
+
+        if (storedId) {
+            setSearchQuery(storedId);
+        }
+    }, []);
+
+ 
 
     const [medicalData, setMedicalData] = useState(null);
     const [personResults, setPersonResults] = useState([]);
@@ -549,18 +662,19 @@ const PhysicalNeuroExam = () => {
                 sx={{
                     display: "flex",
                     justifyContent: "space-between",
-                    alignItems: "center",
+                    flexWrap: "nowrap", // ❌ prevent wrapping
                     width: "100%",
-                    mb: 3,
+                    mt: 2,
+
                     gap: 2,
                 }}
             >
-                {tabs1.map((tab, index) => (
+                {tabs.map((tab, index) => (
                     <Card
                         key={index}
                         onClick={() => handleStepClick(index, tab.to)}
                         sx={{
-                            flex: `1 1 ${100 / tabs1.length}%`, // evenly divide row
+                            flex: `1 1 ${100 / tabs.length}%`, // evenly divide row
                             height: 135,
                             display: "flex",
                             alignItems: "center",
@@ -568,7 +682,10 @@ const PhysicalNeuroExam = () => {
                             cursor: "pointer",
                             borderRadius: 2,
                             border: `2px solid ${borderColor}`,
-                            backgroundColor: activeStep === index ? settings?.header_color || "#1976d2" : "#E8C999",
+                            backgroundColor:
+                                activeStep === index
+                                    ? settings?.header_color || "#1976d2"
+                                    : "#E8C999",
                             color: activeStep === index ? "#fff" : "#000",
                             boxShadow:
                                 activeStep === index
@@ -576,20 +693,28 @@ const PhysicalNeuroExam = () => {
                                     : "0px 2px 6px rgba(0,0,0,0.15)",
                             transition: "0.3s ease",
                             "&:hover": {
-                                backgroundColor: activeStep === index ? "#000000" : "#f5d98f",
+                                backgroundColor: activeStep === index ? "#000" : "#f5d98f",
                             },
                         }}
-
                     >
-                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                            <Box sx={{ fontSize: 32, mb: 0.5 }}>{tab.icon}</Box>
-                            <Typography sx={{ fontSize: 13, fontWeight: "bold", textAlign: "center" }}>
+                        <Box
+                            sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                            }}
+                        >
+                            <Box sx={{ fontSize: 40, mb: 1 }}>{tab.icon}</Box>
+                            <Typography
+                                sx={{ fontSize: 14, fontWeight: "bold", textAlign: "center" }}
+                            >
                                 {tab.label}
                             </Typography>
                         </Box>
                     </Card>
                 ))}
             </Box>
+            <br />
 
             <TableContainer component={Paper} sx={{ width: '100%', }}>
                 <Table>
@@ -624,7 +749,7 @@ const PhysicalNeuroExam = () => {
                     backgroundColor: "#f1f1f1",
                     border: `2px solid ${borderColor}`,
                     padding: 4,
-                    borderRadius: 2,
+
                     boxShadow: 3,
                 }}
             >

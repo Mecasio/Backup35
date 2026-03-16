@@ -5024,39 +5024,6 @@ io.on("connection", (socket) => {
   });
 
   // Get applicant exam schedule
-  app.get("/api/exam-schedule/:applicant_number", async (req, res) => {
-    const { applicant_number } = req.params;
-
-    try {
-      const [rows] = await db.query(
-        `
-      SELECT
-        s.day_description AS date_of_exam,
-        s.start_time,
-        s.end_time,
-        s.building_description,
-        s.room_description,
-        s.proctor,
-        s.created_at AS schedule_created_at
-      FROM exam_applicants ea
-      JOIN entrance_exam_schedule s
-        ON ea.schedule_id = s.schedule_id
-      WHERE ea.applicant_id = ?
-      LIMIT 1
-    `,
-        [applicant_number],
-      );
-
-      if (rows.length === 0) {
-        return res.status(404).json({ message: "No exam schedule found" });
-      }
-
-      res.json(rows[0]);
-    } catch (err) {
-      console.error("Error fetching exam schedule:", err);
-      res.status(500).json({ error: "Database error" });
-    }
-  });
 
   // Get person by applicant_number
   app.get("/api/person-by-applicant/:applicant_number", async (req, res) => {
@@ -5261,6 +5228,8 @@ WHERE proctor LIKE ?
       res.status(500).json({ message: "Server error" });
     }
   });
+
+  
 
   // 2) PUT update (must exist)
   // 📌 Update single Qualifying/Interview scores + log notifications
@@ -5717,6 +5686,41 @@ ${process.env.DB_HOST_LOCAL}:5173/login
     }
   });
 });
+
+
+  app.get("/api/exam-schedule/:applicant_number", async (req, res) => {
+    const { applicant_number } = req.params;
+
+    try {
+      const [rows] = await db.query(
+        `
+      SELECT
+        s.day_description AS date_of_exam,
+        s.start_time,
+        s.end_time,
+        s.building_description,
+        s.room_description,
+        s.proctor,
+        s.created_at AS schedule_created_at
+      FROM exam_applicants ea
+      JOIN entrance_exam_schedule s
+        ON ea.schedule_id = s.schedule_id
+      WHERE ea.applicant_id = ?
+      LIMIT 1
+    `,
+        [applicant_number],
+      );
+
+      if (rows.length === 0) {
+        return res.status(404).json({ message: "No exam schedule found" });
+      }
+
+      res.json(rows[0]);
+    } catch (err) {
+      console.error("Error fetching exam schedule:", err);
+      res.status(500).json({ error: "Database error" });
+    }
+  });
 
 // ============================
 // GET - Day List (from schedule table)

@@ -28,7 +28,7 @@ import API_BASE_URL from "../apiConfig";
 import DescriptionIcon from "@mui/icons-material/Description";
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-const ReadmissionDashboard4 = () => {
+const MedicalDashboard4 = () => {
 
     const settings = useContext(SettingsContext);
 
@@ -74,11 +74,11 @@ const ReadmissionDashboard4 = () => {
 
     const stepsData = [
         { label: "Medical Applicant List", to: "/medical_applicant_list", icon: <ListAltIcon /> },
-    { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
-    { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
-    { label: "Medical History", to: "/medical_requirements_form", icon: <PersonIcon /> },
-    { label: "Dental Assessment", to: "/dental_assessment", icon: <DescriptionIcon /> },
-    { label: "Physical and Neurological Examination", to: "/physical_neuro_exam", icon: <SchoolIcon /> },
+        { label: "Applicant Form", to: "/medical_dashboard1", icon: <HowToRegIcon /> },
+        { label: "Submitted Documents", to: "/medical_requirements", icon: <UploadFileIcon /> }, // updated icon
+        { label: "Medical History", to: "/medical_requirements_form", icon: <PersonIcon /> },
+        { label: "Dental Assessment", to: "/dental_assessment", icon: <DescriptionIcon /> },
+        { label: "Physical and Neurological Examination", to: "/physical_neuro_exam", icon: <SchoolIcon /> },
     ];
 
     const [currentStep, setCurrentStep] = useState(1);
@@ -205,27 +205,27 @@ const ReadmissionDashboard4 = () => {
         setUserID("");
     }, [queryPersonId]);
 
-  const [studentData, setStudentData] = useState(null);
+    const [studentData, setStudentData] = useState(null);
 
-  const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(location.search);
 
-  const person_id = params.get("person_id");
-  const student_number = params.get("student_number");
+    const person_id = params.get("person_id");
+    const student_number = params.get("student_number");
 
-  useEffect(() => {
-    const fetchStudent = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/api/student-info`, {
-          params: { person_id, student_number }
-        });
-        setStudentData(res.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
+    useEffect(() => {
+        const fetchStudent = async () => {
+            try {
+                const res = await axios.get(`${API_BASE_URL}/api/student-info`, {
+                    params: { person_id, student_number }
+                });
+                setStudentData(res.data);
+            } catch (err) {
+                console.error(err);
+            }
+        };
 
-    if (person_id || student_number) fetchStudent();
-  }, [person_id, student_number]);
+        if (person_id || student_number) fetchStudent();
+    }, [person_id, student_number]);
 
 
     const [selectedPerson, setSelectedPerson] = useState(null);
@@ -365,13 +365,56 @@ const ReadmissionDashboard4 = () => {
         { label: "Other Information", icon: <InfoIcon />, path: "/medical_dashboard5" },
     ];
 
-   const handleStepClick = (index) => {
-    setActiveStep(index);
-    const newClickedSteps = [...clickedSteps];
-    newClickedSteps[index] = true;
-    setClickedSteps(newClickedSteps);
-  };
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const personIdFromUrl = queryParams.get("person_id");
 
+        if (!personIdFromUrl) return;
+
+        // fetch info of that person
+        axios
+            .get(`${API_BASE_URL}api/person_with_applicant/${personIdFromUrl}`)
+            .then((res) => {
+                if (res.data?.student_number) {
+
+                    // AUTO-INSERT applicant_number into search bar
+                    setSearchQuery(res.data.student_number);
+
+                    // If you have a fetchUploads() or fetchExamScore() — call it
+                    if (typeof fetchUploadsByApplicantNumber === "function") {
+                        fetchUploadsByApplicantNumber(res.data.student_number);
+                    }
+
+                    if (typeof fetchApplicants === "function") {
+                        fetchApplicants();
+                    }
+                }
+            })
+            .catch((err) => console.error("Auto search failed:", err));
+    }, [location.search]);
+
+    const handleStepClick = (index, to) => {
+        setActiveStep(index);
+        const pid = sessionStorage.getItem("edit_person_id");
+        const sn = sessionStorage.getItem("edit_student_number");
+
+        if (pid) {
+            navigate(`${to}?person_id=${pid}`);
+        } else if (sn) {
+            navigate(`${to}?student_number=${sn}`);
+        } else {
+            navigate(to); // no id → open without query
+        }
+    };
+
+    useEffect(() => {
+        const storedId = sessionStorage.getItem("edit_student_number");
+
+        if (storedId) {
+            setSearchQuery(storedId);
+        }
+    }, []);
+    
     const inputStyle = {
         width: "100%",
         border: "1px solid #ccc",
@@ -489,7 +532,7 @@ const ReadmissionDashboard4 = () => {
 
     // Put this at the very bottom before the return 
     if (loading || hasAccess === null) {
-       return <LoadingOverlay open={loading} message="Loading..." />;
+        return <LoadingOverlay open={loading} message="Loading..." />;
     }
 
     if (!hasAccess) {
@@ -501,7 +544,7 @@ const ReadmissionDashboard4 = () => {
 
     // dot not alter
     return (
-          <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
+        <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
             {showPrintView && (
                 <div ref={divToPrintRef} style={{ display: "block" }}>
                     <ExamPermit personId={userID} />   {/* ✅ pass the searched person_id */}
@@ -534,9 +577,9 @@ const ReadmissionDashboard4 = () => {
 
             </Box>
 
-              <hr style={{ border: "1px solid #ccc", width: "100%" }} />
-      <br />
-      <br />
+            <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+            <br />
+            <br />
 
 
 
@@ -878,11 +921,11 @@ const ReadmissionDashboard4 = () => {
                             {index < steps.length - 1 && (
                                 <Box
                                     sx={{
-                                            height: "2px",
-                    backgroundColor: mainButtonColor,
-                    flex: 1,
-                    alignSelf: "center",
-                    mx: 2,
+                                        height: "2px",
+                                        backgroundColor: mainButtonColor,
+                                        flex: 1,
+                                        alignSelf: "center",
+                                        mx: 2,
                                     }}
                                 />
                             )}
@@ -1704,4 +1747,4 @@ const ReadmissionDashboard4 = () => {
 };
 
 
-export default ReadmissionDashboard4;
+export default MedicalDashboard4;

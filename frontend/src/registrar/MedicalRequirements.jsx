@@ -124,13 +124,58 @@ const MedicalRequirements = () => {
     const [explicitSelection, setExplicitSelection] = useState(false);
 
 
+    const location = useLocation();
 
-    const handleStepClick = (index, path) => {
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const personIdFromUrl = queryParams.get("person_id");
+
+        if (!personIdFromUrl) return;
+
+        // fetch info of that person
+        axios
+            .get(`${API_BASE_URL}api/person_with_applicant/${personIdFromUrl}`)
+            .then((res) => {
+                if (res.data?.student_number) {
+
+                    // AUTO-INSERT applicant_number into search bar
+                    setSearchQuery(res.data.student_number);
+
+                    // If you have a fetchUploads() or fetchExamScore() — call it
+                    if (typeof fetchUploadsByApplicantNumber === "function") {
+                        fetchUploadsByApplicantNumber(res.data.student_number);
+                    }
+
+                    if (typeof fetchApplicants === "function") {
+                        fetchApplicants();
+                    }
+                }
+            })
+            .catch((err) => console.error("Auto search failed:", err));
+    }, [location.search]);
+
+    const handleStepClick = (index, to) => {
         setActiveStep(index);
-        navigate(path);
+        const pid = sessionStorage.getItem("edit_person_id");
+        const sn = sessionStorage.getItem("edit_student_number");
+
+        if (pid) {
+            navigate(`${to}?person_id=${pid}`);
+        } else if (sn) {
+            navigate(`${to}?student_number=${sn}`);
+        } else {
+            navigate(to); // no id → open without query
+        }
     };
 
-    const location = useLocation();
+    useEffect(() => {
+        const storedId = sessionStorage.getItem("edit_student_number");
+
+        if (storedId) {
+            setSearchQuery(storedId);
+        }
+    }, []);
+
     const [uploads, setUploads] = useState([]);
     const [persons, setPersons] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');

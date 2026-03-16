@@ -1069,7 +1069,7 @@ const Dashboard1 = (props) => {
           marginTop: "25px",
         }}
       >
-        LISTS OF ALL PRINTABLE FILES
+        AVAILABLE PRINTABLE DOCUMENTS
       </h1>
 
       {/* Cards Section */}
