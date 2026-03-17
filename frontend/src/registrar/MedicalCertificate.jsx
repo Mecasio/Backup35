@@ -53,7 +53,7 @@ const MedicalCertificate = () => {
     const [hasAccess, setHasAccess] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const pageId = 28;
+    const pageId = 130;
 
     const [employeeID, setEmployeeID] = useState("");
 
