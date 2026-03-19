@@ -101,7 +101,8 @@ router.post("/register", async (req, res) => {
     middleName,
     lastName,
     birthday,
-    academicProgram
+    academicProgram,
+    applyingAs
   } = req.body;
   const normalizedEmail = email?.trim().toLowerCase();
 
@@ -271,21 +272,24 @@ router.post("/register", async (req, res) => {
     // ⭐⭐⭐ FIX: STORE EMAIL INTO person_table.emailAddress ⭐⭐⭐
     const age = calculateAge(birthday);
 
-    const [personResult] = await db.query(
-      `INSERT INTO person_table 
-(campus, emailAddress, first_name, middle_name, last_name, birthOfDate, age, academicProgram, termsOfAgreement, current_step)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 1)`,
-      [
-        campus,
-        normalizedEmail,
-        firstName.trim(),
-        middleName?.trim() || null,
-        lastName.trim(),
-        birthday,
-        age,
-        academicProgram
-      ]
-    );
+ const [personResult] = await db.query(
+  `INSERT INTO person_table 
+(campus, emailAddress, first_name, middle_name, last_name, birthOfDate, age, academicProgram, applyingAs, termsOfAgreement, current_step)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  [
+    campus,
+    normalizedEmail,
+    firstName.trim(),
+    middleName?.trim() || null,
+    lastName.trim(),
+    birthday,
+    age,
+    academicProgram,
+    applyingAs,   // ✅ NOW MATCHES
+    0,            // termsOfAgreement
+    1             // current_step
+  ]
+);
 
     person_id = personResult.insertId;
 
@@ -873,6 +877,7 @@ router.post("/login_applicant", async (req, res) => {
       birthday: user.birthOfDate,
       birthOfDate: user.birthOfDate,
       academicProgram: user.academicProgram,
+      applyingAs: user.applyingAs,
       role: user.role,
       person_id: user.person_id,
       applicant_number: applicantNumber,

@@ -122,11 +122,11 @@ const ApplicantDashboard = (props) => {
   }, []);
 
   const [openAgreementModal, setOpenAgreementModal] = useState(true);
-const [agreeChecked, setAgreeChecked] = useState(false);
+  const [agreeChecked, setAgreeChecked] = useState(false);
 
-useEffect(() => {
-  setOpenAgreementModal(true);
-}, []);
+  useEffect(() => {
+    setOpenAgreementModal(true);
+  }, []);
 
   const [medicalUploads, setMedicalUploads] = useState([]);
 
@@ -1654,64 +1654,67 @@ useEffect(() => {
 
           </Box>
 
-<Dialog
-  open={openAgreementModal}
-  disableEscapeKeyDown
-  maxWidth="sm"
-  fullWidth
->
-  <DialogTitle sx={{ fontWeight: "bold", textAlign: "center" }}>
-    ⚠️ Important Notice Before Proceeding
-  </DialogTitle>
+          <Dialog
+            open={openAgreementModal}
+            disableEscapeKeyDown
+            maxWidth="sm"
+            fullWidth
+          >
+            <DialogTitle sx={{ fontWeight: "bold", textAlign: "center" }}>
+              ⚠️ Important Notice Before Proceeding
+            </DialogTitle>
 
-  <DialogContent>
-    <Typography sx={{ mt: 2, textAlign: "justify", fontSize: "15px" }}>
-      Welcome to the <strong>{companyName}</strong> Applicant Dashboard.
-    </Typography>
+            <DialogContent>
+              <Typography sx={{ mt: 2, textAlign: "justify", fontSize: "15px" }}>
+                Welcome to the <strong>{companyName}</strong> Applicant Dashboard.
+              </Typography>
 
-    <Typography sx={{ mt: 2, textAlign: "justify", fontSize: "15px" }}>
-      Before continuing, please make sure that you will:
-    </Typography>
+              <Typography sx={{ mt: 2, textAlign: "justify", fontSize: "15px" }}>
+                Before continuing, please make sure that you will:
+              </Typography>
 
-    <Box sx={{ mt: 2, pl: 2 }}>
-      <Typography>• Fill up all required personal information.</Typography>
-      <Typography>• Upload your 2 by 2 Formal Picture.</Typography>
-      <Typography>• Upload all required online documents.</Typography>
-      <Typography>• Ensure that the information you provide is accurate and correct.</Typography>
-      <Typography>• Regularly check your Applicant Dashboard for updates.</Typography>
-    </Box>
+              <Box sx={{ mt: 2, pl: 2 }}>
+                <Typography>• Fill out all required personal information.</Typography>
+                <Typography>
+                  • Fields marked with <span style={{ color: "red" }}>*</span> (Asterisk) are required to fill up
+                </Typography>
+                <Typography>• Upload your 2 by 2 Formal Picture.</Typography>
+                <Typography>• Upload All Main Required Online Documents.</Typography>
+                <Typography>• Ensure that the information you provide is accurate and correct.</Typography>
+                <Typography>• Regularly check your Applicant Dashboard for updates.</Typography>
+              </Box>
 
-    <Typography sx={{ mt: 2, textAlign: "justify", fontSize: "15px" }}>
-      Failure to complete the required information or document uploads may delay the evaluation of your application.
-    </Typography>
+              <Typography sx={{ mt: 2, textAlign: "justify", fontSize: "15px" }}>
+                Failure to complete the required information or document uploads may delay the evaluation of your application.
+              </Typography>
 
-    <FormControlLabel
-      sx={{ mt: 3 }}
-      control={
-        <Checkbox
-          checked={agreeChecked}
-          onChange={(e) => setAgreeChecked(e.target.checked)}
-        />
-      }
-      label="I confirm that I will complete all required information and upload all required documents."
-    />
-  </DialogContent>
+              <FormControlLabel
+                sx={{ mt: 3 }}
+                control={
+                  <Checkbox
+                    checked={agreeChecked}
+                    onChange={(e) => setAgreeChecked(e.target.checked)}
+                  />
+                }
+                label="I confirm that I will complete all required information and upload all required documents."
+              />
+            </DialogContent>
 
-  <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
-    <Button
-      variant="contained"
-      disabled={!agreeChecked}
-      onClick={() => setOpenAgreementModal(false)}
-      sx={{
-        fontWeight: "bold",
-        textTransform: "none",
-        minWidth: "150px",
-      }}
-    >
-      I Agree & Continue
-    </Button>
-  </DialogActions>
-</Dialog>
+            <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+              <Button
+                variant="contained"
+                disabled={!agreeChecked}
+                onClick={() => setOpenAgreementModal(false)}
+                sx={{
+                  fontWeight: "bold",
+                  textTransform: "none",
+                  minWidth: "150px",
+                }}
+              >
+                I Agree & Continue
+              </Button>
+            </DialogActions>
+          </Dialog>
 
 
 

@@ -655,7 +655,7 @@ const Dashboard3 = (props) => {
               {/* Educational Attainment */}
               <Box sx={{ flex: "1" }}>
                 <Typography variant="subtitle1" mb={1} sx={{ minHeight: "32px" }}>
-                  Educational Attainment
+                  Educational Attainment<span style={{color: "red"}}> *</span>
                 </Typography>
 
                 <FormControl fullWidth size="small" required error={!!errors.schoolLevel}>
@@ -686,7 +686,7 @@ const Dashboard3 = (props) => {
               {/* School Last Attended */}
               <Box sx={{ flex: "1" }}>
                 <Typography variant="subtitle1" mb={1} sx={{ minHeight: "32px" }}>
-                  School Last Attended
+                  School Last Attended<span style={{color: "red"}}> *</span>
                 </Typography>
 
                 <TextField
@@ -712,7 +712,7 @@ const Dashboard3 = (props) => {
                   mb={1}
                   sx={{ minHeight: "32px", fontSize: "12.5px" }}
                 >
-                  School Full Address (Street / BRGY / City)
+                  School Full Address (Street / BRGY / City)<span style={{color: "red"}}> *</span>
                 </Typography>
 
                 <TextField
@@ -759,7 +759,7 @@ const Dashboard3 = (props) => {
             >
               <Box sx={{ flex: "1 1 33%" }}>
                 <Typography variant="subtitle1" mb={1}>
-                  Recognition / Awards
+                  Recognition / Awards<span style={{color: "red"}}> *</span>
                 </Typography>
                 <TextField
                   fullWidth
@@ -767,7 +767,7 @@ const Dashboard3 = (props) => {
                   name="honor"
                   required
                   value={person.honor || ""}
-                  placeholder="Enter your Honor"
+                  placeholder="Enter your Recognition / Awards"
                   onChange={handleChange}
                   onBlur={() => handleUpdate(person)}
 
@@ -778,7 +778,7 @@ const Dashboard3 = (props) => {
 
               <Box sx={{ flex: "1 1 33%" }}>
                 <Typography variant="subtitle1" mb={1}>
-                  General Average
+                  General Average<span style={{color: "red"}}> *</span>
                 </Typography>
                 <TextField
                   fullWidth
@@ -804,7 +804,7 @@ const Dashboard3 = (props) => {
 
               <Box sx={{ flex: "1 1 33%" }}>
                 <Typography variant="subtitle1" mb={1}>
-                  Year Graduated
+                  Year Graduated<span style={{color: "red"}}> *</span>
                 </Typography>
                 <TextField
                   fullWidth

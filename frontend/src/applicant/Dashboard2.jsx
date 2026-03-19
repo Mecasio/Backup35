@@ -858,7 +858,7 @@ const Dashboard2 = (props) => {
                 <>
                   <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
                     <Box sx={{ flex: 1 }}>
-                      <Typography variant="subtitle2" mb={1}>Father Family Name</Typography>
+                      <Typography variant="subtitle2" mb={1}>Father Family Name<span style={{color: "red"}}> *</span></Typography>
                       <TextField
                         fullWidth
                         size="small"
@@ -872,7 +872,7 @@ const Dashboard2 = (props) => {
                       />
                     </Box>
                     <Box sx={{ flex: 1 }}>
-                      <Typography variant="subtitle2" mb={1}>Father Given Name</Typography>
+                      <Typography variant="subtitle2" mb={1}>Father Given Name<span style={{color: "red"}}> *</span></Typography>
                       <TextField
                         fullWidth
                         size="small"
@@ -984,7 +984,7 @@ const Dashboard2 = (props) => {
                   {person.father_education !== 1 && (
                     <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap' }}>
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="subtitle2" mb={1}> Educational Attainment</Typography>
+                        <Typography variant="subtitle2" mb={1}> Educational Attainment<span style={{color: "red"}}> *</span></Typography>
                         <TextField
                           fullWidth
                           size="small"
@@ -999,7 +999,7 @@ const Dashboard2 = (props) => {
                       </Box>
 
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="subtitle2" mb={1}>Father Last School</Typography>
+                        <Typography variant="subtitle2" mb={1}>Father Last School<span style={{color: "red"}}> *</span></Typography>
                         <TextField
                           fullWidth
                           size="small"
@@ -1014,7 +1014,7 @@ const Dashboard2 = (props) => {
                       </Box>
 
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="subtitle2" mb={1}>Father Course</Typography>
+                        <Typography variant="subtitle2" mb={1}>Father Course<span style={{color: "red"}}> *</span></Typography>
                         <TextField
                           fullWidth
                           size="small"
@@ -1029,7 +1029,7 @@ const Dashboard2 = (props) => {
                       </Box>
 
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="subtitle2" mb={1}>Father Year Graduated</Typography>
+                        <Typography variant="subtitle2" mb={1}>Father Year Graduated<span style={{color: "red"}}> *</span></Typography>
                         <TextField
                           fullWidth
                           size="small"
@@ -1055,7 +1055,7 @@ const Dashboard2 = (props) => {
                             textOverflow: "ellipsis" // 👉 adds "..."
                           }}
                         >
-                          School Full Address (St/ Brgy / City)
+                          School Full Address (St/ Brgy / City)<span style={{color: "red"}}> *</span>
                         </Typography>
                         <TextField
                           fullWidth
@@ -1083,7 +1083,7 @@ const Dashboard2 = (props) => {
 
                     {/* Father Contact */}
                     <Box flex={1} display="flex" flexDirection="column">
-                      <Typography variant="subtitle2" mb={0.5}>Father Contact</Typography>
+                      <Typography variant="subtitle2" mb={0.5}>Father Contact<span style={{color: "red"}}> *</span></Typography>
 
                       <TextField
                         fullWidth
@@ -1113,7 +1113,7 @@ const Dashboard2 = (props) => {
 
                     {/* Father Occupation */}
                     <Box flex={1}>
-                      <Typography variant="subtitle2" mb={0.5}>Father Occupation</Typography>
+                      <Typography variant="subtitle2" mb={0.5}>Father Occupation<span style={{color: "red"}}> *</span></Typography>
                       <TextField
                         fullWidth
                         size="small"
@@ -1130,7 +1130,7 @@ const Dashboard2 = (props) => {
 
                     {/* Father Employer */}
                     <Box flex={1}>
-                      <Typography variant="subtitle2" mb={0.5}>Father Employer</Typography>
+                      <Typography variant="subtitle2" mb={0.5}>Father Employer<span style={{color: "red"}}> *</span></Typography>
                       <TextField
                         fullWidth
                         size="small"
@@ -1147,7 +1147,7 @@ const Dashboard2 = (props) => {
 
                     {/* Father Income */}
                     <Box flex={1}>
-                      <Typography variant="subtitle2" mb={0.5}>Father Income</Typography>
+                      <Typography variant="subtitle2" mb={0.5}>Father Income<span style={{color: "red"}}> *</span></Typography>
 
                       <TextField
                         fullWidth
@@ -1177,7 +1177,7 @@ const Dashboard2 = (props) => {
                   </Box>
 
                   <Box flex={1}>
-                    <Typography variant="subtitle2" mb={0.5}>Father Email Address</Typography>
+                    <Typography variant="subtitle2" mb={0.5}>Father Email Address<span style={{color: "red"}}> *</span></Typography>
                     <TextField
                       fullWidth
                       size="small"
@@ -1246,7 +1246,7 @@ const Dashboard2 = (props) => {
                 <>
                   <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
                     <Box sx={{ flex: 1 }}>
-                      <Typography variant="subtitle2" mb={1}>Mother Family Name</Typography>
+                      <Typography variant="subtitle2" mb={1}>Mother Family Name<span style={{color: "red"}}> *</span></Typography>
                       <TextField
                         fullWidth
                         size="small"
@@ -1262,7 +1262,7 @@ const Dashboard2 = (props) => {
                     </Box>
 
                     <Box sx={{ flex: 1 }}>
-                      <Typography variant="subtitle2" mb={1}>Mother First Name</Typography>
+                      <Typography variant="subtitle2" mb={1}>Mother First Name<span style={{color: "red"}}> *</span></Typography>
                       <TextField
                         fullWidth
                         size="small"
@@ -1278,7 +1278,7 @@ const Dashboard2 = (props) => {
                     </Box>
 
                     <Box sx={{ flex: 1 }}>
-                      <Typography variant="subtitle2" mb={1}>Mother Middle Name</Typography>
+                      <Typography variant="subtitle2" mb={1}>Mother Middle Name<span style={{color: "red"}}> *</span></Typography>
                       <TextField
                         fullWidth
                         size="small"
@@ -1378,7 +1378,7 @@ const Dashboard2 = (props) => {
                   {person.mother_education !== 1 && (
                     <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'nowrap' }}>
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="subtitle2" mb={1}>Educational Attainment</Typography>
+                        <Typography variant="subtitle2" mb={1}>Educational Attainment<span style={{color: "red"}}> *</span></Typography>
                         <TextField
                           fullWidth
                           size="small"
@@ -1393,7 +1393,7 @@ const Dashboard2 = (props) => {
                       </Box>
 
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="subtitle2" mb={1}>Mother Last School</Typography>
+                        <Typography variant="subtitle2" mb={1}>Mother Last School<span style={{color: "red"}}> *</span></Typography>
                         <TextField
                           fullWidth
                           size="small"
@@ -1408,7 +1408,7 @@ const Dashboard2 = (props) => {
                       </Box>
 
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="subtitle2" mb={1}>Mother Course</Typography>
+                        <Typography variant="subtitle2" mb={1}>Mother Course<span style={{color: "red"}}> *</span></Typography>
                         <TextField
                           fullWidth
                           size="small"
@@ -1423,7 +1423,7 @@ const Dashboard2 = (props) => {
                       </Box>
 
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="subtitle2" mb={1}>Mother Year Graduated</Typography>
+                        <Typography variant="subtitle2" mb={1}>Mother Year Graduated<span style={{color: "red"}}> *</span></Typography>
                         <TextField
                           fullWidth
                           size="small"
@@ -1449,7 +1449,7 @@ const Dashboard2 = (props) => {
                             textOverflow: "ellipsis" // 👉 adds "..."
                           }}
                         >
-                          School Full Address (St/ Brgy / City)
+                          School Full Address (St/ Brgy / City)<span style={{color: "red"}}> *</span>
                         </Typography>
 
                         <TextField
@@ -1478,7 +1478,7 @@ const Dashboard2 = (props) => {
 
                     {/* Mother Contact */}
                     <Box flex={1} display="flex" flexDirection="column">
-                      <Typography variant="subtitle2" mb={0.5}>Mother Contact</Typography>
+                      <Typography variant="subtitle2" mb={0.5}>Mother Contact<span style={{color: "red"}}> *</span></Typography>
 
                       <TextField
                         fullWidth
@@ -1508,7 +1508,7 @@ const Dashboard2 = (props) => {
 
                     {/* Mother Occupation */}
                     <Box flex={1}>
-                      <Typography variant="subtitle2" mb={0.5}>Mother Occupation</Typography>
+                      <Typography variant="subtitle2" mb={0.5}>Mother Occupation<span style={{color: "red"}}> *</span></Typography>
                       <TextField
                         fullWidth
                         size="small"
@@ -1525,7 +1525,7 @@ const Dashboard2 = (props) => {
 
                     {/* Mother Employer */}
                     <Box flex={1}>
-                      <Typography variant="subtitle2" mb={0.5}>Mother Employer</Typography>
+                      <Typography variant="subtitle2" mb={0.5}>Mother Employer<span style={{color: "red"}}> *</span></Typography>
                       <TextField
                         fullWidth
                         size="small"
@@ -1542,7 +1542,7 @@ const Dashboard2 = (props) => {
 
                     {/* Mother Income */}
                     <Box flex={1}>
-                      <Typography variant="subtitle2" mb={0.5}>Mother Income</Typography>
+                      <Typography variant="subtitle2" mb={0.5}>Mother Income<span style={{color: "red"}}> *</span></Typography>
 
                       <TextField
                         fullWidth
@@ -1613,7 +1613,7 @@ const Dashboard2 = (props) => {
             <br />
 
             <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle2" mb={1}>Guardian</Typography>
+              <Typography variant="subtitle2" mb={1}>Guardian<span style={{color: "red"}}> *</span></Typography>
               <FormControl style={{ marginBottom: "10px", width: "200px" }} size="small" required error={!!errors.guardian}>
                 <InputLabel id="guardian-label">Guardian</InputLabel>
                 <Select
@@ -1652,7 +1652,7 @@ const Dashboard2 = (props) => {
             <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'nowrap' }}>
               {/* Guardian Family Name */}
               <Box sx={{ flex: 1 }}>
-                <Typography variant="subtitle2" mb={1}>Guardian Family Name</Typography>
+                <Typography variant="subtitle2" mb={1}>Guardian Family Name<span style={{color: "red"}}> *</span></Typography>
                 <TextField
                   fullWidth
                   size="small"
@@ -1669,7 +1669,7 @@ const Dashboard2 = (props) => {
 
               {/* Guardian First Name */}
               <Box sx={{ flex: 1 }}>
-                <Typography variant="subtitle2" mb={1}>Guardian First Name</Typography>
+                <Typography variant="subtitle2" mb={1}>Guardian First Name<span style={{color: "red"}}> *</span></Typography>
                 <TextField
                   fullWidth
                   size="small"
@@ -1753,7 +1753,7 @@ const Dashboard2 = (props) => {
             <br />
 
             <Box sx={{ width: '100%', mb: 2 }}>
-              <Typography variant="subtitle2" mb={1}>Guardian Address</Typography>
+              <Typography variant="subtitle2" mb={1}>Guardian Address<span style={{color: "red"}}> *</span></Typography>
               <TextField
                 fullWidth
                 size="small"
@@ -1772,7 +1772,7 @@ const Dashboard2 = (props) => {
 
               {/* Guardian Contact */}
               <Box flex={1} display="flex" flexDirection="column">
-                <Typography variant="subtitle2" mb={0.5}>Guardian Contact</Typography>
+                <Typography variant="subtitle2" mb={0.5}>Guardian Contact<span style={{color: "red"}}> *</span></Typography>
 
                 <TextField
                   fullWidth
@@ -1844,7 +1844,7 @@ const Dashboard2 = (props) => {
 
             {/* Annual Income */}
             <Box sx={{ width: '100%', mb: 2 }}>
-              <Typography variant="subtitle2" mb={1}>Annual Income</Typography>
+              <Typography variant="subtitle2" mb={1}>Annual Income<span style={{color: "red"}}> *</span></Typography>
               <FormControl fullWidth size="small" required error={!!errors.annual_income}>
                 <InputLabel id="annual-income-label">Annual Income</InputLabel>
                 <Select

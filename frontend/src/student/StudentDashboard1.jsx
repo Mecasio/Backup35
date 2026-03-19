@@ -324,10 +324,10 @@ const StudentDashboard1 = () => {
   const isReadOnly = userRole === "student";
   const readOnlySx = isReadOnly
     ? {
-        "& input, & textarea": { pointerEvents: "none" },
-        "& .MuiSelect-select": { pointerEvents: "none" },
-        "& .MuiCheckbox-root": { pointerEvents: "none" },
-      }
+      "& input, & textarea": { pointerEvents: "none" },
+      "& .MuiSelect-select": { pointerEvents: "none" },
+      "& .MuiCheckbox-root": { pointerEvents: "none" },
+    }
     : {};
 
   const steps = [
@@ -1394,28 +1394,28 @@ const StudentDashboard1 = () => {
                   <MenuItem value="">
                     <em>Select Applying</em>
                   </MenuItem>
-                  <MenuItem value="Senior High School Graduate">
+                  <MenuItem value="0">
                     Senior High School Graduate
                   </MenuItem>
-                  <MenuItem value="Senior High School Graduating Student">
+                  <MenuItem value="1">
                     Senior High School Graduating Student
                   </MenuItem>
-                  <MenuItem value="ALS Passer">
+                  <MenuItem value="2">
                     ALS (Alternative Learning System) Passer
                   </MenuItem>
-                  <MenuItem value="Transferee">
+                  <MenuItem value="3">
                     Transferee from other University/College
                   </MenuItem>
-                  <MenuItem value="Cross Enrolee">
+                  <MenuItem value="4">
                     Cross Enrolee Student
                   </MenuItem>
-                  <MenuItem value="Foreign Applicant">
+                  <MenuItem value="5">
                     Foreign Applicant/Student
                   </MenuItem>
-                  <MenuItem value="Baccalaureate Graduate">
+                  <MenuItem value="6">
                     Baccalaureate Graduate
                   </MenuItem>
-                  <MenuItem value="Master Degree Graduate">
+                  <MenuItem value="7">
                     Master Degree Graduate
                   </MenuItem>
                 </Select>
@@ -1471,15 +1471,13 @@ const StudentDashboard1 = () => {
                         </MenuItem>
                         {filteredCurriculum.map((item, index) => (
                           <MenuItem key={index} value={item.curriculum_id}>
-                            {`(${item.program_code}): ${item.program_description}${
-                              item.major ? ` (${item.major})` : ""
-                            } (${
-                              Number(item.components) === 1
+                            {`(${item.program_code}): ${item.program_description}${item.major ? ` (${item.major})` : ""
+                              } (${Number(item.components) === 1
                                 ? "Manila Campus"
                                 : Number(item.components) === 2
                                   ? "Cavite Campus"
                                   : "—"
-                            })`}
+                              })`}
                           </MenuItem>
                         ))}
                       </Select>
@@ -3133,7 +3131,7 @@ const StudentDashboard1 = () => {
                   </Box>
 
                   {/* Preview Image */}
-                  {preview && (
+                  {(preview || person.profile_img) && (
                     <Box
                       sx={{
                         display: "flex",
@@ -3144,7 +3142,11 @@ const StudentDashboard1 = () => {
                     >
                       <Box
                         component="img"
-                        src={preview}
+                        src={
+                          preview
+                            ? preview
+                            : `${API_BASE_URL}/uploads/Applicant1by1/${person.profile_img}`
+                        }
                         alt="Preview"
                         sx={{
                           width: "192px",
@@ -3154,11 +3156,19 @@ const StudentDashboard1 = () => {
                           borderRadius: 2,
                         }}
                       />
+
+                      {/* ❌ REMOVE BUTTON */}
                       <Button
                         size="small"
                         onClick={() => {
                           setSelectedFile(null);
                           setPreview(null);
+
+                          // ✅ IMPORTANT: remove existing image
+                          setPerson((prev) => ({
+                            ...prev,
+                            profile_img: "",
+                          }));
                         }}
                         sx={{
                           position: "absolute",

@@ -39,7 +39,7 @@ const allowedOrigins = [
   "http://192.168.50.211:5173",
   "http://136.239.248.62:5173",
   "http://192.168.50.44:5173",
-  "http://192.168.0.180:5173",
+  "http://192.168.50.71:5173",
 ];
 
 app.use(
@@ -1983,7 +1983,7 @@ app.get("/api/medical-applicants", async (req, res) => {
 app.get("/api/all-applicants", async (req, res) => {
   try {
     const [rows] = await db.execute(`
-      SELECT
+      SELECT DISTINCT
         snt.student_number,
         p.person_id,
         p.last_name,
@@ -2121,7 +2121,7 @@ app.get("/api/verified-ecat-applicants", async (req, res) => {
 
     const totalMain = categoryCount[0].count;
 
-    const [rows] = await db.execute(
+    const [rows] = await db.execute(                                                                                                                                                                           
       `
       SELECT
         p.person_id,

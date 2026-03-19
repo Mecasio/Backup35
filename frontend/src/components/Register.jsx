@@ -96,13 +96,14 @@ const Register = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [academicProgram, setAcademicProgram] = useState("");
+  const [applyingAs, setApplyingAs] = useState("");
 
   const handleRegister = async () => {
     if (isSubmitting) return;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!lastName || !firstName || !middleName || !birthday || !academicProgram) {
+    if (!lastName || !firstName || !middleName || !birthday || !academicProgram || !applyingAs) {
 
       setSnack({
         open: true,
@@ -212,6 +213,7 @@ const Register = () => {
         middleName,
         birthday,
         academicProgram,
+        applyingAs,
         otp,
       });
 
@@ -361,6 +363,7 @@ const Register = () => {
                 <input
                   type="text"
                   placeholder="Enter your last name"
+                  required
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value.toUpperCase())}
                   onKeyDown={handleKeyDownRegister}
@@ -384,6 +387,7 @@ const Register = () => {
                 <label>First Name</label>
                 <input
                   type="text"
+                  required
                   placeholder="Enter your first name"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value.toUpperCase())}
@@ -432,6 +436,7 @@ const Register = () => {
                 <label>Birthday</label>
                 <input
                   type="date"
+                  required
                   value={birthday}
                   onChange={(e) => setBirthday(e.target.value)}
                   onKeyDown={handleKeyDownRegister}
@@ -454,6 +459,7 @@ const Register = () => {
               <div className="TextField" style={{ position: "relative" }}>
                 <label>Academic Program</label>
                 <select
+                required
                   value={academicProgram}
                   onChange={(e) => setAcademicProgram(e.target.value)}
                   className="border"
@@ -473,8 +479,37 @@ const Register = () => {
 
 
               <div className="TextField" style={{ position: "relative" }}>
+                <label>Applying As</label>
+                <select
+                required
+                  value={applyingAs}
+                  onChange={(e) => setApplyingAs(e.target.value)}
+                  className="border"
+                  style={{
+                    paddingLeft: "1rem",
+                    height: "45px",
+                    border: `2px solid ${borderColor}`,
+                    width: "100%",
+                  }}
+                >
+                  <option value="">Select Applying</option>
+                  <option value="1">Senior High School Graduate</option>
+                  <option value="2">Senior High School Graduating Student</option>
+                  <option value="3">ALS (Alternative Learning System) Passer</option>
+                  <option value="4">Transferee from other University/College</option>
+                  <option value="5">Cross Enrolee Student</option>
+                  <option value="6">Foreign Applicant/Student</option>
+                  <option value="7">Baccalaureate Graduate</option>
+                  <option value="8">Master Degree Graduate</option>
+                </select>
+              </div>
+
+
+
+              <div className="TextField" style={{ position: "relative" }}>
                 <label htmlFor="email">Email Address</label>
                 <input
+                required
                   type="email"
                   className="border"
                   id="email"

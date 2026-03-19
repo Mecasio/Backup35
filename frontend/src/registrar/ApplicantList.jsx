@@ -434,13 +434,7 @@ const ApplicantList = () => {
     }
   };
 
-  useEffect(() => {
-    // Replace this with your actual API endpoint
-    fetch(`${API_BASE_URL}/api/all-applicants`)
-      .then((res) => res.json())
-      .then((data) => setPersons(data)); // ✅ Correct
-  }, []);
-
+``
   useEffect(() => {
     if (!socket.current) return;
 

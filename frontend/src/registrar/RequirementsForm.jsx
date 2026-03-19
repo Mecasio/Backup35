@@ -129,7 +129,7 @@ const RequirementsForm = () => {
   };
 
 
-
+  const [applicantType, setApplicantType] = useState("All");
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
 
@@ -195,13 +195,14 @@ const RequirementsForm = () => {
 
     try {
       if (isEditing) {
-        // ✅ UPDATE
         await axios.put(`${API_BASE_URL}/requirements/${editId}`, {
           requirements_description: description,
           short_label: shortLabel,
           category: category,
           xerox_copies: xeroxCopies,
+          requires_original: requiresOriginal,
           is_optional: isOptional,
+          applicant_type: applicantType
         });
 
         setSnack({
@@ -219,6 +220,7 @@ const RequirementsForm = () => {
           xerox_copies: xeroxCopies,
           requires_original: requiresOriginal,
           is_optional: isOptional,
+          applicant_type: applicantType
         });
 
         setSnack({
@@ -341,10 +343,15 @@ const RequirementsForm = () => {
               <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Description</TableCell>
               <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Short Label</TableCell>
               <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Category</TableCell>
+              <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
+                Applicant Type
+              </TableCell>
               <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Original Documents</TableCell>
               <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Xerox Copies</TableCell>
               <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Optional</TableCell>
               <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>Actions</TableCell>
+
+
             </TableRow>
           </TableHead>
 
@@ -371,6 +378,9 @@ const RequirementsForm = () => {
                 <TableCell sx={{ border: `2px solid ${borderColor}` }}>
                   {req.category || "Main"}
                 </TableCell>
+                <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
+                  {req.applicant_type || "All"}
+                </TableCell>
 
                 {/* ORIGINAL */}
                 <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
@@ -386,6 +396,7 @@ const RequirementsForm = () => {
                 <TableCell sx={{ border: `2px solid ${borderColor}`, textAlign: "center" }}>
                   {req.is_optional ? "Yes" : "No"}
                 </TableCell>
+
                 {/* ACTIONS */}
                 <TableCell
                   sx={{
@@ -524,6 +535,42 @@ const RequirementsForm = () => {
             >
               <MenuItem value="Yes">Yes</MenuItem>
               <MenuItem value="No">No</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Typography fontWeight={500}>Applicant Type:</Typography>
+          <FormControl fullWidth>
+            <InputLabel>Applicant Type</InputLabel>
+            <Select
+              value={applicantType}
+              label="Applicant Type"
+              onChange={(e) => setApplicantType(e.target.value)}
+            >
+              <MenuItem value="0">All Applicants</MenuItem>
+              <MenuItem value="1">
+                Senior High School Graduate
+              </MenuItem>
+              <MenuItem value="2">
+                Senior High School Graduating Student
+              </MenuItem>
+              <MenuItem value="3">
+                ALS (Alternative Learning System) Passer
+              </MenuItem>
+              <MenuItem value="4">
+                Transferee from other University/College
+              </MenuItem>
+              <MenuItem value="5">
+                Cross Enrolee Student
+              </MenuItem>
+              <MenuItem value="6">
+                Foreign Applicant/Student
+              </MenuItem>
+              <MenuItem value="7">
+                Baccalaureate Graduate
+              </MenuItem>
+              <MenuItem value="8">
+                Master Degree Graduate
+              </MenuItem>
             </Select>
           </FormControl>
 

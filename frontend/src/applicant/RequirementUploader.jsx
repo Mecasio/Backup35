@@ -81,12 +81,13 @@ const RequirementUploader = () => {
     }
 
     // ✅ Fetch all requirements dynamically from backend
-    axios.get(`${API_BASE_URL}/requirements`)
+    axios.get(`${API_BASE_URL}/requirements/${id}`)
       .then((res) => setRequirements(res.data))
       .catch((err) => console.error("Error loading requirements:", err));
   }, []);
 
   const [openModal, setOpenModal] = useState(false);
+  const [openConfirmModal, setOpenConfirmModal] = useState(false);
 
   const fetchUploads = async (personId) => {
     try {
@@ -105,7 +106,7 @@ const RequirementUploader = () => {
 
       // ✅ Get all verifiable requirements from DB
       // ✅ Get ONLY Regular + Verifiable requirements
-      const reqRes = await axios.get(`${API_BASE_URL}/requirements`);
+      const reqRes = await axios.get(`${API_BASE_URL}/requirements/${personId}`);
 
       const verifiableRequirements = reqRes.data.filter(
         (r) => r.is_verifiable === 1 && r.category === "Main"
@@ -121,9 +122,8 @@ const RequirementUploader = () => {
 
       // ✅ Only show Congratulations if all required are uploaded (not every upload)
       if (!allRequirementsCompleted && allRequiredUploaded) {
-        setOpenModal(true);
+        setOpenConfirmModal(true); // ✅ show REVIEW modal first
       }
-
 
       // ✅ Update completion state
       setAllRequirementsCompleted(allRequiredUploaded);
@@ -132,6 +132,14 @@ const RequirementUploader = () => {
       console.error("❌ Fetch uploads failed:", err);
     }
   };
+
+  useEffect(() => {
+    const completed = localStorage.getItem("requirementsCompleted");
+
+    if (completed === "1") {
+      setOpenModal(true); // 🎉 show success modal ONLY on revisit
+    }
+  }, []);
 
 
   const checkAllRequiredUploads = () => {
@@ -433,6 +441,129 @@ const RequirementUploader = () => {
         </DialogActions>
       </Dialog>
 
+      <Dialog
+        open={openConfirmModal}
+        onClose={() => setOpenConfirmModal(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: "bold", textAlign: "center" }}>
+          📄 Review Your Uploaded Requirements
+        </DialogTitle>
+
+        <DialogContent>
+
+          <Typography sx={{ mb: 2, textAlign: "center" }}>
+            Please review your uploaded documents before final submission.
+          </Typography>
+
+          {/* 🔹 Requirements List */}
+          {requirements
+            .filter((r) => r.category === "Main")
+            .map((doc) => {
+              const uploaded = uploads.find(
+                (u) => Number(u.requirements_id) === Number(doc.id)
+              );
+
+              return (
+                <Box
+                  key={doc.id}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    border: "1px solid #ccc",
+                    borderRadius: "8px",
+                    p: 1.5,
+                    mb: 1,
+                  }}
+                >
+                  <Box>
+                    <Typography sx={{ fontWeight: "bold" }}>
+                      {doc.description}
+                    </Typography>
+
+                    <Typography sx={{ fontSize: "13px", color: "#555" }}>
+                      {uploaded?.original_name || "No file uploaded"}
+                    </Typography>
+                  </Box>
+
+                  {uploaded && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      startIcon={<VisibilityIcon />}
+                      href={`${API_BASE_URL}/ApplicantOnlineDocuments/${uploaded.file_path}`}
+                      target="_blank"
+                    >
+                      Preview
+                    </Button>
+                  )}
+                </Box>
+              );
+            })}
+
+          {/* 🔔 Notice */}
+          <Box
+            sx={{
+              mt: 3,
+              p: 2,
+              backgroundColor: "#fff3cd",
+              border: "1px solid #ffeeba",
+              borderRadius: "8px",
+            }}
+          >
+            <Typography sx={{ fontSize: "14px" }}>
+              ⚠ <strong>Notice:</strong> Please ensure that all uploaded documents are
+              correct and clear.
+            </Typography>
+          </Box>
+
+        </DialogContent>
+
+        <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
+
+          {/* Cancel */}
+          <Button
+            variant="outlined"
+            onClick={() => setOpenConfirmModal(false)}
+            sx={{
+              color: "red",
+              borderColor: "red",
+              '&:hover': {
+                borderColor: "darkred",
+                backgroundColor: "rgba(255, 0, 0, 0.04)"
+              }
+            }}
+          >
+            Cancel
+          </Button>
+
+          {/* Final Submit */}
+          <Button
+            variant="contained"
+            color="success"
+            onClick={() => {
+              setOpenConfirmModal(false);
+
+              // ✅ mark as completed ONLY after final confirmation
+              localStorage.setItem("requirementsCompleted", "1");
+
+              setSnack({
+                open: true,
+                severity: "success",
+                message: "Requirements submitted successfully.",
+              });
+
+              window.location.href = "/applicant_dashboard";
+            }}
+          >
+            Submit Requirements
+          </Button>
+
+        </DialogActions>
+      </Dialog>
+
 
       <Box
         sx={{
@@ -616,32 +747,7 @@ const RequirementUploader = () => {
         ))}
       </Box>
 
-      <Box sx={{ mt: 4, textAlign: "center" }}>
-        <Button
-          variant="contained"
-          size="large"
-          onClick={() => {
-            if (!checkAllRequiredUploads()) return;
-
-            setSnack({
-              open: true,
-              severity: "success",
-              message: "All required documents uploaded successfully.",
-            });
-
-            // example redirect
-            window.location.href = "/applicant_dashboard";
-          }}
-          sx={{
-
-            fontWeight: "bold",
-            padding: "12px 40px",
-            fontSize: "18px",
-          }}
-        >
-          Submit Requirements
-        </Button>
-      </Box>
+  
 
     </Box>
   );

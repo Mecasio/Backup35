@@ -90,32 +90,32 @@ const RegistrarDashboard1 = () => {
     }, [settings]);
 
     const stepsData = [
-      {
-      label: "Admission Process For College",
-      to: "/applicant_list",
-      icon: <SchoolIcon fontSize="large" />,
-    },
-    {
-      label: "Applicant Form",
-      to: "/registrar_dashboard1",
-      icon: <AssignmentIcon fontSize="large" />,
-    },
-    {
-      label: "Student Requirements",
-      to: "/registrar_requirements",
-      icon: <AssignmentTurnedInIcon fontSize="large" />,
-    },
-    {
-      label: "Qualifying / Interview Exam Score",
-      to: "/qualifying_interview_exam_scores",
-      icon: <ScoreIcon fontSize="large" />,
-    },
-    {
-      label: "Student Numbering",
-      to: "/student_numbering_per_college",
-      icon: <DashboardIcon fontSize="large" />,
-    },
-  
+        {
+            label: "Admission Process For College",
+            to: "/applicant_list",
+            icon: <SchoolIcon fontSize="large" />,
+        },
+        {
+            label: "Applicant Form",
+            to: "/registrar_dashboard1",
+            icon: <AssignmentIcon fontSize="large" />,
+        },
+        {
+            label: "Student Requirements",
+            to: "/registrar_requirements",
+            icon: <AssignmentTurnedInIcon fontSize="large" />,
+        },
+        {
+            label: "Qualifying / Interview Exam Score",
+            to: "/qualifying_interview_exam_scores",
+            icon: <ScoreIcon fontSize="large" />,
+        },
+        {
+            label: "Student Numbering",
+            to: "/student_numbering_per_college",
+            icon: <DashboardIcon fontSize="large" />,
+        },
+
 
 
     ];
@@ -1739,15 +1739,33 @@ const RegistrarDashboard1 = () => {
                                     onChange={handleChange}
                                     onBlur={handleBlur}
                                 >
-                                    <MenuItem value=""><em>Select Applying</em></MenuItem>
-                                    <MenuItem value="Senior High School Graduate">Senior High School Graduate</MenuItem>
-                                    <MenuItem value="Senior High School Graduating Student">Senior High School Graduating Student</MenuItem>
-                                    <MenuItem value="ALS Passer">ALS (Alternative Learning System) Passer</MenuItem>
-                                    <MenuItem value="Transferee">Transferee from other University/College</MenuItem>
-                                    <MenuItem value="Cross Enrolee">Cross Enrolee Student</MenuItem>
-                                    <MenuItem value="Foreign Applicant">Foreign Applicant/Student</MenuItem>
-                                    <MenuItem value="Baccalaureate Graduate">Baccalaureate Graduate</MenuItem>
-                                    <MenuItem value="Master Degree Graduate">Master Degree Graduate</MenuItem>
+                                      <MenuItem value="">
+                                                      <em>Select Applying</em>
+                                                    </MenuItem>
+                                                    <MenuItem value="1">
+                                                      Senior High School Graduate
+                                                    </MenuItem>
+                                                    <MenuItem value="2">
+                                                      Senior High School Graduating Student
+                                                    </MenuItem>
+                                                    <MenuItem value="3">
+                                                      ALS (Alternative Learning System) Passer
+                                                    </MenuItem>
+                                                    <MenuItem value="4">
+                                                      Transferee from other University/College
+                                                    </MenuItem>
+                                                    <MenuItem value="5">
+                                                      Cross Enrolee Student
+                                                    </MenuItem>
+                                                    <MenuItem value="6">
+                                                      Foreign Applicant/Student
+                                                    </MenuItem>
+                                                    <MenuItem value="7">
+                                                      Baccalaureate Graduate
+                                                    </MenuItem>
+                                                    <MenuItem value="8">
+                                                      Master Degree Graduate
+                                                    </MenuItem>
                                 </Select>
                                 {errors.applyingAs && (
                                     <FormHelperText>This field is required.</FormHelperText>
@@ -3316,11 +3334,22 @@ const RegistrarDashboard1 = () => {
                                     </Box>
 
                                     {/* Preview Image */}
-                                    {preview && (
-                                        <Box sx={{ display: "flex", justifyContent: "center", my: 2, position: "relative" }}>
+                                    {(preview || person.profile_img) && (
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                justifyContent: "center",
+                                                my: 2,
+                                                position: "relative",
+                                            }}
+                                        >
                                             <Box
                                                 component="img"
-                                                src={preview}
+                                                src={
+                                                    preview
+                                                        ? preview
+                                                        : `${API_BASE_URL}/uploads/Applicant1by1/${person.profile_img}`
+                                                }
                                                 alt="Preview"
                                                 sx={{
                                                     width: "192px",
@@ -3330,11 +3359,19 @@ const RegistrarDashboard1 = () => {
                                                     borderRadius: 2,
                                                 }}
                                             />
+
+                                            {/* ❌ REMOVE BUTTON */}
                                             <Button
                                                 size="small"
                                                 onClick={() => {
                                                     setSelectedFile(null);
                                                     setPreview(null);
+
+                                                    // ✅ IMPORTANT: remove existing image
+                                                    setPerson((prev) => ({
+                                                        ...prev,
+                                                        profile_img: "",
+                                                    }));
                                                 }}
                                                 sx={{
                                                     position: "absolute",
@@ -3355,7 +3392,6 @@ const RegistrarDashboard1 = () => {
                                             </Button>
                                         </Box>
                                     )}
-
                                     {/* Guidelines Section */}
                                     <Box
                                         sx={{

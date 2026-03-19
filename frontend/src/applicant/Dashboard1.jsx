@@ -1290,7 +1290,7 @@ const Dashboard1 = (props) => {
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <br />
             <div className="flex items-center mb-4 gap-4">
-              <label className="w-40 font-medium">Campus:</label>
+              <label className="w-40 font-medium">Campus:<span style={{ color: "red" }}> *</span></label>
 
               <FormControl
                 fullWidth
@@ -1327,6 +1327,7 @@ const Dashboard1 = (props) => {
                   ))}
                 </Select>
 
+
                 {errors.campus && (
                   <FormHelperText>This field is required.</FormHelperText>
                 )}
@@ -1334,7 +1335,7 @@ const Dashboard1 = (props) => {
             </div>
 
             <div className="flex items-center mb-4 gap-4">
-              <label className="w-40 font-medium">Academic Program:</label>
+              <label className="w-40 font-medium">Academic Program:<span style={{ color: "red" }}> *</span></label>
               <FormControl
                 fullWidth
                 size="small"
@@ -1371,7 +1372,7 @@ const Dashboard1 = (props) => {
             </div>
 
             <div className="flex items-center mb-4 gap-4">
-              <label className="w-40 font-medium">Classified As:</label>
+              <label className="w-40 font-medium">Classified As:<span style={{ color: "red" }}> *</span></label>
               <FormControl
                 fullWidth
                 size="small"
@@ -1407,7 +1408,7 @@ const Dashboard1 = (props) => {
             </div>
 
             <div className="flex items-center mb-4 gap-4">
-              <label className="w-40 font-medium">Applying As:</label>
+              <label className="w-40 font-medium">Applying As:<span style={{ color: "red" }}> *</span></label>
               <FormControl
                 fullWidth
                 size="small"
@@ -1417,6 +1418,7 @@ const Dashboard1 = (props) => {
               >
                 <InputLabel id="applying-as-label">Applying As</InputLabel>
                 <Select
+                readOnly
                   labelId="applying-as-label"
                   id="applying-as-select"
                   name="applyingAs"
@@ -1428,28 +1430,28 @@ const Dashboard1 = (props) => {
                   <MenuItem value="">
                     <em>Select Applying</em>
                   </MenuItem>
-                  <MenuItem value="Senior High School Graduate">
+                  <MenuItem value="1">
                     Senior High School Graduate
                   </MenuItem>
-                  <MenuItem value="Senior High School Graduating Student">
+                  <MenuItem value="2">
                     Senior High School Graduating Student
                   </MenuItem>
-                  <MenuItem value="ALS Passer">
+                  <MenuItem value="3">
                     ALS (Alternative Learning System) Passer
                   </MenuItem>
-                  <MenuItem value="Transferee">
+                  <MenuItem value="4">
                     Transferee from other University/College
                   </MenuItem>
-                  <MenuItem value="Cross Enrolee">
+                  <MenuItem value="5">
                     Cross Enrolee Student
                   </MenuItem>
-                  <MenuItem value="Foreign Applicant">
+                  <MenuItem value="6">
                     Foreign Applicant/Student
                   </MenuItem>
-                  <MenuItem value="Baccalaureate Graduate">
+                  <MenuItem value="7">
                     Baccalaureate Graduate
                   </MenuItem>
-                  <MenuItem value="Master Degree Graduate">
+                  <MenuItem value="8">
                     Master Degree Graduate
                   </MenuItem>
                 </Select>
@@ -1480,7 +1482,7 @@ const Dashboard1 = (props) => {
                 >
                   {/* Program 1 */}
                   <Box display="flex" alignItems="center" gap={2} mb={3}>
-                    <label className="w-40 font-medium">Course Applied:</label>
+                    <label className="w-40 font-medium">Course Applied:<span style={{ color: "red" }}> *</span></label>
                     <FormControl
                       fullWidth
                       size="small"
@@ -1676,7 +1678,7 @@ const Dashboard1 = (props) => {
                   {/* Year Level */}
                   <div className="flex items-center mb-4 gap-2">
                     <label className="w-40 mt:[2] font-medium ">
-                      Year Level:
+                      Year Level:<span style={{ color: "red" }}> *</span>
                     </label>
                     <FormControl
                       fullWidth
@@ -1779,7 +1781,7 @@ const Dashboard1 = (props) => {
               {/* Last Name */}
               <Box flex="1 1 20%">
                 <Typography mb={1} fontWeight="medium">
-                  Last Name
+                  Last Name<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <TextField
                   InputProps={{
@@ -1810,7 +1812,7 @@ const Dashboard1 = (props) => {
               {/* First Name */}
               <Box flex="1 1 20%">
                 <Typography mb={1} fontWeight="medium">
-                  First Name
+                  First Name<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <TextField
                   fullWidth
@@ -1920,8 +1922,8 @@ const Dashboard1 = (props) => {
               {/* Height Field */}
               <Box display="flex" flexDirection="column" flex="0 0 26%">
                 <Box display="flex" alignItems="center" gap={1}>
-                  <Typography fontWeight="medium" minWidth="60px">
-                    Height:
+                  <Typography fontWeight="medium" minWidth="70px">
+                    Height:<span style={{ color: "red" }}> *</span>
                   </Typography>
                   <TextField
                     size="small"
@@ -1946,8 +1948,8 @@ const Dashboard1 = (props) => {
               {/* Weight Field */}
               <Box display="flex" flexDirection="column" flex="0 0 26%">
                 <Box display="flex" alignItems="center" gap={1}>
-                  <Typography fontWeight="medium" minWidth="60px">
-                    Weight:
+                  <Typography fontWeight="medium" minWidth="75px">
+                    Weight:<span style={{ color: "red" }}> *</span>
                   </Typography>
                   <TextField
                     size="small"
@@ -1981,7 +1983,7 @@ const Dashboard1 = (props) => {
             >
               {/* LRN Label */}
               <Typography fontWeight="medium" minWidth="180px">
-                Learning Reference Number:
+                Learning Reference Number:<span style={{ color: "red" }}> *</span>
               </Typography>
 
               {/* LRN Input */}
@@ -2030,7 +2032,7 @@ const Dashboard1 = (props) => {
               />
 
               <Typography fontWeight="medium">
-                Gender:
+                Gender:<span style={{ color: "red" }}> *</span>
               </Typography>
               {/* Gender */}
               <TextField
@@ -2179,7 +2181,7 @@ const Dashboard1 = (props) => {
               {/* 🎂 Birth Date */}
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Birth of Date
+                  Birth of Date<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <TextField
                   fullWidth
@@ -2202,7 +2204,7 @@ const Dashboard1 = (props) => {
               {/* 👤 Age (auto-filled, read-only) */}
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Age
+                  Age<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <TextField
                   fullWidth
@@ -2220,7 +2222,7 @@ const Dashboard1 = (props) => {
               </Box>
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Birth Place
+                  Birth Place<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <TextField
                   fullWidth
@@ -2239,7 +2241,7 @@ const Dashboard1 = (props) => {
               </Box>
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Language/Dialect Spoken
+                  Language/Dialect Spoken<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <TextField
                   fullWidth
@@ -2263,7 +2265,7 @@ const Dashboard1 = (props) => {
             <Box display="flex" gap={2}>
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Citizenship
+                  Citizenship<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <FormControl
                   fullWidth
@@ -2410,7 +2412,7 @@ const Dashboard1 = (props) => {
 
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Religion
+                  Religion<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <FormControl
                   fullWidth
@@ -2468,7 +2470,7 @@ const Dashboard1 = (props) => {
               </Box>
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Civil Status
+                  Civil Status<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <FormControl
                   fullWidth
@@ -2504,7 +2506,7 @@ const Dashboard1 = (props) => {
               </Box>
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Tribe/Ethnic Group
+                  Tribe/Ethnic Group<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <FormControl
                   fullWidth
@@ -2591,7 +2593,7 @@ const Dashboard1 = (props) => {
             <Box display="flex" gap={2} mb={2}>
               <Box flex={1} display="flex" alignItems="center" gap={2}>
                 <Typography sx={{ width: 180 }} fontWeight="medium">
-                  Contact Number:
+                  Contact Number:<span style={{ color: "red" }}> *</span>
                 </Typography>
 
                 <TextField
@@ -2626,7 +2628,7 @@ const Dashboard1 = (props) => {
 
               <Box flex={1} display="flex" alignItems="center" gap={2}>
                 <Typography sx={{ width: 180 }} fontWeight="medium">
-                  Email Address:
+                  Email Address:<span style={{ color: "red" }}> *</span>
                 </Typography>
 
                 <TextField
@@ -2685,7 +2687,7 @@ const Dashboard1 = (props) => {
             <Box display="flex" gap={2} mb={2}>
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Present Street
+                  Present Street<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <TextField
                   fullWidth
@@ -2702,7 +2704,7 @@ const Dashboard1 = (props) => {
 
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Present Zip Code
+                  Zip Code<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <TextField
                   fullWidth
@@ -2728,7 +2730,7 @@ const Dashboard1 = (props) => {
                 error={!!errors.presentRegion}
               >
                 <Typography mb={1} fontWeight="medium">
-                  Region
+                  Region<span style={{ color: "red" }}> *</span>
                 </Typography>
 
                 <Select
@@ -2775,7 +2777,7 @@ const Dashboard1 = (props) => {
                 error={!!errors.presentProvince}
               >
                 <Typography mb={1} fontWeight="medium">
-                  Province
+                  Province<span style={{ color: "red" }}> *</span>
                 </Typography>
 
                 <Select
@@ -2824,7 +2826,7 @@ const Dashboard1 = (props) => {
                 error={!!errors.presentMunicipality}
               >
                 <Typography mb={1} fontWeight="medium">
-                  Municipality
+                  Municipality<span style={{ color: "red" }}> *</span>
                 </Typography>
 
                 <Select
@@ -2865,7 +2867,7 @@ const Dashboard1 = (props) => {
                 error={!!errors.presentBarangay}
               >
                 <Typography mb={1} fontWeight="medium">
-                  Barangay
+                  Barangay<span style={{ color: "red" }}> *</span>
                 </Typography>
 
                 <Select
@@ -2900,7 +2902,7 @@ const Dashboard1 = (props) => {
             {/* DSWD Household Number */}
             <Box mb={2}>
               <Typography mb={1} fontWeight="medium">
-                Present DSWD Household Number
+                Present DSWD Household Number<span style={{ color: "red" }}> *</span>
               </Typography>
               <TextField
                 fullWidth
@@ -2966,7 +2968,7 @@ const Dashboard1 = (props) => {
             <Box display="flex" gap={2} mb={2}>
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Permanent Street
+                  Permanent Street<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <TextField
                   fullWidth
@@ -2985,7 +2987,7 @@ const Dashboard1 = (props) => {
 
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Permanent Zip Code
+                  Zip Code<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <TextField
                   fullWidth
@@ -3009,7 +3011,7 @@ const Dashboard1 = (props) => {
               {/* Permanent Region */}
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Permanent Region
+                  Permanent Region<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <FormControl
                   fullWidth
@@ -3059,7 +3061,7 @@ const Dashboard1 = (props) => {
               {/* Permanent Province */}
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Permanent Province
+                  Permanent Province<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <FormControl
                   fullWidth
@@ -3111,7 +3113,7 @@ const Dashboard1 = (props) => {
               {/* Permanent Municipality */}
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Permanent Municipality
+                  Permanent Municipality<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <FormControl
                   fullWidth
@@ -3155,7 +3157,7 @@ const Dashboard1 = (props) => {
               {/* Permanent Barangay */}
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
-                  Permanent Barangay
+                  Permanent Barangay<span style={{ color: "red" }}> *</span>
                 </Typography>
                 <FormControl
                   fullWidth
@@ -3198,7 +3200,7 @@ const Dashboard1 = (props) => {
             {/* DSWD Household Number */}
             <Box mb={2}>
               <Typography mb={1} fontWeight="medium">
-                Permanent DSWD Household Number
+                Permanent DSWD Household Number<span style={{ color: "red" }}> *</span>
               </Typography>
               <TextField
                 fullWidth
@@ -3281,7 +3283,7 @@ const Dashboard1 = (props) => {
                   </Box>
 
                   {/* Preview Image */}
-                  {preview && (
+                  {(preview || person.profile_img) && (
                     <Box
                       sx={{
                         display: "flex",
@@ -3292,7 +3294,11 @@ const Dashboard1 = (props) => {
                     >
                       <Box
                         component="img"
-                        src={preview}
+                        src={
+                          preview
+                            ? preview
+                            : `${API_BASE_URL}/uploads/Applicant1by1/${person.profile_img}`
+                        }
                         alt="Preview"
                         sx={{
                           width: "192px",
@@ -3302,11 +3308,19 @@ const Dashboard1 = (props) => {
                           borderRadius: 2,
                         }}
                       />
+
+                      {/* ❌ REMOVE BUTTON */}
                       <Button
                         size="small"
                         onClick={() => {
                           setSelectedFile(null);
                           setPreview(null);
+
+                          // ✅ IMPORTANT: remove existing image
+                          setPerson((prev) => ({
+                            ...prev,
+                            profile_img: "",
+                          }));
                         }}
                         sx={{
                           position: "absolute",
