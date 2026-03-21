@@ -220,6 +220,7 @@ const OfficeOfTheRegistrar = () => {
 
   html, body {
     margin: 1;
+    margin-top: 10px;
     padding: 0;
     width: 210mm;
     height: 297mm;

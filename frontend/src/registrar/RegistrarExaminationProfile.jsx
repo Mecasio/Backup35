@@ -780,7 +780,7 @@ const ExaminationProfile = ({ personId }) => {
                         <div
                             style={{
                                 position: "absolute",
-                                top: "25%",
+                                top: "28%",
                                 left: "50%",
                                 transform: "translate(-50%, -50%)",
                                 fontSize: "120px",

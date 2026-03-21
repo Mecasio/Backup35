@@ -111,42 +111,15 @@ router.post("/register", async (req, res) => {
 
   // 🔍 Check if applicant already exists by name + birthday
 
-  if (existingPerson.length > 0) {
-    const personId = existingPerson[0].person_id;
-
-    const [applicant] = await db.query(
-      `SELECT applicant_number 
-     FROM applicant_numbering_table 
-     WHERE person_id = ? 
-     LIMIT 1`,
-      [personId]
-    );
-
-    if (applicant.length > 0) {
-      const applicantNumber = applicant[0].applicant_number;
-
-      const [exam] = await db.query(
-        `SELECT email_sent
-       FROM exam_applicants
-       WHERE applicant_id = ?
-       LIMIT 1`,
-        [applicantNumber]
-      );
-
-      if (exam.length > 0 && exam[0].email_sent === 1) {
-        return res.status(400).json({
-          success: false,
-          message:
-            "This applicant has already been processed for the examination. Multiple applications are not allowed.",
-        });
-      }
-    }
-
-    return res.status(400).json({
-      success: false,
-      message: "This applicant already exists in the system.",
-    });
-  }
+  const [existingPerson] = await db.query(
+    `SELECT person_id 
+   FROM person_table
+   WHERE first_name = ?
+   AND last_name = ?
+   AND birthOfDate = ?
+   LIMIT 1`,
+    [firstName.trim(), lastName.trim(), birthday],
+  );
 
   if (existingPerson.length > 0) {
     const personId = existingPerson[0].person_id;

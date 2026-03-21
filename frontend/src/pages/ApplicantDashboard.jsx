@@ -209,27 +209,19 @@ const ApplicantDashboard = (props) => {
 
   const checkRequirements = async (personId) => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/uploads`, {
-        headers: { "x-person-id": personId },
-      });
+      const res = await axios.get(
+        `${API_BASE_URL}/requirements/status/${personId}`
+      );
 
-      const uploadsData = res.data;
-      const rebuiltSelectedFiles = {};
+      const completed = res.data.completed;
 
-      uploadsData.forEach((upload) => {
-        const desc = upload.description.toLowerCase();
-        if (desc.includes("form 138")) rebuiltSelectedFiles["Form138"] = true;
-        if (desc.includes("good moral")) rebuiltSelectedFiles["GoodMoralCharacter"] = true;
-        if (desc.includes("birth certificate")) rebuiltSelectedFiles["BirthCertificate"] = true;
-        if (desc.includes("graduating class")) rebuiltSelectedFiles["CertificateOfGraduatingClass"] = true;
-        if (desc.includes("vaccine card")) rebuiltSelectedFiles["VaccineCard"] = true;
-      });
+      setAllRequirementsCompleted(completed);
 
-      const allRequired = ["Form138", "GoodMoralCharacter", "BirthCertificate", "CertificateOfGraduatingClass", "VaccineCard"]
-        .every((key) => rebuiltSelectedFiles[key]);
+      localStorage.setItem(
+        "requirementsCompleted",
+        completed ? "1" : "0"
+      );
 
-      setAllRequirementsCompleted(allRequired);
-      localStorage.setItem("requirementsCompleted", allRequired ? "1" : "0");
     } catch (err) {
       console.error("Failed to check requirements:", err);
     }

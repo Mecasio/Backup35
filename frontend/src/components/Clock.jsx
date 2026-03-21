@@ -30,12 +30,13 @@ const Clock = () => {
 
   return (
     <Box sx={{ textAlign: "right" }}>
-      <Typography sx={{ fontWeight: "bold" }}>
-        Time: {formattedTime}
+      <Typography sx={{  fontSize: "16px" }}>
+        <b>Date:</b> {formattedDate}
       </Typography>
-      <Typography sx={{ fontSize: "13px" }}>
-        {formattedDate}
+      <Typography sx={{  fontSize: "16px"  }}>
+        <b>Time:</b> {formattedTime}
       </Typography>
+
     </Box>
   );
 };

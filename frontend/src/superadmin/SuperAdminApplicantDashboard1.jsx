@@ -1132,11 +1132,7 @@ const SuperAdminApplicantDashboard1 = () => {
 
             const res = await axios.post(`${API_BASE_URL}/form/add-applicant`, payload);
 
-            setSnackbar({
-                open: true,
-                message: `Applicant created! Applicant Number: ${res.data.applicant_number}`,
-                severity: "success"
-            });
+            setSnackbar(`Applicant created! Applicant Number: ${res.data.applicant_number}`);
 
             setOpenAddApplicant(false);
 
@@ -1153,11 +1149,7 @@ const SuperAdminApplicantDashboard1 = () => {
 
         } catch (error) {
             console.error(error);
-            setSnackbar({
-                open: true,
-                message: error.response?.data?.message || "Error adding applicant",
-                severity: "error"
-            });
+            setSnackbar(error.response?.data?.message || "Error adding applicant");
         }
     };
 

@@ -658,7 +658,7 @@ const AdminDashboard2 = () => {
     setExamPermitError("");
   };
 
-  const handleExamPermitClick = async () => {
+ const handleExamPermitClick = async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/api/verified-exam-applicants`);
       const verified = res.data.some(a => a.person_id === parseInt(userID));

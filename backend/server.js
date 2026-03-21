@@ -1603,6 +1603,8 @@ app.get("/api/verified-exam-applicants", async (req, res) => {
   }
 });
 
+
+
 // Update requirements when submitted documents are checked
 app.put("/api/update-requirements/:person_id", async (req, res) => {
   const { person_id } = req.params;
@@ -7848,6 +7850,73 @@ app.get("/api/person_status_by_applicant/:applicant_number", (req, res) => {
   });
 });
 
+app.get("/api/requirements/status/:person_id", async (req, res) => {
+  const { person_id } = req.params;
+
+  try {
+    // 1️⃣ Get applicant type
+    const [[person]] = await db.query(
+      `
+      SELECT applicant_type
+      FROM person_table
+      WHERE person_id = ?
+      `,
+      [person_id]
+    );
+
+    if (!person) {
+      return res.status(404).json({
+        error: "Person not found",
+      });
+    }
+
+    const applicantType = person.applicant_type;
+
+    // 2️⃣ Get required requirements
+    const [required] = await db.query(
+      `
+      SELECT id, description, category
+      FROM requirements_table
+      WHERE applicant_type = ?
+      AND is_optional = 0
+      `,
+      [applicantType]
+    );
+
+    // 3️⃣ Get uploaded requirements
+    const [uploaded] = await db.query(
+      `
+      SELECT requirements_id
+      FROM requirement_uploads
+      WHERE person_id = ?
+      AND document_status = 'Approved'
+      `,
+      [person_id]
+    );
+
+    const uploadedIds = uploaded.map(r => r.requirements_id);
+
+    // 4️⃣ Check missing requirements
+    const missing = required.filter(
+      req => !uploadedIds.includes(req.id)
+    );
+
+    res.json({
+      required_count: required.length,
+      uploaded_count: uploaded.length,
+      missing_requirements: missing,
+      completed: missing.length === 0
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: "Failed to check requirements"
+    });
+  }
+});
+
+
 app.get("/api/applied_program/:dprtmnt_id", async (req, res) => {
   const { dprtmnt_id } = req.params;
   try {
@@ -9483,7 +9552,7 @@ app.get("/api/verification-status/:applicant_number", async (req, res) => {
   try {
     // âœ… Step 1: Get person_id from applicant_number
     const [personRows] = await db.query(
-      "SELECT person_id FROM applicant_numbering_table WHERE applicant_number = ?",
+      "SELECT person_id, applyingAs FROM applicant_numbering_table WHERE applicant_number = ?",
       [applicant_number],
     );
     if (personRows.length === 0) {
@@ -9491,11 +9560,13 @@ app.get("/api/verification-status/:applicant_number", async (req, res) => {
     }
 
     const personId = personRows[0].person_id;
+    const applyingAS = personRows[0].applyingAs;
 
     // âœ… Step 2: Count how many verifiable requirements exist
     const [requirements] = await db.query(
-      "SELECT COUNT(*) AS total_required FROM requirements_table WHERE is_verifiable = 1",
+      "SELECT COUNT(*) AS total_required FROM requirements_table WHERE is_verifiable = 1 AND applicant_type = ? OR applicant_type = 0", [applyingAS]
     );
+    
     const totalRequired = requirements[0]?.total_required || 0;
 
     // âœ… Step 3: Count how many of those requirements were submitted & verified

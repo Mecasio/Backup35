@@ -783,14 +783,12 @@ const Dashboard1 = (props) => {
       "presentProvince",
       "presentMunicipality",
       "presentBarangay",
-      "presentDswdHouseholdNumber",
       "permanentStreet",
       "permanentZipCode",
       "permanentRegion",
       "permanentProvince",
       "permanentMunicipality",
       "permanentBarangay",
-      "permanentDswdHouseholdNumber",
     ];
 
     let newErrors = {};
@@ -825,6 +823,23 @@ const Dashboard1 = (props) => {
       const lrnValue = person.lrnNumber?.toString().trim();
       if (!lrnValue) {
         newErrors.lrnNumber = true;
+        isValid = false;
+      }
+    }
+
+    if (person.presentDswdChecked === 1) {
+      const value = person.presentDswdHouseholdNumber?.trim();
+      if (!value) {
+        newErrors.presentDswdHouseholdNumber = true;
+        isValid = false;
+      }
+    }
+
+    // ✅ Permanent DSWD (only if checked)
+    if (person.permanentDswdChecked === 1) {
+      const value = person.permanentDswdHouseholdNumber?.trim();
+      if (!value) {
+        newErrors.permanentDswdHouseholdNumber = true;
         isValid = false;
       }
     }
@@ -1301,7 +1316,7 @@ const Dashboard1 = (props) => {
                 className="mb-4"
               >
                 <Select
-                readOnly
+                  readOnly
                   id="campus-select"
                   name="campus"
                   value={person.campus || ""}
@@ -1420,7 +1435,7 @@ const Dashboard1 = (props) => {
               >
                 <InputLabel id="applying-as-label">Applying As</InputLabel>
                 <Select
-                readOnly
+                  readOnly
                   labelId="applying-as-label"
                   id="applying-as-select"
                   name="applyingAs"
@@ -2199,7 +2214,7 @@ const Dashboard1 = (props) => {
                   helperText={
                     errors.birthOfDate ? "This field is required." : ""
                   }
-                 />
+                />
               </Box>
 
               {/* 👤 Age (auto-filled, read-only) */}
@@ -2902,23 +2917,38 @@ const Dashboard1 = (props) => {
 
             {/* DSWD Household Number */}
             <Box mb={2}>
-              <Typography mb={1} fontWeight="medium">
-                Present DSWD Household Number<span style={{ color: "red" }}> *</span>
-              </Typography>
-              <TextField
-                fullWidth
-                size="small"
-                name="presentDswdHouseholdNumber"
-                value={person.presentDswdHouseholdNumber || ""}
-                onBlur={() => handleUpdate(person)}
-                onChange={handleChange}
-                placeholder="Enter your Present DSWD Household Number"
-                error={!!errors.presentDswdHouseholdNumber}
-                helperText={
-                  errors.presentDswdHouseholdNumber && "This field is required."
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="presentDswdChecked"
+                    checked={person.presentDswdChecked === 1}
+                    onChange={handleChange}
+                  />
                 }
+                label="I have a Present DSWD Household Number"
               />
             </Box>
+
+            {person.presentDswdChecked === 1 && (
+              <Box mb={2}>
+                <Typography mb={1} fontWeight="medium">
+                  Present DSWD Household Number <span style={{ color: "red" }}>*</span>
+                </Typography>
+                <TextField
+                  fullWidth
+                  size="small"
+                  name="presentDswdHouseholdNumber"
+                  value={person.presentDswdHouseholdNumber || ""}
+                  onBlur={() => handleUpdate(person)}
+                  onChange={handleChange}
+                  placeholder="Enter your Present DSWD Household Number"
+                  error={!!errors.presentDswdHouseholdNumber}
+                  helperText={
+                    errors.presentDswdHouseholdNumber && "This field is required."
+                  }
+                />
+              </Box>
+            )}
 
             <Typography
               style={{ fontSize: "20px", color: mainButtonColor, fontWeight: "bold" }}
@@ -3200,25 +3230,38 @@ const Dashboard1 = (props) => {
 
             {/* DSWD Household Number */}
             <Box mb={2}>
-              <Typography mb={1} fontWeight="medium">
-                Permanent DSWD Household Number<span style={{ color: "red" }}> *</span>
-              </Typography>
-              <TextField
-                fullWidth
-                size="small"
-                variant="outlined"
-                placeholder="Enter your Permanent DSWD Household Number"
-                name="permanentDswdHouseholdNumber"
-                value={person.permanentDswdHouseholdNumber || ""}
-                onBlur={() => handleUpdate(person)}
-                onChange={handleChange}
-                error={!!errors.permanentDswdHouseholdNumber}
-                helperText={
-                  errors.permanentDswdHouseholdNumber &&
-                  "This field is required."
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="permanentDswdChecked"
+                    checked={person.permanentDswdChecked === 1}
+                    onChange={handleChange}
+                  />
                 }
+                label="I have a Permanent DSWD Household Number"
               />
             </Box>
+
+            {person.permanentDswdChecked === 1 && (
+              <Box mb={2}>
+                <Typography mb={1} fontWeight="medium">
+                  Permanent DSWD Household Number <span style={{ color: "red" }}>*</span>
+                </Typography>
+                <TextField
+                  fullWidth
+                  size="small"
+                  name="permanentDswdHouseholdNumber"
+                  value={person.permanentDswdHouseholdNumber || ""}
+                  onBlur={() => handleUpdate(person)}
+                  onChange={handleChange}
+                  placeholder="Enter your Permanent DSWD Household Number"
+                  error={!!errors.permanentDswdHouseholdNumber}
+                  helperText={
+                    errors.permanentDswdHouseholdNumber && "This field is required."
+                  }
+                />
+              </Box>
+            )}
 
             <Modal open={open} onClose={handleClose}>
               <Box
