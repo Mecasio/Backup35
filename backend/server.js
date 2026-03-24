@@ -45,7 +45,7 @@ const allowedOrigins = [
   "http://192.168.50.211:5173",
   "http://136.239.248.62:5173",
   "http://192.168.50.44:5173",
-  "http://192.168.50.47:5173",
+  "http://192.168.50.41:5173",
 ];
 
 app.use(
@@ -8262,10 +8262,13 @@ app.get("/api/person_data/:person_id/:role", async (req, res) => {
            p.middle_name AS mname,
            p.last_name AS lname,
            ua.role,
+           ant.applicant_number,
            ua.email
          FROM person_table AS p
          INNER JOIN user_accounts AS ua
            ON p.person_id = ua.person_id
+         INNER JOIN applicant_numbering_table AS ant
+         ON p.person_id =  ant.person_id
          WHERE p.person_id = ? AND ua.role = ?`,
         [person_id, role],
       );

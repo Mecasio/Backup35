@@ -243,7 +243,7 @@ const OfficeOfTheRegistrar = () => {
   }
 
     .student-table {
-    margin-top: -30px !important;
+    margin-top: -50px !important;
   }
 
 
@@ -429,14 +429,17 @@ const OfficeOfTheRegistrar = () => {
                                     paddingBottom: 0,
                                     letterSpacing: '1px',
                                 }}>
-                                    <div style={{ marginLeft: "-155px", fontFamily: "Arial", fontSize: "12px", }}>Republic of the Philippines</div>
+                                    <div style={{
+                                        marginLeft: "-155px",
+                                        fontFamily: "Arial", fontSize: "13px"
+                                    }}>Republic of the Philippines</div>
                                     <div
                                         style={{
                                             marginLeft: "-155px",
-                                            fontSize: "14px",
-                                            letterSpacing: "2px",
+                                            letterSpacing: "1px",
+                                            fontWeight: "bold",
                                             fontFamily: "Arial",
-                                            fontWeight: "bold"
+                                            fontSize: "18px"
                                         }}
                                     >
                                         {firstLine}
@@ -445,17 +448,17 @@ const OfficeOfTheRegistrar = () => {
                                         <div
                                             style={{
                                                 marginLeft: "-155px",
-                                                fontSize: "14px",
-                                                letterSpacing: "2px",
+                                                letterSpacing: "1px",
+                                                fontWeight: "bold",
                                                 fontFamily: "Arial",
-                                                fontWeight: "bold"
+                                                fontSize: "18px"
                                             }}
                                         >
                                             {secondLine}
                                         </div>
                                     )}
                                     {campusAddress && (
-                                        <div style={{ fontSize: "12px", fontFamily: "Arial", marginLeft: "-155px" }}>
+                                        <div style={{ fontSize: "13px", fontFamily: "Arial", marginLeft: "-155px" }}>
                                             {campusAddress}
                                         </div>
                                     )}

@@ -912,7 +912,7 @@ const AdminApplicantList = () => {
   const [applicants, setApplicants] = useState([]);
   const divToPrintRef = useRef();
 
-  const printDiv = () => {
+const printDiv = () => {
     // ✅ Determine dynamic campus address (dropdown or custom)
     let campusAddress = "";
     if (settings?.campus_address && settings.campus_address.trim() !== "") {
@@ -940,94 +940,108 @@ const AdminApplicantList = () => {
       <html>
         <head>
           <title>Applicant List</title>
-          <style>
-            @page { size: A4; margin: 10mm; }
-            body { font-family: Arial; margin: 0; padding: 0; }
-            .print-container {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              text-align: center;
-            }
-            .print-header {
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              position: relative;
-              width: 100%;
-          margin-top: 30px;
-            }
-            .print-header img {
-              position: absolute;
-              left: 0;
-          
-              width: 120px;
-              height: 120px;
-              border-radius: 50%;
-              object-fit: cover;
-            }
-  
-      /* ✅ Uniform and visible table borders (fix thin right side) */
+         <style>
+  @page { size: A4 landscape; margin: 10mm; }
+
+  body {
+    font-family: Arial;
+    margin: 0;
+    padding: 0;
+  }
+
+  .print-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+.print-header {
+  position: relative;
+  width: 100%;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.print-header img {
+  position: absolute;
+  left: 300px; /* adjust if needed */
+  top: 10px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-left: 50px; /* ✅ your requested spacing */
+}
+
+.header-top img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.header-text {
+  display: inline-block;
+  padding-left: 120px; /* ✅ VERY IMPORTANT (logo width + spacing) */
+}
+
   table {
-    border-collapse: collapse; /* better for print consistency */
+    border-collapse: collapse;
     width: 100%;
-        margin-top: 20px;
-              margin-left: 20px;
-              margin-right: 20px;
-    border: 1.2px solid black; /* slightly thicker for print clarity */
+    margin-top: 20px;
+    border: 1.5px solid black; /* slightly thicker for landscape clarity */
     table-layout: fixed;
   }
-  
+
   th, td {
-    border: 1.2px solid black;
-    padding: 4px 6px;
-    font-size: 12px;
+    border: 1.5px solid black;
+    padding: 6px 8px;
+    font-size: 13px; /* slightly bigger (more space in landscape) */
     text-align: center;
-    box-sizing: border-box;
-  }
-  
-  th, td {
     word-wrap: break-word;
   }
-  
-  /* ✅ Ensure rightmost edge doesn’t fade out */
+
   table tr td:last-child,
   table tr th:last-child {
-    border-right: 1.2px solid black !important;
+    border-right: 1.5px solid black !important;
   }
-  
-  /* ✅ Optional: add slight table padding to prevent cutoff at page edge */
-  .print-container {
-    padding-right: 10px; /* ensures right border isn’t cut off */
-    padding-left: 10px;
-  }
-  
+
   th {
-    background-color: #800000;
-    color: white;
+    background-color: lightgray;
+    color: black;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
-          </style>
+</style>
         </head>
         <body onload="window.print(); setTimeout(() => window.close(), 100);">
           <div class="print-container">
   
             <!-- ✅ HEADER -->
-            <div class="print-header">
-              <img src="${logoSrc}" alt="School Logo" />
-              <div>
-                <div>Republic of the Philippines</div>
+       <div class="print-header">
+  <img src="${logoSrc}" alt="School Logo" />
+
+  <div class="header-text">
+                <div style="font-size: 13px; font-family: Arial">Republic of the Philippines</div>
   
                 <!-- ✅ Dynamic company name -->
                 ${name
         ? `
-                      <b style="letter-spacing: 1px; font-size: 20px; font-family: 'Times New Roman', serif;">
+                      <b style="letter-spacing: 1px; font-size: 20px; font-family: Arial, sans-serif;">
                         ${firstLine}
                       </b>
                       ${secondLine
-          ? `<div style="letter-spacing: 1px; font-size: 20px; font-family: 'Times New Roman', serif;">
+          ? `<div style="letter-spacing: 1px; font-size: 20px; font-family: Arial, sans-serif;">
                               <b>${secondLine}</b>
                             </div>`
           : ""
@@ -1037,7 +1051,7 @@ const AdminApplicantList = () => {
       }
   
                 <!-- ✅ Dynamic campus address -->
-                <div style="font-size: 12px;">${campusAddress}</div>
+                <div style="font-size: 13px; font-family: Arial">${campusAddress}</div>
   
                 <div style="margin-top: 30px;">
                   <b style="font-size: 24px; letter-spacing: 1px;">Applicant List</b>
@@ -1048,14 +1062,15 @@ const AdminApplicantList = () => {
             <!-- ✅ TABLE -->
             <table>
               <thead>
+               
                 <tr>
-                  <th>Applicant ID</th>
-                  <th>Applicant Name</th>
-                  <th>Program</th>
-                  <th>JHS GWA</th>
-                  <th>SHS GWA</th>
-                  <th>Date Applied</th>
-                  <th>Status</th>
+    <th style="width:10%">Applicant ID</th>
+    <th style="width:40%">Applicant Name</th>
+    <th style="width:15%">Program</th>
+    <th style="width:10%">SHS GWA</th>
+    <th style="width:10%">Date Applied</th>
+    <th style="width:15%">Status</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -1063,24 +1078,19 @@ const AdminApplicantList = () => {
         .map(
           (person) => `
                       <tr>
-                        <td>${person.applicant_number || ""}</td>
-                        <td>${person.last_name}, ${person.first_name} ${person.middle_name || ""} ${person.extension || ""}</td>
-                        <td>${person.program_code || ""}</td>
-                        <td>${person.generalAverage || ""}</td>
-                        <td>${person.generalAverage1 || ""}</td>
-                        <td>${new Date(
+                        <td style="width:10%">${person.applicant_number || ""}</td>
+                        <td style="width:40%">${person.last_name}, ${person.first_name} ${person.middle_name || ""} ${person.extension || ""}</td>
+                        <td style="width:15%">${person.program_code || ""}</td>
+                        
+                        <td style="width:10%">${person.generalAverage1 || ""}</td>
+                        <td style="width:10%">${new Date(
             person.created_at.split("T")[0],
           ).toLocaleDateString("en-PH", {
             year: "numeric",
             month: "short",
             day: "2-digit",
           })}</td>
-                        <td>${person.registrar_status === 1
-              ? "Submitted"
-              : person.registrar_status === 0
-                ? "Unsubmitted / Incomplete"
-                : ""
-            }</td>
+                        <td style="width:15%">${getApplicantStatus(person)}</td>
                       </tr>
                     `,
         )
@@ -1093,6 +1103,7 @@ const AdminApplicantList = () => {
     `);
     newWin.document.close();
   };
+
 
   // Put this at the very bottom before the return
   if (loading || hasAccess === null) {

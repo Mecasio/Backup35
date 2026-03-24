@@ -28,15 +28,15 @@ const AnnouncementSlider = () => {
     const intervalRef = useRef(null);
     const [isHovered, setIsHovered] = useState(false);
 
- useEffect(() => {
-    if (slides.length <= 1 || isDragging || isHovered) return;
+    useEffect(() => {
+        if (slides.length <= 1 || isDragging || isHovered) return;
 
-    const timer = setTimeout(() => {
-        setIndex(prev => (prev + 1) % slides.length);
-    }, 5000);
+        const timer = setTimeout(() => {
+            setIndex(prev => (prev + 1) % slides.length);
+        }, 5000);
 
-    return () => clearTimeout(timer);
-}, [slides.length, index, isDragging, isHovered]);
+        return () => clearTimeout(timer);
+    }, [slides.length, index, isDragging, isHovered]);
 
 
 
@@ -82,8 +82,8 @@ const AnnouncementSlider = () => {
     return (
         <div
             style={{
-                width: "950px",
-                height: "720px",
+                width: "900px",
+                height: "700px",
                 marginRight: "300px",
                 background: "#000",
                 display: "flex",
@@ -132,32 +132,32 @@ const AnnouncementSlider = () => {
             </IconButton>
 
             <AnimatePresence mode="wait">
-               <motion.div
-    key={current.id}
-    drag="x"
-    dragDirectionLock
-    dragConstraints={{ left: 0, right: 0 }}
-    dragElastic={0.02}
+                <motion.div
+                    key={current.id}
+                    drag="x"
+                    dragDirectionLock
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.02}
 
-    onMouseEnter={() => setIsHovered(true)}
-    onMouseLeave={() => setIsHovered(false)}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
 
-    onDragStart={() => setIsDragging(true)}
-    onDragEnd={handleDragEnd}
+                    onDragStart={() => setIsDragging(true)}
+                    onDragEnd={handleDragEnd}
 
-    initial={{ x: 300, opacity: 0 }}
-    animate={{ x: 0, opacity: 1 }}
-    exit={{ x: -300, opacity: 0 }}
-    transition={{ duration: 0.5 }}
+                    initial={{ x: 300, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: -300, opacity: 0 }}
+                    transition={{ duration: 0.5 }}
 
-    style={{
-        width: "100%",
-        height: "100%",
-        position: "relative",
-        overflow: "hidden",
-        cursor: isDragging ? "grabbing" : "grab",
-    }}
->
+                    style={{
+                        width: "100%",
+                        height: "100%",
+                        position: "relative",
+                        overflow: "hidden",
+                        cursor: isDragging ? "grabbing" : "grab",
+                    }}
+                >
 
                     <img
                         src={`${API_BASE_URL}/uploads/announcement/${current.file_path}`}

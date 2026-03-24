@@ -315,7 +315,7 @@ const PersonalDataForm = () => {
 
 
 
-      return (
+     return (
            <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
                <Box
                    sx={{
@@ -432,7 +432,7 @@ const PersonalDataForm = () => {
                                    <div>
                                        {/* Top Line: Republic */}
                                        <div style={{
-                                           fontSize: "14px",
+                                           fontSize: "13px",
                                            fontFamily: "Arial",
                                            textAlign: "left",
                                            marginBottom: "5px"
@@ -443,10 +443,10 @@ const PersonalDataForm = () => {
                                        {/* Institute Name */}
                                        <div style={{
                                            textAlign: "center",
-                                           fontSize: "23px",
+                                           letterSpacing: "1px",
                                            fontWeight: "bold",
-                                           color: "black",
                                            fontFamily: "Arial",
+                                           fontSize: "20px",
                                            marginBottom: "5px"
                                        }}>
                                            {companyName}

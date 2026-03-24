@@ -111,75 +111,107 @@ router.post("/register", async (req, res) => {
 
   // 🔍 Check if applicant already exists by name + birthday
 
-  const [existingPerson] = await db.query(
+ 
+
+  // 🔍 STEP 1: EMAIL MUST BE UNIQUE
+  const [existingEmail] = await db.query(
+    "SELECT * FROM user_accounts WHERE email = ?",
+    [normalizedEmail]
+  );
+
+  if (existingEmail.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Email is already registered",
+    });
+  }
+
+  // 🔍 STEP 2A: CHECK FULL MATCH (first + last + birthday)
+  const [fullMatch] = await db.query(
     `SELECT person_id 
    FROM person_table
    WHERE first_name = ?
    AND last_name = ?
    AND birthOfDate = ?
    LIMIT 1`,
-    [firstName.trim(), lastName.trim(), birthday],
+    [firstName.trim(), lastName.trim(), birthday]
   );
 
-  if (existingPerson.length > 0) {
-    const personId = existingPerson[0].person_id;
+  if (fullMatch.length > 0) {
+    const personId = fullMatch[0].person_id;
 
-    // Get applicant_number
     const [applicant] = await db.query(
       `SELECT applicant_number 
      FROM applicant_numbering_table 
      WHERE person_id = ? 
      LIMIT 1`,
-      [personId],
+      [personId]
     );
 
     if (applicant.length > 0) {
       const applicantNumber = applicant[0].applicant_number;
 
-      // 🔍 Check exam_applicants
       const [exam] = await db.query(
         `SELECT email_sent
        FROM exam_applicants
        WHERE applicant_id = ?
        LIMIT 1`,
-        [applicantNumber],
+        [applicantNumber]
       );
 
-      // 🚫 If email already sent → block registration
       if (exam.length > 0 && exam[0].email_sent === 1) {
-        await insertAuditLog({
-          actorId: normalizedEmail || "unknown",
-          role: "applicant",
-          resourceType: "applicant",
-          resource: normalizedEmail || "unknown",
-          outcome: "FAILED",
-          reason: "Duplicate applicant already processed for exam",
-        });
-
         return res.status(400).json({
           success: false,
           message:
-            "This applicant has already been processed for the examination. Multiple applications are not allowed.",
+            "This applicant already received an email. Duplicate registration is not allowed.",
         });
       }
     }
   }
 
-  if (existingPerson.length > 0) {
-    await insertAuditLog({
-      actorId: normalizedEmail || "unknown",
-      role: "applicant",
-      resourceType: "applicant",
-      resource: normalizedEmail || "unknown",
-      outcome: "FAILED",
-      messageOverride: `REGISTER FAILED - ${normalizedEmail || "unknown"}`,
-      reason: "Applicant already exists",
-    });
-    return res.status(400).json({
-      success: false,
-      message: "This applicant already exists in the system.",
-    });
+  // 🔍 STEP 2B: CHECK PARTIAL MATCH (last + middle)
+  const [partialMatch] = await db.query(
+    `SELECT person_id 
+   FROM person_table
+   WHERE last_name = ?
+   AND middle_name = ?
+   LIMIT 1`,
+    [lastName.trim(), middleName?.trim() || null]
+  );
+
+  if (partialMatch.length > 0) {
+    const personId = partialMatch[0].person_id;
+
+    const [applicant] = await db.query(
+      `SELECT applicant_number 
+     FROM applicant_numbering_table 
+     WHERE person_id = ? 
+     LIMIT 1`,
+      [personId]
+    );
+
+    if (applicant.length > 0) {
+      const applicantNumber = applicant[0].applicant_number;
+
+      const [exam] = await db.query(
+        `SELECT email_sent
+       FROM exam_applicants
+       WHERE applicant_id = ?
+       LIMIT 1`,
+        [applicantNumber]
+      );
+
+      if (exam.length > 0 && exam[0].email_sent === 1) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "A similar applicant already received an email. Registration denied.",
+        });
+      }
+    }
   }
+
+  
 
   if (!normalizedEmail || !password) {
     return res.json({

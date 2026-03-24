@@ -252,12 +252,12 @@ const AdmissionFormProcess = () => {
               padding: 10px 20px;
 
               /* 🔹 Apply 10% zoom out */
-              transform: scale(0.90);
+              transform: scale(0.88);
           
             }
 
             .student-table {
-              margin-top: -50px !important;
+              margin-top: -70px !important;
             }
 
             button {
@@ -484,16 +484,17 @@ const AdmissionFormProcess = () => {
                     paddingBottom: 0,
                   }}
                 >
-                  <div style={{ fontFamily: "Arial", fontSize: "12px" }}>
+                  <div style={{ fontFamily: "Arial", fontSize: "13px" }}>
                     Republic of the Philippines
                   </div>
                   <div
                     style={{
-                      fontSize: "14px",
-                      letterSpacing: "2px",
-
+                       letterSpacing: "1px",
+                      fontWeight: "bold",
                       fontFamily: "Arial",
-                      fontWeight: "bold"
+                      fontSize: "20px"
+
+
                     }}
                   >
                     {firstLine}
@@ -501,11 +502,12 @@ const AdmissionFormProcess = () => {
                   {secondLine && (
                     <div
                       style={{
-                        fontSize: "14px",
-                        letterSpacing: "2px",
+                          letterSpacing: "1px",
+                      fontWeight: "bold",
+                      fontFamily: "Arial",
+                      fontSize: "20px"
 
-                        fontFamily: "Arial",
-                        fontWeight: "bold"
+
                       }}
                     >
                       {secondLine}
@@ -514,8 +516,7 @@ const AdmissionFormProcess = () => {
                   {campusAddress && (
                     <div
                       style={{
-                        fontSize: "12px",
-                        letterSpacing: "1px",
+                        fontSize: "13px",
                         fontFamily: "Arial",
                       }}
                     >
@@ -1667,13 +1668,17 @@ const AdmissionFormProcess = () => {
                     paddingBottom: 0,
                   }}
                 >
-                  <div style={{ fontFamily: "Arial", fontSize: "12px" }}>
+                  <div style={{ fontFamily: "Arial", fontSize: "13px" }}>
                     Republic of the Philippines
                   </div>
                   <div
                     style={{
-                      letterSpacing: "2px",
+                       letterSpacing: "1px",
                       fontWeight: "bold",
+                      fontFamily: "Arial",
+                      fontSize: "20px"
+
+
                     }}
                   >
                     {firstLine}
@@ -1681,8 +1686,12 @@ const AdmissionFormProcess = () => {
                   {secondLine && (
                     <div
                       style={{
-                        letterSpacing: "2px",
-                        fontWeight: "bold",
+                           letterSpacing: "1px",
+                      fontWeight: "bold",
+                      fontFamily: "Arial",
+                      fontSize: "20px"
+
+
                       }}
                     >
                       {secondLine}
@@ -1691,8 +1700,8 @@ const AdmissionFormProcess = () => {
                   {campusAddress && (
                     <div
                       style={{
-                        fontSize: "12px",
-                        letterSpacing: "1px",
+                        fontSize: "13px",
+                       
                         fontFamily: "Arial",
                       }}
                     >

@@ -142,34 +142,6 @@ const RequirementUploader = () => {
   }, []);
 
 
-  const checkAllRequiredUploads = () => {
-
-    const requiredDocs = requirements.filter(
-      (r) => r.category === "Main"
-    );
-
-    const uploadedIds = uploads.map((u) => Number(u.requirements_id));
-
-    const missingDocs = requiredDocs.filter(
-      (doc) => !uploadedIds.includes(Number(doc.id))
-    );
-
-    if (missingDocs.length > 0) {
-
-      const missingNames = missingDocs.map(d => d.description).join(", ");
-
-      setSnack({
-        open: true,
-        severity: "error",
-        message: `Please upload all required documents: ${missingNames}`,
-      });
-
-      return false;
-    }
-
-    return true;
-  };
-
   const [totalRequirements, setTotalRequirements] = useState(0);
 
 

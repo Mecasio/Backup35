@@ -57,7 +57,7 @@ const SuperAdminRequirementsUploader = () => {
           const filtered = allRequirements.filter(
             (req) =>
               Number(req.applicant_type) ===
-                Number(selectedPerson.applyingAs) ||
+              Number(selectedPerson.applyingAs) ||
               Number(req.applicant_type) === 0,
           );
 
@@ -80,7 +80,7 @@ const SuperAdminRequirementsUploader = () => {
     open: false,
     message: "",
     severity: "success", // success | error | warning | info
-  });
+  })
 
   const showSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
@@ -103,16 +103,7 @@ const SuperAdminRequirementsUploader = () => {
     }
   };
 
-  const handleStepClick = (index, to) => {
-    setActiveStep(index);
 
-    const pid = sessionStorage.getItem("admin_edit_person_id");
-    if (pid) {
-      navigate(`${to}?person_id=${pid}`);
-    } else {
-      navigate(to);
-    }
-  };
 
   const location = useLocation();
   const [uploads, setUploads] = useState([]);
@@ -178,8 +169,8 @@ const SuperAdminRequirementsUploader = () => {
   const [stepperColor, setStepperColor] = useState("#000000"); // ✅ NEW
 
   const [fetchedLogo, setFetchedLogo] = useState(null);
-  
-  
+
+
   const [companyName, setCompanyName] = useState("");
   const [shortTerm, setShortTerm] = useState("");
   const [campusAddress, setCampusAddress] = useState("");
@@ -435,7 +426,7 @@ const SuperAdminRequirementsUploader = () => {
           profile_img: "",
           generalAverage1: "",
           program: "",
-    strand: "",
+          strand: "",
           height: "",
           applyingAs: "",
           document_status: "",
@@ -469,7 +460,7 @@ const SuperAdminRequirementsUploader = () => {
         height: "",
         applyingAs: "",
         program: "",
-    strand: "",
+        strand: "",
         document_status: "",
         last_name: "",
         first_name: "",
@@ -545,6 +536,21 @@ const SuperAdminRequirementsUploader = () => {
       alert("Please select a document type.");
       return;
     }
+
+    const file = selectedFiles.file;
+
+    if (!file) {
+      showSnackbar("Please select a file first.", "warning");
+      return;
+    }
+
+    const maxSize = 4 * 1024 * 1024; // 4MB
+
+    if (file.size > maxSize) {
+      showSnackbar("File must not exceed 4MB", "error");
+      return;
+    }
+
 
     // If remarks is chosen but no file selected
     if (selectedFiles.remarks && !selectedFiles.file) {
@@ -753,6 +759,7 @@ const SuperAdminRequirementsUploader = () => {
             ) : (
               <Box display="flex" justifyContent="center" gap={1}>
                 <Button
+                disabled
                   variant="contained"
                   onClick={() => handleStatusChange(uploaded.upload_id, "1")}
                   sx={{
@@ -764,6 +771,7 @@ const SuperAdminRequirementsUploader = () => {
                   Verified
                 </Button>
                 <Button
+                disabled
                   variant="contained"
                   onClick={() => handleStatusChange(uploaded.upload_id, "2")}
                   sx={{
@@ -993,7 +1001,7 @@ const SuperAdminRequirementsUploader = () => {
         component={Paper}
         sx={{ width: "100%", border: `2px solid ${borderColor}` }}
       >
-       <Box sx={{ px: 2, mb: 2, mt: 2 }}>
+        <Box sx={{ px: 2, mb: 2, mt: 2 }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 1, }}>
             <Typography
               sx={{
@@ -1191,6 +1199,7 @@ const SuperAdminRequirementsUploader = () => {
                 Document Status:
               </Typography>
               <TextField
+              disabled
                 select
                 size="small"
                 name="document_status"

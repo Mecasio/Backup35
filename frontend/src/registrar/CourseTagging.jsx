@@ -181,6 +181,7 @@ const CourseTagging = () => {
   const [first_name, setUserFirstName] = useState(null);
   const [middle_name, setUserMiddleName] = useState(null);
   const [last_name, setUserLastName] = useState(null);
+  const [applyingAs, setApplyingAs] = useState("");
   const [currId, setCurr] = useState(null);
   const [courseCode, setCourseCode] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
@@ -197,6 +198,9 @@ const CourseTagging = () => {
   const [disableYearButtons, setDisableYearButtons] = useState(false);
   const [activeSemester, setActiveSemester] = useState("");
   const [activeSemesterId, setActiveSemesterId] = useState(null);
+
+  const isBulkEnrollDisabled =
+    String(applyingAs) === "7" || String(applyingAs) === "8";
 
   // 🔍 Map of course_id -> { allowed, hasPrereq }
   const [prereqMap, setPrereqMap] = useState({});
@@ -688,6 +692,7 @@ const CourseTagging = () => {
         firstName: first_name,
         middleName: middle_name,
         lastName: last_name,
+        applyingAs: applyingAsValue,
       } = response.data;
 
       localStorage.setItem("token2", token2);
@@ -707,6 +712,7 @@ const CourseTagging = () => {
       setUserFirstName(first_name);
       setUserMiddleName(middle_name);
       setUserLastName(last_name);
+      setApplyingAs(applyingAsValue ?? "");
       setCurr(effectiveProgram);
       setCourseCode(courseCode);
       setCourseDescription(courseDescription);
@@ -721,6 +727,7 @@ const CourseTagging = () => {
       });
     } catch (error) {
       console.log("");
+      setApplyingAs("");
       setSnack({
         open: true,
         message: "Student not found or error processing request.",
@@ -861,6 +868,10 @@ const CourseTagging = () => {
 
   // Wrapper: bulk enroll click → show modal if at least one course has prerequisite
   const handleBulkEnrollClick = async (yearLevelId, semesterLabel) => {
+    if (isBulkEnrollDisabled) {
+      return;
+    }
+
     if (!selectedSection) {
       setSnack({
         open: true,
@@ -1465,6 +1476,7 @@ const CourseTagging = () => {
                   key={index}
                   variant="contained"
                   color="success"
+                  disabled={disableYearButtons || isBulkEnrollDisabled}
                   onClick={() => handleBulkEnrollClick(year_level.year_level_id, formatSemester(activeSemester))}
                   sx={{
                     minWidth: 125,
@@ -1531,6 +1543,14 @@ const CourseTagging = () => {
                   }}
                 >
                   SUBJECT CODE
+                </TableCell>
+                 <TableCell
+                  style={{
+                    textAlign: "center",
+                    border: `2px solid ${borderColor}`,
+                  }}
+                >
+                 COMPONENTS
                 </TableCell>
                 <TableCell
                   style={{
@@ -1642,6 +1662,14 @@ const CourseTagging = () => {
                     }}
                   >
                     {e.course_code}
+                  </TableCell>
+                     <TableCell
+                    style={{
+                      display: "none",
+                      border: `2px solid ${borderColor}`,
+                    }}
+                  >
+                    {e.components}
                   </TableCell>
                   <TableCell
                     style={{

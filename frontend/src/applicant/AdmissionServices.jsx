@@ -253,24 +253,6 @@ const AdmissionServices = () => {
 
 
 
-    // 🔒 Disable right-click
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-    // 🔒 Block DevTools shortcuts + Ctrl+P silently
-    document.addEventListener('keydown', (e) => {
-        const isBlockedKey =
-            e.key === 'F12' || // DevTools
-            e.key === 'F11' || // Fullscreen
-            (e.ctrlKey && e.shiftKey && (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'j')) || // Ctrl+Shift+I/J
-            (e.ctrlKey && e.key.toLowerCase() === 'u') || // Ctrl+U (View Source)
-            (e.ctrlKey && e.key.toLowerCase() === 'p');   // Ctrl+P (Print)
-
-        if (isBlockedKey) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-    });
-
 
 
     return (
@@ -388,10 +370,9 @@ const AdmissionServices = () => {
                                         }}>
                                             <div style={{
                                                 marginLeft: "-145px",
-                                                fontSize: "12px",
+                                                fontSize: "13px",
                                                 fontFamily: "Arial",
-                                                letterSpacing: '2px',
-                                                fontWeight: "normal"
+
                                             }}>
                                                 Republic of the Philippines
                                             </div>
@@ -399,11 +380,10 @@ const AdmissionServices = () => {
                                             <div
                                                 style={{
                                                     marginLeft: "-145px",
-                                                    fontSize: "14px",
-                                                    letterSpacing: "2px",
-
+                                                    letterSpacing: "1px",
+                                                    fontWeight: "bold",
                                                     fontFamily: "Arial",
-                                                    fontWeight: "bold"
+                                                    fontSize: "20px"
                                                 }}
                                             >
                                                 <b>{firstLine}</b>
@@ -413,12 +393,10 @@ const AdmissionServices = () => {
                                                 <div
                                                     style={{
                                                         marginLeft: "-145px",
-                                                        fontSize: "14px",
-                                                        letterSpacing: "2px",
-
+                                                        letterSpacing: "1px",
+                                                        fontWeight: "bold",
                                                         fontFamily: "Arial",
-                                                        fontWeight: "bold"
-
+                                                        fontSize: "20px"
                                                     }}
                                                 >
                                                     <b>{secondLine}</b>
@@ -427,14 +405,15 @@ const AdmissionServices = () => {
 
                                             <div style={{
                                                 marginLeft: "-145px",
-                                                fontSize: "12px",
-                                                fontFamily: "Arial",
-                                                letterSpacing: '1px',
+                                                fontFamily: "Arial", fontSize: "13px"
 
                                             }}>
                                                 {/* ✅ Only dynamic campus address */}
                                                 {campusAddress && (
-                                                    <div style={{ fontSize: "12px", letterSpacing: "1px", }}>
+                                                    <div style={{
+                                                        fontSize: "13px",
+                                                        fontFamily: "Arial",
+                                                    }}>
                                                         {campusAddress}
                                                     </div>
                                                 )}

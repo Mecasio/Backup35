@@ -90,7 +90,7 @@ const RoomRegistration = () => {
   }, [settings]);
 
 
-
+  const [openFormDialog, setOpenFormDialog] = useState(false);
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
@@ -318,6 +318,8 @@ const RoomRegistration = () => {
     setType(room.type || "");
     setBranch(room.branch || 1);
     setIsAircon(room.is_airconditioned || 0);
+
+    setOpenFormDialog(true); 
   };
 
 
@@ -501,17 +503,55 @@ const RoomRegistration = () => {
       <br />
 
 
-      {/* ✅ TABLE SECTION */}
-      <Grid item xs={12} md={7}>
-        <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}`, }}>
-          <Table>
-            <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
-              <TableRow>
-                <TableCell sx={{ color: 'white', textAlign: "Center" }}>Room Registered</TableCell>
-              </TableRow>
-            </TableHead>
-          </Table>
-        </TableContainer>
+
+     <Grid item xs={12} md={7}>
+      <TableContainer component={Paper} sx={{ width: '100%', border: `2px solid ${borderColor}` }}>
+  <Table>
+    <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2" }}>
+      <TableRow>
+        <TableCell sx={{ color: 'white', p: 1 }}>
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "100%"
+            }}
+          >
+            {/* LEFT SIDE */}
+            <Typography sx={{ fontWeight: "bold", color: "white" }}>
+              Room Registered
+            </Typography>
+
+            {/* RIGHT SIDE BUTTON */}
+            <Button
+              variant="contained"
+              onClick={() => setOpenFormDialog(true)}
+              sx={{
+                backgroundColor: "#1976d2", // ✅ Blue
+                color: "#fff",
+                fontWeight: "bold",
+                borderRadius: "8px",
+                width: "250px",
+                textTransform: "none",
+                px: 2,
+                '&:hover': {
+                  backgroundColor: "#1565c0" // darker blue hover
+                }
+              }}
+            >
+              + Add Room
+            </Button>
+          </Box>
+
+        </TableCell>
+      </TableRow>
+    </TableHead>
+  </Table>
+</TableContainer>
+
+        
 
         <Paper
           elevation={3}
@@ -949,28 +989,26 @@ const RoomRegistration = () => {
       <br />
       <br />
 
-
-      <TableContainer component={Paper} sx={{ width: '50%', border: `2px solid ${borderColor}`, }}>
-        <Table>
-          <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", }}>
-            <TableRow>
-              <TableCell sx={{ color: 'white', textAlign: "Center" }}>Room Registration Panel</TableCell>
-            </TableRow>
-          </TableHead>
-        </Table>
-      </TableContainer>
-
-
-      {/* ✅ FORM SECTION */}
-      <Grid item xs={12} md={5}>
-        <Paper
-          elevation={3}
+      <Dialog
+        open={openFormDialog}
+        onClose={() => setOpenFormDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        {/* HEADER */}
+        <DialogTitle
           sx={{
-            p: 3,
-            border: `2px solid ${borderColor}`,
-            width: "50%"
+            backgroundColor: settings?.header_color || "#1976d2",
+            color: "#fff",
+            textAlign: "center",
+            fontWeight: "bold"
           }}
         >
+          {editingRoom ? "Update Room" : "Room Registration"}
+        </DialogTitle>
+
+        {/* CONTENT */}
+        <DialogContent sx={{ mt: 2 }}>
 
           <Typography fontWeight={500}>Branch:</Typography>
           <TextField
@@ -987,12 +1025,10 @@ const RoomRegistration = () => {
             ))}
           </TextField>
 
-
           <Typography fontWeight={500}>Building Name:</Typography>
           <TextField
             fullWidth
             label="Building Name"
-            variant="outlined"
             value={buildingName}
             onChange={(e) => setBuildingName(e.target.value)}
             sx={{ mb: 2 }}
@@ -1002,23 +1038,22 @@ const RoomRegistration = () => {
           <TextField
             fullWidth
             label="Room Name"
-            variant="outlined"
             value={roomName}
             onChange={(e) => setRoomName(e.target.value)}
             sx={{ mb: 2 }}
           />
+
           <Typography fontWeight={500}>Floor:</Typography>
           <TextField
             fullWidth
-            label="Floor"
             type="number"
+            label="Floor"
             value={floor}
             onChange={(e) => setFloor(e.target.value)}
             sx={{ mb: 2 }}
           />
 
           <Typography fontWeight={500}>Room Type:</Typography>
-
           <TextField
             select
             fullWidth
@@ -1029,17 +1064,9 @@ const RoomRegistration = () => {
             <MenuItem value="">
               <em>Select Room Type</em>
             </MenuItem>
-
-            <MenuItem value="Lecture">
-              Lecture
-            </MenuItem>
-
-            <MenuItem value="Laboratory">
-              Laboratory
-            </MenuItem>
+            <MenuItem value="Lecture">Lecture</MenuItem>
+            <MenuItem value="Laboratory">Laboratory</MenuItem>
           </TextField>
-
-
 
           <Typography fontWeight={500}>Airconditioned:</Typography>
           <TextField
@@ -1056,25 +1083,30 @@ const RoomRegistration = () => {
             ))}
           </TextField>
 
+        </DialogContent>
+
+        {/* ACTIONS */}
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setOpenFormDialog(false)}>
+            Cancel
+          </Button>
+
           <Button
             variant="contained"
-            fullWidth
+            sx={{ backgroundColor: settings?.header_color || "#1976d2" }}
             onClick={() => {
               if (editingRoom) {
                 setOpenUpdateDialog(true);
               } else {
                 handleAddRoom();
+                setOpenFormDialog(false); // close after save
               }
             }}
-
           >
-            {editingRoom ? "Update Room" : "Save"}
+            {editingRoom ? "Update" : "Save"}
           </Button>
-        </Paper>
-
-
-      </Grid>
-
+        </DialogActions>
+      </Dialog>
 
 
       <Dialog open={openTypeDialog} onClose={() => setOpenTypeDialog(false)}>

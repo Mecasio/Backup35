@@ -46,7 +46,7 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-
+import Cropper from "react-easy-crop";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const AnnouncementPanel = () => {
@@ -98,22 +98,27 @@ const AnnouncementPanel = () => {
     }, []);
 
 
- const tabs = [
-    { label: "Room Registration", to: "/room_registration", icon: <KeyIcon fontSize="large" /> },
-    { label: "Verify Documents Room Assignment", to: "/verify_document_schedule", icon: <MeetingRoomIcon fontSize="large" /> },
-    // { label: "Verify Documents Schedule Management", to: "/verify_schedule", icon: <ScheduleIcon fontSize="large" /> },
-    { label: "Evaluator's Applicant List", to: "/evaluator_schedule_room_list", icon: <PeopleIcon fontSize="large" /> },
-    { label: "Entrance Exam Room Assignment", to: "/assign_entrance_exam", icon: <MeetingRoomIcon fontSize="large" /> },
-    // { label: "Entrance Exam Schedule Management", to: "/assign_schedule_applicant", icon: <ScheduleIcon fontSize="large" /> },
-    { label: "Proctor's Applicant List", to: "/admission_schedule_room_list", icon: <PeopleIcon fontSize="large" /> },
-    // { label: "Examination Permit", to: "/registrar_examination_profile", icon: <PersonSearchIcon fontSize="large" /> },
-    { label: "Announcement", to: "/announcement_for_admission", icon: <CampaignIcon fontSize="large" /> },
-  ];
+    const tabs = [
+        { label: "Room Registration", to: "/room_registration", icon: <KeyIcon fontSize="large" /> },
+        { label: "Verify Documents Room Assignment", to: "/verify_document_schedule", icon: <MeetingRoomIcon fontSize="large" /> },
+        // { label: "Verify Documents Schedule Management", to: "/verify_schedule", icon: <ScheduleIcon fontSize="large" /> },
+        { label: "Evaluator's Applicant List", to: "/evaluator_schedule_room_list", icon: <PeopleIcon fontSize="large" /> },
+        { label: "Entrance Exam Room Assignment", to: "/assign_entrance_exam", icon: <MeetingRoomIcon fontSize="large" /> },
+        // { label: "Entrance Exam Schedule Management", to: "/assign_schedule_applicant", icon: <ScheduleIcon fontSize="large" /> },
+        { label: "Proctor's Applicant List", to: "/admission_schedule_room_list", icon: <PeopleIcon fontSize="large" /> },
+        // { label: "Examination Permit", to: "/registrar_examination_profile", icon: <PersonSearchIcon fontSize="large" /> },
+        { label: "Announcement", to: "/announcement_for_admission", icon: <CampaignIcon fontSize="large" /> },
+    ];
 
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = useState(5);
     const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
 
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+    const [openCrop, setOpenCrop] = useState(false);
+    const [imageSrc, setImageSrc] = useState(null);
 
     const handleStepClick = (index, to) => {
         setActiveStep(index);
@@ -188,7 +193,7 @@ const AnnouncementPanel = () => {
             setSnackbar({ open: true, message: "Error saving announcement!", severity: "error" });
         }
     }
-    
+
     const handleEdit = (announcement) => {
         setForm({
             title: announcement.title,
@@ -243,6 +248,62 @@ const AnnouncementPanel = () => {
         '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
         '& svg': { color: 'white' }
     };
+    const createImage = (url) =>
+        new Promise((resolve, reject) => {
+            const image = new Image();
+            image.addEventListener("load", () => resolve(image));
+            image.addEventListener("error", (error) => reject(error));
+            image.setAttribute("crossOrigin", "anonymous");
+            image.src = url;
+        });
+
+    const getCroppedImg = async (imageSrc, crop) => {
+        const image = await createImage(imageSrc);
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = 900;  // ✅ force exact size
+        canvas.height = 700;
+
+        ctx.drawImage(
+            image,
+            crop.x,
+            crop.y,
+            crop.width,
+            crop.height,
+            0,
+            0,
+            900,
+            700
+        );
+
+        return new Promise((resolve) => {
+            canvas.toBlob((blob) => {
+                const file = new File([blob], "cropped.jpg", {
+                    type: "image/jpeg",
+                });
+                resolve(file);
+            }, "image/jpeg");
+        });
+    };
+
+    const handleCropSave = async () => {
+        try {
+            const croppedFile = await getCroppedImg(imageSrc, croppedAreaPixels);
+
+            setImage(croppedFile); // ✅ THIS replaces original image
+            setOpenCrop(false);
+
+            setSnackbar({
+                open: true,
+                message: "Image cropped successfully!",
+                severity: "success",
+            });
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
 
 
 
@@ -586,7 +647,8 @@ const AnnouncementPanel = () => {
                                                 style={{
                                                     width: "200px",
                                                     height: "150px",
-                                                    objectFit: "cover",
+                                                    objectFit: "contain",
+                                                    background: "#000",
                                                     borderRadius: "4px",
                                                 }}
                                             />
@@ -867,7 +929,22 @@ const AnnouncementPanel = () => {
                         sx={{ mt: 2, bgcolor: mainButtonColor }}
                     >
                         {image ? "Change Image" : "Upload Image"}
-                        <input type="file" hidden accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
+                        <input
+                            type="file"
+                            hidden
+                            accept="image/*"
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (!file) return;
+
+                                const reader = new FileReader();
+                                reader.onload = () => {
+                                    setImageSrc(reader.result);
+                                    setOpenCrop(true); // 👉 open crop modal
+                                };
+                                reader.readAsDataURL(file);
+                            }}
+                        />
                     </Button>
 
                     {image && (
@@ -947,6 +1024,33 @@ const AnnouncementPanel = () => {
                         }}
                     >
                         Yes, Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog open={openCrop} onClose={() => setOpenCrop(false)} maxWidth="md">
+                <DialogTitle>Crop Image (900 x 700)</DialogTitle>
+
+                <DialogContent>
+                    <Box sx={{ position: "relative", width: "500px", height: "375px" }}>
+                        <Cropper
+                            image={imageSrc}
+                            crop={crop}
+                            zoom={zoom}
+                            aspect={1000 / 750} // ✅ IMPORTANT (4:3 ratio)
+                            onCropChange={setCrop}
+                            onZoomChange={setZoom}
+                            onCropComplete={(croppedArea, croppedPixels) => {
+                                setCroppedAreaPixels(croppedPixels);
+                            }}
+                        />
+                    </Box>
+                </DialogContent>
+
+                <DialogActions>
+                    <Button onClick={() => setOpenCrop(false)}>Cancel</Button>
+                    <Button variant="contained" onClick={handleCropSave}>
+                        Crop & Use Image
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -662,9 +662,11 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
                   ? `Student · ${personData?.student_number || ""}`
                   : role === "faculty"
                     ? `Faculty · ${personData?.employee_id || ""}`
-                    : role
-                      ? role.charAt(0).toUpperCase() + role.slice(1)
-                      : ""}
+                    : role === "applicant"
+                      ? `Applicant · ${personData?.applicant_number || ""}`
+                        : role
+                          ? role.charAt(0).toUpperCase() + role.slice(1)
+                          : ""}
             </div>
             {hasDepartment && (
               <div className="sb-profile-dprtmnt">{personData.dprtmnt_code} Department</div>

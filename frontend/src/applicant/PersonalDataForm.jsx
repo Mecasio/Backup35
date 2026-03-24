@@ -9,7 +9,7 @@ import API_BASE_URL from "../apiConfig";
 
 const PersonalDataForm = () => {
 
-     const settings = useContext(SettingsContext);
+    const settings = useContext(SettingsContext);
 
     const [titleColor, setTitleColor] = useState("#000000");
     const [subtitleColor, setSubtitleColor] = useState("#555555");
@@ -438,7 +438,7 @@ const PersonalDataForm = () => {
                                 <div>
                                     {/* Top Line: Republic */}
                                     <div style={{
-                                        fontSize: "14px",
+                                        fontSize: "13px",
                                         fontFamily: "Arial",
                                         textAlign: "left",
                                         marginBottom: "5px"
@@ -449,10 +449,10 @@ const PersonalDataForm = () => {
                                     {/* Institute Name */}
                                     <div style={{
                                         textAlign: "center",
-                                        fontSize: "23px",
+                                        letterSpacing: "1px",
                                         fontWeight: "bold",
-                                        color: "black",
                                         fontFamily: "Arial",
+                                        fontSize: "20px",
                                         marginBottom: "5px"
                                     }}>
                                         {companyName}

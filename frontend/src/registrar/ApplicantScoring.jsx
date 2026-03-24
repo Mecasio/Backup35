@@ -121,44 +121,44 @@ const ApplicantScoring = () => {
     };
 
     const tabs = [
-   {
-      label: "Admission Process for Registrar",
-      to: "/applicant_list_admin",
-      icon: <SchoolIcon fontSize="large" />,
-    },
-    {
-      label: "Applicant Form",
-      to: "/admin_dashboard1",
-      icon: <DashboardIcon fontSize="large" />,
-    },
-    {
-      label: "Student Requirements",
-      to: "/student_requirements",
-      icon: <AssignmentIcon fontSize="large" />,
-    },
-    {
-      label: "Verify Schedule Management",
-      to: "/verify_schedule",
-      icon: <ScheduleIcon fontSize="large" />,
-    },
-    {
-      label: "Entrance Exam Schedule Management",
-      to: "/assign_schedule_applicant",
-      icon: <ScheduleIcon fontSize="large" />,
-    },
+        {
+            label: "Admission Process for Registrar",
+            to: "/applicant_list_admin",
+            icon: <SchoolIcon fontSize="large" />,
+        },
+        {
+            label: "Applicant Form",
+            to: "/admin_dashboard1",
+            icon: <DashboardIcon fontSize="large" />,
+        },
+        {
+            label: "Student Requirements",
+            to: "/student_requirements",
+            icon: <AssignmentIcon fontSize="large" />,
+        },
+        {
+            label: "Verify Schedule Management",
+            to: "/verify_schedule",
+            icon: <ScheduleIcon fontSize="large" />,
+        },
+        {
+            label: "Entrance Exam Schedule Management",
+            to: "/assign_schedule_applicant",
+            icon: <ScheduleIcon fontSize="large" />,
+        },
 
-    {
-      label: "Examination Permit",
-      to: "/registrar_examination_profile",
-      icon: <PersonSearchIcon fontSize="large" />,
-    },
+        {
+            label: "Examination Permit",
+            to: "/registrar_examination_profile",
+            icon: <PersonSearchIcon fontSize="large" />,
+        },
 
 
-    {
-      label: "Entrance Examination Score",
-      to: "/applicant_scoring",
-      icon: <ScoreIcon fontSize="large" />,
-    },
+        {
+            label: "Entrance Examination Score",
+            to: "/applicant_scoring",
+            icon: <ScoreIcon fontSize="large" />,
+        },
 
     ];
 
@@ -733,130 +733,143 @@ const ApplicantScoring = () => {
     const divToPrintRef = useRef();
 
 
-    const printDiv = () => {
-        const newWin = window.open("", "Print-Window");
-        newWin.document.open();
+ const printDiv = () => {
+  const newWin = window.open("", "Print-Window");
+  newWin.document.open();
 
-        // ✅ Dynamic logo and company name from Settings
-        const logoSrc = fetchedLogo || EaristLogo;
-        const name = companyName?.trim() || "No Company Name Available";
+  const logoSrc = fetchedLogo || EaristLogo;
+  const name = companyName?.trim() || "";
 
-        // ✅ Split company name into two lines for layout
-        const words = name.split(" ");
-        const middleIndex = Math.ceil(words.length / 2);
-        const firstLine = words.slice(0, middleIndex).join(" ");
-        const secondLine = words.slice(middleIndex).join(" ");
+  // ✅ Balanced split (better than simple half)
+  const words = name.split(" ");
+  const middleIndex = Math.ceil(words.length / 2);
+  const firstLine = words.slice(0, middleIndex).join(" ");
+  const secondLine = words.slice(middleIndex).join(" ");
 
-        // ✅ Dynamic campus address from Settings (dropdown or custom)
-        let campusAddress = "";
-        if (settings?.campus_address) {
-            campusAddress = settings.campus_address;
-        } else if (settings?.address) {
-            campusAddress = settings.address;
-        } else {
-            campusAddress = "No address set in Settings";
-        }
+  // ✅ Dynamic campus address
+  let campusAddress = "";
+  if (settings?.campus_address && settings.campus_address.trim() !== "") {
+    campusAddress = settings.campus_address;
+  } else if (settings?.address && settings.address.trim() !== "") {
+    campusAddress = settings.address;
+  } else {
+    campusAddress = "No address set in Settings";
+  }
 
-        const htmlContent = `
+  const htmlContent = `
   <html>
     <head>
       <title>Entrance Examination Scores</title>
-    <style>
-  @page { size: A4; margin: 10mm; }
-  body { font-family: Arial; margin: 0; padding: 0; }
+      <style>
+        @page { size: A4 landscape; margin: 10mm; }
 
-  .print-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 0 10px; /* ✅ ensures right/left borders are not cut off */
-  }
+        body {
+          font-family: Arial;
+          margin: 0;
+          padding: 0;
+        }
 
-  .print-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    width: 100%;
-      margin-top: 30px;
-  }
+        .print-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 0 15px;
+        }
 
-  .print-header img {
-    position: absolute;
-    left: 0;
-    margin-left: 10px;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
+        /* ✅ HEADER FIXED ALIGNMENT */
+        .print-header {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 20px;
+          width: 100%;
+          margin-top: 20px;
+        }
 
-  /* ✅ Consistent and thicker table borders */
-table {
-  border-collapse: collapse;
-  width: 100%;
-  margin-top: 20px;
-  border: 1.5px solid black;
-  table-layout: fixed; /* ✅ lock column widths */
-}
-th, td {
-  border: 1.5px solid black;
-  padding: 6px;
-  font-size: 12px;
-  text-align: center;
-  word-wrap: break-word; /* ✅ prevent overflow */
-  box-sizing: border-box;
-}
+        .print-header img {
+          width: 120px;
+          height: 120px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
 
-  /* ✅ Force right border to print cleanly */
-  th:last-child,
-  td:last-child {
-    border-right: 1.2px solid maroon !important;
-  }
+        .header-text {
+          text-align: center;
+        }
 
-  /* ✅ Slight padding helps prevent printer cutoff */
-  @media print {
-    body {
-      margin-right: 5mm;
-      margin-left: 5mm;
-    }
-  }
+        .header-text .gov {
+          font-size: 13px;
+        }
 
-  th {
-    background-color: #800000;
-    color: white;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-</style>
+        .header-text .school-name {
+          font-size: 22px;
+          font-weight: bold;
+          letter-spacing: 1px;
+          line-height: 1.2;
+        }
 
+        .header-text .address {
+          font-size: 13px;
+          margin-top: 2px;
+        }
+
+        .header-text .title {
+          margin-top: 25px;
+          font-size: 22px;
+          font-weight: bold;
+          letter-spacing: 1px;
+        }
+
+        /* ✅ TABLE IMPROVEMENTS */
+        table {
+          border-collapse: collapse;
+          width: 100%;
+          margin-top: 25px;
+          border: 1.5px solid black;
+          table-layout: fixed;
+        }
+
+        th, td {
+          border: 1.5px solid black;
+          padding: 7px 8px;
+          font-size: 13px;
+          text-align: center;
+          word-wrap: break-word;
+        }
+
+        th {
+          background-color: lightgray;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+
+        /* ✅ Prevent last column cut */
+        th:last-child, td:last-child {
+          border-right: 1.5px solid black !important;
+        }
+
+      </style>
     </head>
+
     <body onload="window.print(); setTimeout(() => window.close(), 100);">
       <div class="print-container">
+
         <!-- ✅ HEADER -->
         <div class="print-header">
-          <img src="${logoSrc}" alt="School Logo" />
-          <div>
-            <div>Republic of the Philippines</div>
+          <img src="${logoSrc}" alt="School Logo"/>
 
-            <!-- ✅ Dynamic company name -->
-            <b style="letter-spacing: 1px; font-size: 22px; font-family: 'Times New Roman', serif;">
-              ${firstLine}
-            </b>
-            ${secondLine
-                ? `<div style="letter-spacing: 1px; font-size: 22px; font-family: 'Times New Roman', serif;">
-                     <b>${secondLine}</b>
-                   </div>`
-                : ""
-            }
+          <div class="header-text">
+            <div class="gov">Republic of the Philippines</div>
 
-            <!-- ✅ Dynamic campus address from Settings -->
-            <div style="font-size: 12px;">${campusAddress}</div>
+            ${name ? `
+              <div class="school-name">${firstLine}</div>
+              ${secondLine ? `<div class="school-name">${secondLine}</div>` : ""}
+            ` : ""}
 
-            <div style="margin-top: 25px;">
-              <b style="font-size: 22px; letter-spacing: 1px;">Entrance Examination Scores</b>
-            </div>
+            <div class="address">${campusAddress}</div>
+
+            <div class="title">Entrance Examination Scores</div>
           </div>
         </div>
 
@@ -864,56 +877,56 @@ th, td {
         <table>
           <thead>
             <tr>
-              <th style="width:15%">Applicant ID</th>
-              <th class="name-col">Applicant Name</th>
-              <th style="width:15%">Program</th>
-              <th style="width:7%">English</th>
-              <th style="width:7%">Science</th>
-              <th style="width:7%">Filipino</th>
-              <th style="width:7%">Math</th>
-              <th style="width:7%">Abstract</th>
-              <th style="width:10%">Final Rating</th>
-                 <th style="width:10%">Status</th>
+              <th style="width:10%">Applicant ID</th>
+              <th style="width:28%">Applicant Name</th>
+              <th style="width:10%">Program</th>
+              <th style="width:6%">Eng</th>
+              <th style="width:6%">Sci</th>
+              <th style="width:6%">Fil</th>
+              <th style="width:6%">Math</th>
+              <th style="width:6%">Abs</th>
+              <th style="width:8%">Final</th>
+              <th style="width:8%">Status</th>
             </tr>
           </thead>
-          <tbody>
-            ${filteredPersons
-                .map((person) => {
-                    const english = Number(person.english) || 0;
-                    const science = Number(person.science) || 0;
-                    const filipino = Number(person.filipino) || 0;
-                    const math = Number(person.math) || 0;
-                    const abstract = Number(person.abstract) || 0;
-                    const computedFinalRating = (english + science + filipino + math + abstract) / 5;
 
-                    return `
+          <tbody>
+            ${filteredPersons.map((person) => {
+              const english = Number(person.english) || 0;
+              const science = Number(person.science) || 0;
+              const filipino = Number(person.filipino) || 0;
+              const math = Number(person.math) || 0;
+              const abstract = Number(person.abstract) || 0;
+
+              const computedFinalRating =
+                (english + science + filipino + math + abstract) / 5;
+
+              return `
                 <tr>
                   <td>${person.applicant_number || ""}</td>
-                  <td class="name-col">${person.last_name}, ${person.first_name} ${person.middle_name || ""} ${person.extension || ""}</td>
-                  <td>${curriculumOptions.find(
-                        (item) =>
-                            item.curriculum_id?.toString() === person.program?.toString()
-                    )?.program_code || ""}</td>
+                  <td>${person.last_name}, ${person.first_name} ${person.middle_name || ""} ${person.extension || ""}</td>
+                  <td>${person.program_code || ""}</td>
                   <td>${english}</td>
                   <td>${science}</td>
                   <td>${filipino}</td>
                   <td>${math}</td>
                   <td>${abstract}</td>
                   <td>${computedFinalRating.toFixed(2)}</td>
-                   <td>${person.status || ""}</td>
-                </tr>`;
-                })
-                .join("")}
+                  <td>${person.status || ""}</td>
+                </tr>
+              `;
+            }).join("")}
           </tbody>
         </table>
+
       </div>
     </body>
-  </html>`;
+  </html>
+  `;
 
-        newWin.document.write(htmlContent);
-        newWin.document.close();
-    };
-
+  newWin.document.write(htmlContent);
+  newWin.document.close();
+};
 
 
     const [file, setFile] = useState(null);
@@ -1203,7 +1216,7 @@ th, td {
                                     name="fromDate"
                                     value={person.fromDate || ""}
                                     onChange={(e) => setPerson(prev => ({ ...prev, fromDate: e.target.value }))}
-                                 />
+                                />
                             </FormControl>
 
                             <div style={{ position: "relative" }}>
@@ -1249,7 +1262,7 @@ th, td {
                                     name="toDate"
                                     value={person.toDate || ""}
                                     onChange={(e) => setPerson(prev => ({ ...prev, toDate: e.target.value }))}
-                                 />
+                                />
                             </FormControl>
 
 
