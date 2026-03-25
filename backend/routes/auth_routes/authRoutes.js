@@ -405,10 +405,10 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     const semCode = activeYearResult[0].semester_code;
 
     const [countRes] = await db.query(
-      "SELECT COUNT(*) AS count FROM applicant_numbering_table",
+      "SELECT counter, query FROM applicant_counter WHERE id = 1",
     );
 
-    const padded = String(countRes[0].count + 1).padStart(5, "0");
+    const padded = String(countRes[0].query).padStart(5, "0");
     const applicant_number = `${year}${semCode}${padded}`;
 
     await db.query(
@@ -459,6 +459,12 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
        VALUES (?, ?, 0, 'Waiting List')`,
       [null, applicant_number],
     );
+
+    const nextQuery = countRes[0].query + 1;
+
+    await db.query(
+      "UPDATE applicant_counter SET counter = ?, query = ? WHERE id = 1", [countRes[0].query, nextQuery]
+    )
 
     res.status(201).json({
       success: true,
@@ -1027,10 +1033,11 @@ router.post("/login_applicant", async (req, res) => {
       const semCode = activeYear[0].semester_code;
 
       const [countRes] = await db.query(
-        "SELECT COUNT(*) AS count FROM applicant_numbering_table",
+        "SELECT counter, query FROM applicant_counter WHERE id = 1",
       );
-      const padded = String(countRes[0].count + 1).padStart(5, "0");
-      applicantNumber = `${year}${semCode}${padded}`;
+
+      const padded = String(countRes[0].query).padStart(5, "0");
+      const applicantNumber = `${year}${semCode}${padded}`;
 
       // Insert applicant_number
       await db.query(
@@ -1053,6 +1060,11 @@ router.post("/login_applicant", async (req, res) => {
         "UPDATE applicant_numbering_table SET qr_code = ? WHERE applicant_number = ?",
         [qrFilename, applicantNumber],
       );
+
+      const nextQuery = countRes[0].query + 1;
+      await db.query(
+        "UPDATE applicant_counter SET counter = ?, query = ? WHERE id = 1", [countRes[0].query, nextQuery]
+      )
     } else {
       // ✅ Already has applicant_number + QR
       applicantNumber = existing[0].applicant_number;

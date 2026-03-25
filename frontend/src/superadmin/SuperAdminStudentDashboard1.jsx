@@ -22,17 +22,16 @@ import { motion } from "framer-motion";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { FaFileExcel } from "react-icons/fa";
 import ExamPermit from "../applicant/ExamPermit";
-import { Snackbar, Alert } from '@mui/material';
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 import SearchIcon from "@mui/icons-material/Search";
+import { Snackbar, Alert } from "@mui/material";
 import API_BASE_URL from "../apiConfig";
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import DateField from "../components/DateField";
 
 
-
-const SuperAdminStudentDashboard1 = () => {
+const SuperAdminApplicantDashboard1 = () => {
 
     const settings = useContext(SettingsContext);
 
@@ -83,7 +82,7 @@ const SuperAdminStudentDashboard1 = () => {
 
     }, [settings]);
 
-    const [snack, setSnack] = useState({ open: false, message: '', severity: 'info' });
+
     const navigate = useNavigate();
     const [userID, setUserID] = useState("");
     const [user, setUser] = useState("");
@@ -152,12 +151,14 @@ const SuperAdminStudentDashboard1 = () => {
         fetchYearLevels();
     }, []);
 
+    const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+    const handleCloseSnackbar = () => setSnackbar((prev) => ({ ...prev, open: false }));
 
     const [hasAccess, setHasAccess] = useState(null);
     const [loading, setLoading] = useState(false);
 
 
-    const pageId = 86;
+    const pageId = 75;
 
     const [employeeID, setEmployeeID] = useState("");
 
@@ -204,16 +205,18 @@ const SuperAdminStudentDashboard1 = () => {
         }
     };
 
+
     // do not alter
     const location = useLocation();
 
     const queryParams = new URLSearchParams(location.search);
-    const queryPersonId = queryParams.get("person_id")?.trim() || "";
+    const queryPersonId = queryParams.get("person_id");
 
     useEffect(() => {
         const storedUser = localStorage.getItem("email");
         const storedRole = localStorage.getItem("role");
         const loggedInPersonId = localStorage.getItem("person_id");
+        const searchedPersonId = sessionStorage.getItem("admin_edit_person_id");
 
         if (!storedUser || !storedRole || !loggedInPersonId) {
             window.location.href = "/login";
@@ -223,76 +226,35 @@ const SuperAdminStudentDashboard1 = () => {
         setUser(storedUser);
         setUserRole(storedRole);
 
+        // Roles that can access
         const allowedRoles = ["registrar", "applicant", "superadmin"];
-        if (!allowedRoles.includes(storedRole)) {
-            window.location.href = "/login";
+        if (allowedRoles.includes(storedRole)) {
+            // ✅ Always take URL param first
+            const targetId = queryPersonId || searchedPersonId || loggedInPersonId;
+
+            // Save it so other pages (ECAT, forms) can use it
+            sessionStorage.setItem("admin_edit_person_id", targetId);
+
+            setUserID(targetId);
+            fetchByPersonId(targetId);
             return;
         }
 
-        const lastSelected = sessionStorage.getItem("admin_edit_person_id");
-
-        // ⭐ CASE 1: URL HAS ?person_id=
-        if (queryPersonId !== "") {
-            sessionStorage.setItem("admin_edit_person_id", queryPersonId);
-            setUserID(queryPersonId);
-            return;
-        }
-
-
-        // ⭐ CASE 3: No URL ID and no last selected → start blank
-        setUserID("");
+        window.location.href = "/login";
     }, [queryPersonId]);
-
-
-
-
 
     const fetchByPersonId = async (personID) => {
         try {
-            const res = await axios.get(`${API_BASE_URL}/api/person/${personID}`);
+            const res = await axios.get(`${API_BASE_URL}/api/person_with_applicant/${personID}`);
             setPerson(res.data);
             setSelectedPerson(res.data);
             if (res.data?.applicant_number) {
-                // optional: whatever logic you want
             }
         } catch (err) {
-            console.error("❌ person (DB3) fetch failed:", err);
+            console.error("❌ person_with_applicant failed:", err);
         }
     };
 
-    useEffect(() => {
-        let consumedFlag = false;
-
-        const tryLoad = async () => {
-            if (queryPersonId) {
-                await fetchByPersonId(queryPersonId);
-                setExplicitSelection(true);
-                consumedFlag = true;
-                return;
-            }
-
-            // fallback only if it's a fresh selection from Applicant List
-            const source = sessionStorage.getItem("admin_edit_person_id_source");
-            const tsStr = sessionStorage.getItem("admin_edit_person_id_ts");
-            const id = sessionStorage.getItem("admin_edit_person_id");
-            const ts = tsStr ? parseInt(tsStr, 10) : 0;
-            const isFresh = source === "applicant_list" && Date.now() - ts < 5 * 60 * 1000;
-
-            if (id && isFresh) {
-                await fetchByPersonId(id);
-                setExplicitSelection(true);
-                consumedFlag = true;
-            }
-        };
-
-        tryLoad().finally(() => {
-            // consume the freshness so it won't auto-load again later
-            if (consumedFlag) {
-                sessionStorage.removeItem("admin_edit_person_id_source");
-                sessionStorage.removeItem("admin_edit_person_id_ts");
-            }
-        });
-    }, [queryPersonId]);
 
 
 
@@ -300,11 +262,11 @@ const SuperAdminStudentDashboard1 = () => {
     const [clickedSteps, setClickedSteps] = useState([]);
 
     const steps = [
-        { label: "Personal Information", icon: <PersonIcon />, path: "/super_admin_student_dashboard1" },
-        { label: "Family Background", icon: <FamilyRestroomIcon />, path: "/super_admin_student_dashboard2" },
-        { label: "Educational Attainment", icon: <SchoolIcon />, path: "/super_admin_student_dashboard3" },
-        { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: "/super_admin_student_dashboard4" },
-        { label: "Other Information", icon: <InfoIcon />, path: "/super_admin_student_dashboard5" },
+        { label: "Personal Information", icon: <PersonIcon />, path: "/super_admin_applicant_dashboard1" },
+        { label: "Family Background", icon: <FamilyRestroomIcon />, path: "/super_admin_applicant_dashboard2" },
+        { label: "Educational Attainment", icon: <SchoolIcon />, path: "/super_admin_applicant_dashboard3" },
+        { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: "/super_admin_applicant_dashboard4" },
+        { label: "Other Information", icon: <InfoIcon />, path: "/super_admin_applicant_dashboard5" },
     ];
 
     const handleStepClick = (index) => {
@@ -314,6 +276,94 @@ const SuperAdminStudentDashboard1 = () => {
     };
 
 
+
+
+    // Do not alter
+    // ✅ Universal update for SuperAdmin (edits any applicant safely)
+    const handleUpdate = async (updatedData) => {
+        if (!person) return;
+
+        try {
+            // ✅ Get correct applicant ID
+            const targetId = selectedPerson?.person_id || queryPersonId || person.person_id;
+            if (!targetId) {
+                console.warn("⚠️ No valid applicant ID found — skipping update.");
+                return;
+            }
+
+            // ✅ Only include valid columns existing in person_table
+            const allowedFields = [
+                "person_id", "profile_img", "campus", "academicProgram", "classifiedAs", "applyingAs",
+                "program", "program2", "program3", "yearLevel",
+                "last_name", "first_name", "middle_name", "extension", "nickname",
+                "height", "weight", "lrnNumber", "nolrnNumber", "gender",
+                "pwdMember", "pwdType", "pwdId",
+                "birthOfDate", "age", "birthPlace", "languageDialectSpoken",
+                "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
+                "cellphoneNumber", "emailAddress",
+                "presentStreet", "presentBarangay", "presentZipCode", "presentRegion",
+                "presentProvince", "presentMunicipality", "presentDswdHouseholdNumber",
+                "sameAsPresentAddress",
+                "permanentStreet", "permanentBarangay", "permanentZipCode",
+                "permanentRegion", "permanentProvince", "permanentMunicipality",
+                "permanentDswdHouseholdNumber",
+                "solo_parent",
+                "father_deceased", "father_family_name", "father_given_name", "father_middle_name",
+                "father_ext", "father_nickname", "father_education", "father_education_level",
+                "father_last_school", "father_course", "father_year_graduated", "father_school_address",
+                "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
+                "mother_deceased", "mother_family_name", "mother_given_name", "mother_middle_name",
+                "mother_ext", "mother_nickname", "mother_education", "mother_education_level",
+                "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
+                "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
+                "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
+                "guardian_ext", "guardian_nickname", "guardian_address", "guardian_contact", "guardian_email",
+                "annual_income",
+                "schoolLevel", "schoolLastAttended", "schoolAddress", "courseProgram",
+                "honor", "generalAverage", "yearGraduated",
+                "schoolLevel1", "schoolLastAttended1", "schoolAddress1", "courseProgram1",
+                "honor1", "generalAverage1", "yearGraduated1",
+                "strand",
+                // 🩺 Health and medical
+                "cough", "colds", "fever", "asthma", "faintingSpells", "heartDisease",
+                "tuberculosis", "frequentHeadaches", "hernia", "chronicCough", "headNeckInjury",
+                "hiv", "highBloodPressure", "diabetesMellitus", "allergies", "cancer",
+                "smokingCigarette", "alcoholDrinking", "hospitalized", "hospitalizationDetails",
+                "medications",
+                // 🧬 Covid / Vaccination
+                "hadCovid", "covidDate",
+                "vaccine1Brand", "vaccine1Date", "vaccine2Brand", "vaccine2Date",
+                "booster1Brand", "booster1Date", "booster2Brand", "booster2Date",
+                // 🧪 Lab results / medical findings
+                "chestXray", "cbc", "urinalysis", "otherworkups",
+                // 🧍 Additional fields
+                "symptomsToday", "remarks",
+                // ✅ Agreement / Meta
+                "termsOfAgreement", "created_at", "current_step"
+            ];
+
+            // ✅ Clean the payload
+            const cleanedData = Object.fromEntries(
+                Object.entries(updatedData).filter(([key]) => allowedFields.includes(key))
+            );
+
+            if (Object.keys(cleanedData).length === 0) {
+                console.warn("⚠️ No valid fields to update — skipping request.");
+                return;
+            }
+
+            // ✅ Send update request
+            await axios.put(`${API_BASE_URL}/api/person/${targetId}`, cleanedData);
+
+            console.log(`✅ SuperAdmin updated person_id: ${targetId} successfully.`);
+        } catch (error) {
+            console.error("❌ SuperAdmin update failed:", {
+                message: error.message,
+                status: error.response?.status,
+                details: error.response?.data || error,
+            });
+        }
+    };
 
 
     // Helper: parse "YYYY-MM-DD" safely (local date in Asia/Manila)
@@ -360,19 +410,6 @@ const SuperAdminStudentDashboard1 = () => {
     };
 
 
-    // 🧠 Updates record in ENROLLMENT.person_table in real time
-    const handleUpdate = async (updatedPerson) => {
-        try {
-            // ✅ force the request to the enrollment route
-            await axios.put(`${API_BASE_URL}/api/enrollment/person/${userID}`, updatedPerson);
-            console.log("✅ Auto-saved to ENROLLMENT DB3");
-        } catch (error) {
-            console.error("❌ Auto-save failed:", error);
-        }
-    };
-
-
-
 
     // 🧩 Real-time handleChange with Manila-based age + filtering reset
     const handleChange = (e) => {
@@ -408,27 +445,166 @@ const SuperAdminStudentDashboard1 = () => {
 
 
 
-
-
-    // 🖱️ Triggered when input loses focus (safety net)
+    // ✅ Safe handleBlur for SuperAdmin — updates correct applicant only
     const handleBlur = async () => {
         try {
-            await axios.put(`${API_BASE_URL}/api/enrollment/person/${userID}`, person);
-            console.log("✅ Auto-saved (on blur) to ENROLLMENT DB3");
+            // ✅ Determine correct applicant/person_id
+            const targetId = selectedPerson?.person_id || queryPersonId || person.person_id;
+            if (!targetId) {
+                console.warn("⚠️ No valid applicant ID found — skipping update.");
+                return;
+            }
+
+            const allowedFields = [
+                "person_id", "profile_img", "campus", "academicProgram", "classifiedAs", "applyingAs",
+                "program", "program2", "program3", "yearLevel",
+                "last_name", "first_name", "middle_name", "extension", "nickname",
+                "height", "weight", "lrnNumber", "nolrnNumber", "gender",
+                "pwdMember", "pwdType", "pwdId",
+                "birthOfDate", "age", "birthPlace", "languageDialectSpoken",
+                "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
+                "cellphoneNumber", "emailAddress",
+                "presentStreet", "presentBarangay", "presentZipCode", "presentRegion",
+                "presentProvince", "presentMunicipality", "presentDswdHouseholdNumber",
+                "sameAsPresentAddress",
+                "permanentStreet", "permanentBarangay", "permanentZipCode",
+                "permanentRegion", "permanentProvince", "permanentMunicipality",
+                "permanentDswdHouseholdNumber",
+                "solo_parent",
+                "father_deceased", "father_family_name", "father_given_name", "father_middle_name",
+                "father_ext", "father_nickname", "father_education", "father_education_level",
+                "father_last_school", "father_course", "father_year_graduated", "father_school_address",
+                "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
+                "mother_deceased", "mother_family_name", "mother_given_name", "mother_middle_name",
+                "mother_ext", "mother_nickname", "mother_education", "mother_education_level",
+                "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
+                "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
+                "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
+                "guardian_ext", "guardian_nickname", "guardian_address", "guardian_contact", "guardian_email",
+                "annual_income",
+                "schoolLevel", "schoolLastAttended", "schoolAddress", "courseProgram",
+                "honor", "generalAverage", "yearGraduated",
+                "schoolLevel1", "schoolLastAttended1", "schoolAddress1", "courseProgram1",
+                "honor1", "generalAverage1", "yearGraduated1",
+                "strand",
+                // 🩺 Health and medical
+                "cough", "colds", "fever", "asthma", "faintingSpells", "heartDisease",
+                "tuberculosis", "frequentHeadaches", "hernia", "chronicCough", "headNeckInjury",
+                "hiv", "highBloodPressure", "diabetesMellitus", "allergies", "cancer",
+                "smokingCigarette", "alcoholDrinking", "hospitalized", "hospitalizationDetails",
+                "medications",
+                // 🧬 Covid / Vaccination
+                "hadCovid", "covidDate",
+                "vaccine1Brand", "vaccine1Date", "vaccine2Brand", "vaccine2Date",
+                "booster1Brand", "booster1Date", "booster2Brand", "booster2Date",
+                // 🧪 Lab results / medical findings
+                "chestXray", "cbc", "urinalysis", "otherworkups",
+                // 🧍 Additional fields
+                "symptomsToday", "remarks",
+                // ✅ Agreement / Meta
+                "termsOfAgreement", "created_at", "current_step"
+            ];
+
+            // ✅ Clean payload before sending
+            const cleanedData = Object.fromEntries(
+                Object.entries(person).filter(([key]) => allowedFields.includes(key))
+            );
+
+            if (Object.keys(cleanedData).length === 0) {
+                console.warn("⚠️ No valid fields to update — skipping blur save.");
+                return;
+            }
+
+            // ✅ Execute safe update
+            await axios.put(`${API_BASE_URL}/api/person/${targetId}`, cleanedData);
+            console.log(`💾 Auto-saved (on blur) for person_id: ${targetId}`);
         } catch (err) {
-            console.error("❌ Auto-save failed (on blur):", err);
+            console.error("❌ Auto-save (on blur) failed:", {
+                message: err.message,
+                status: err.response?.status,
+                details: err.response?.data || err,
+            });
         }
     };
 
-    // 💾 Manual autosave (optional call)
+    // ✅ Safe autoSave for SuperAdmin — same logic as handleBlur
     const autoSave = async () => {
         try {
-            await axios.put(`${API_BASE_URL}/api/enrollment/person/${userID}`, person);
-            console.log("✅ Auto-saved (manual trigger) to ENROLLMENT DB3");
+            const targetId = selectedPerson?.person_id || queryPersonId || person.person_id;
+            if (!targetId) {
+                console.warn("⚠️ No valid applicant ID found — skipping autoSave.");
+                return;
+            }
+
+            const allowedFields = [
+                "person_id", "profile_img", "campus", "academicProgram", "classifiedAs", "applyingAs",
+                "program", "program2", "program3", "yearLevel",
+                "last_name", "first_name", "middle_name", "extension", "nickname",
+                "height", "weight", "lrnNumber", "nolrnNumber", "gender",
+                "pwdMember", "pwdType", "pwdId",
+                "birthOfDate", "age", "birthPlace", "languageDialectSpoken",
+                "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
+                "cellphoneNumber", "emailAddress",
+                "presentStreet", "presentBarangay", "presentZipCode", "presentRegion",
+                "presentProvince", "presentMunicipality", "presentDswdHouseholdNumber",
+                "sameAsPresentAddress",
+                "permanentStreet", "permanentBarangay", "permanentZipCode",
+                "permanentRegion", "permanentProvince", "permanentMunicipality",
+                "permanentDswdHouseholdNumber",
+                "solo_parent",
+                "father_deceased", "father_family_name", "father_given_name", "father_middle_name",
+                "father_ext", "father_nickname", "father_education", "father_education_level",
+                "father_last_school", "father_course", "father_year_graduated", "father_school_address",
+                "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
+                "mother_deceased", "mother_family_name", "mother_given_name", "mother_middle_name",
+                "mother_ext", "mother_nickname", "mother_education", "mother_education_level",
+                "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
+                "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
+                "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
+                "guardian_ext", "guardian_nickname", "guardian_address", "guardian_contact", "guardian_email",
+                "annual_income",
+                "schoolLevel", "schoolLastAttended", "schoolAddress", "courseProgram",
+                "honor", "generalAverage", "yearGraduated",
+                "schoolLevel1", "schoolLastAttended1", "schoolAddress1", "courseProgram1",
+                "honor1", "generalAverage1", "yearGraduated1",
+                "strand",
+                // 🩺 Health and medical
+                "cough", "colds", "fever", "asthma", "faintingSpells", "heartDisease",
+                "tuberculosis", "frequentHeadaches", "hernia", "chronicCough", "headNeckInjury",
+                "hiv", "highBloodPressure", "diabetesMellitus", "allergies", "cancer",
+                "smokingCigarette", "alcoholDrinking", "hospitalized", "hospitalizationDetails",
+                "medications",
+                // 🧬 Covid / Vaccination
+                "hadCovid", "covidDate",
+                "vaccine1Brand", "vaccine1Date", "vaccine2Brand", "vaccine2Date",
+                "booster1Brand", "booster1Date", "booster2Brand", "booster2Date",
+                // 🧪 Lab results / medical findings
+                "chestXray", "cbc", "urinalysis", "otherworkups",
+                // 🧍 Additional fields
+                "symptomsToday", "remarks",
+                // ✅ Agreement / Meta
+                "termsOfAgreement", "created_at", "current_step"
+            ];
+            const cleanedData = Object.fromEntries(
+                Object.entries(person).filter(([key]) => allowedFields.includes(key))
+            );
+
+            if (Object.keys(cleanedData).length === 0) {
+                console.warn("⚠️ No valid fields to update — skipping autoSave.");
+                return;
+            }
+
+            await axios.put(`${API_BASE_URL}/api/person/${targetId}`, cleanedData);
+            console.log(`💾 Auto-saved (manual) for person_id: ${targetId}`);
         } catch (err) {
-            console.error("❌ Auto-save failed (manual):", err);
+            console.error("❌ Auto-save (manual) failed:", {
+                message: err.message,
+                status: err.response?.status,
+                details: err.response?.data || err,
+            });
         }
     };
+
 
     const [uploadedImage, setUploadedImage] = useState(null);
     const [preview, setPreview] = useState(null);
@@ -449,49 +625,45 @@ const SuperAdminStudentDashboard1 = () => {
         const validTypes = ["image/jpeg", "image/jpg", "image/png"];
         const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
 
-        // ❌ Invalid file type
+        // Check file type
         if (!validTypes.includes(file.type)) {
-            setSnack({
-                open: true,
-                message: "Invalid file type. Please select a JPEG or PNG file.",
-                severity: "error",
-            });
+            setSnackbar({ open: true, message: "Invalid file type. Please select a JPEG or PNG file.", severity: "error" });
             setSelectedFile(null);
             setPreview(null);
             return;
         }
 
-        // ❌ File too large
+        // Check file size
         if (file.size > maxSizeInBytes) {
-            setSnack({
-                open: true,
-                message: "File is too large. Maximum allowed size is 2MB.",
-                severity: "warning",
-            });
+            setSnackbar({ open: true, message: "File is too large. Maximum allowed size is 2MB.", severity: "error" });
             setSelectedFile(null);
             setPreview(null);
             return;
         }
 
-        // ✅ Valid file — set file and preview
+        // If valid, set file and preview
         setSelectedFile(file);
         const reader = new FileReader();
         reader.onloadend = () => setPreview(reader.result);
         reader.readAsDataURL(file);
-
-        setSnack({
-            open: true,
-            message: "✅ File selected successfully.",
-            severity: "success",
-        });
     };
+
+    const MAX_SIZE = 2 * 1024 * 1024;
 
     const handleUpload = async () => {
         if (!selectedFile) {
-            setSnack({
+            setSnackbar({
                 open: true,
-                message: "⚠️ Please select a file first.",
+                message: "Please select a file first.",
                 severity: "warning",
+            });
+            return;
+        }
+        if (selectedFile.size > MAX_SIZE) {
+            setSnackbar({
+                open: true,
+                message: "File must be 2MB or less.",
+                severity: "error",
             });
             return;
         }
@@ -502,11 +674,11 @@ const SuperAdminStudentDashboard1 = () => {
 
         try {
             const response = await axios.post(
-                `${API_BASE_URL}/api/enrollment/upload-profile-picture`,
+                `${API_BASE_URL}/form/upload-profile-picture`,
                 formData,
                 {
                     headers: { "Content-Type": "multipart/form-data" },
-                }
+                },
             );
 
             const fileName = response.data.filename || response.data.profile_img;
@@ -518,21 +690,25 @@ const SuperAdminStudentDashboard1 = () => {
             };
 
             setPerson(updatedPerson);
-            await handleUpdate(updatedPerson); // push to DB
-            setUploadedImage(`${API_BASE_URL}/uploads/${fileName}`);
+            await handleUpdate(updatedPerson); // ✅ this pushes the profile_img change into DB
 
-            setSnack({
+            setUploadedImage(`${API_BASE_URL}/uploads/${fileName}`);
+            setSnackbar({
                 open: true,
-                message: "✅ Upload successful!",
+                message: "Upload successful!",
                 severity: "success",
             });
-
             handleClose();
         } catch (error) {
             console.error("Upload failed:", error);
-            setSnack({
+            const errorMessage =
+                error.response?.data?.error ||
+                error.response?.data?.message ||
+                "Upload failed.";
+
+            setSnackbar({
                 open: true,
-                message: "❌ Upload failed. Please try again.",
+                message: errorMessage,
                 severity: "error",
             });
         }
@@ -690,7 +866,6 @@ const SuperAdminStudentDashboard1 = () => {
         fetchCurriculums();
     }, []);
 
-
     const filteredCurriculum = curriculumOptions.filter((item) => {
         // ✅ CAMPUS FILTER
 
@@ -708,39 +883,47 @@ const SuperAdminStudentDashboard1 = () => {
     });
 
 
+
     const [errors, setErrors] = useState({});
     const [searchQuery, setSearchQuery] = useState("");
     const [searchError, setSearchError] = useState("");
+
     useEffect(() => {
         const delayDebounce = setTimeout(async () => {
-            if (searchQuery.trim() === "") return;
+            if (searchQuery.trim() === "") return; // Don't search empty
 
             try {
-                const res = await axios.get(`${API_BASE_URL}/api/search-person-student`, {
+                const res = await axios.get(`${API_BASE_URL}/api/search-person`, {
                     params: { query: searchQuery }
                 });
 
-                console.log("Search result data:", res.data);
+                console.log("Search result data:", res.data); // See what the backend returns
+
                 setPerson(res.data);
 
+                // ✅ Adjust key based on backend response
                 const idToStore = res.data.person_id || res.data.id;
                 if (!idToStore) {
+                    console.error("No valid person ID found in search result");
                     setSearchError("Invalid search result");
                     return;
                 }
 
+                // Store globally for ECAT and other dashboards
                 sessionStorage.setItem("admin_edit_person_id", idToStore);
-                sessionStorage.setItem("admin_edit_person_data", JSON.stringify(res.data)); // ✅ added
                 setUserID(idToStore);
+
                 setSearchError("");
             } catch (err) {
                 console.error("Search failed:", err);
-                setSearchError("Student not found");
+                setSearchError("Applicant not found");
             }
-        }, 500);
+        }, 500); // debounce so it doesn't search on every keystroke instantly
 
         return () => clearTimeout(delayDebounce);
     }, [searchQuery]);
+
+
 
 
     const [selectedPerson, setSelectedPerson] = useState(null);
@@ -802,44 +985,44 @@ const SuperAdminStudentDashboard1 = () => {
         }
     };
 
-    const handleSnackClose = (_, reason) => {
-        if (reason === 'clickaway') return;
-        setSnack({ ...snack, open: false });
-    };
-
-    const showSnack = (message, severity = "info") => {
-        setSnack({ open: true, message, severity });
-
-        // Auto-close after 3 seconds
-        setTimeout(() => {
-            setSnack(prev => ({ ...prev, open: false }));
-        }, 3000);
-    };
-
     const handleImportExcel = async () => {
-        if (!excelFile) {
-            showSnack("⚠️ Please select a file to import.", "warning");
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append("file", excelFile);
-
         try {
+            if (!excelFile) {
+                setSnackbar({
+                    open: true,
+                    message: "⚠️ Please select an Excel file first.",
+                    severity: "warning"
+                });
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", excelFile);
+
             const res = await axios.post(`${API_BASE_URL}/api/person/import`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
             if (res.data.success) {
-                showSnack(`✅ ${res.data.message}`, "success");
-                // optional: re-fetch applicants if needed
-                // await fetchApplicants();
+                setSnackbar({
+                    open: true,
+                    message: "✅ Excel imported successfully!",
+                    severity: "success"
+                });
+                window.location.reload();
             } else {
-                showSnack(res.data.error || "⚠️ Import failed.", "warning");
+                setSnackbar({
+                    open: true,
+                    message: "❌ Failed: " + (res.data.error || "Unknown error"),
+                    severity: "error"
+                });
             }
-        } catch (error) {
-            console.error("❌ Import error:", error);
-            showSnack("❌ Server error while importing Excel.", "error");
+        } catch (err) {
+            setSnackbar({
+                open: true,
+                message: "❌ Import failed: " + (err.response?.data?.error || err.message),
+                severity: "error"
+            });
         }
     };
 
@@ -893,6 +1076,30 @@ const SuperAdminStudentDashboard1 = () => {
         setExamPermitError("");
     };
 
+    const handleExamPermitClick = async () => {
+        try {
+            const res = await axios.get(`${API_BASE_URL}/api/verified-exam-applicants`);
+            const verified = res.data.some(a => a.person_id === parseInt(userID));
+
+            if (!verified) {
+                setExamPermitError("❌ You cannot print the Exam Permit until all required documents are verified.");
+                setExamPermitModalOpen(true);
+                return;
+            }
+
+            // ✅ Render permit and print
+            setShowPrintView(true);
+            setTimeout(() => {
+                printDiv();
+                setShowPrintView(false);
+            }, 500);
+        } catch (err) {
+            console.error("Error verifying exam permit eligibility:", err);
+            setExamPermitError("⚠️ Unable to check document verification status right now.");
+            setExamPermitModalOpen(true);
+        }
+    };
+
 
 
     const links = [
@@ -913,8 +1120,14 @@ const SuperAdminStudentDashboard1 = () => {
             label: `Application For ${shortTerm ? shortTerm.toUpperCase() : ""} College Admission`,
         },
         { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
-
+        { label: "Examination Permit", onClick: handleExamPermitClick },
     ];
+
+
+
+
+
+
 
 
     const [canPrintPermit, setCanPrintPermit] = useState(false);
@@ -974,31 +1187,27 @@ const SuperAdminStudentDashboard1 = () => {
                         fontSize: "36px",
                     }}
                 >
-                    STUDENT - PERSONAL INFORMATION
+                    APPLICANT - PERSONAL INFORMATION
                 </Typography>
-
-                {/* ✅ Right side: Search + Excel Import side by side */}
-                <Box display="flex" alignItems="center" gap={2}>
-                    <TextField
-                        size="small"
-                        placeholder="Search Student Name / Email / Student Number"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        sx={{
-                            width: 450,
-                            backgroundColor: "#fff",
-                            borderRadius: 1,
-                            "& .MuiOutlinedInput-root": {
-                                borderRadius: "10px",
-                            },
-                        }}
-                        InputProps={{
-                            startAdornment: <SearchIcon sx={{ mr: 1, color: "gray" }} />,
-                        }}
-                    />
+                <TextField
+                    size="small"
+                    placeholder="Search Applicant Name / Email / Applicant ID"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    sx={{
+                        width: 450,
+                        backgroundColor: "#fff",
+                        borderRadius: 1,
+                        "& .MuiOutlinedInput-root": {
+                            borderRadius: "10px",
+                        },
+                    }}
+                    InputProps={{
+                        startAdornment: <SearchIcon sx={{ mr: 1, color: "gray" }} />,
+                    }}
+                />
 
 
-                </Box>
             </Box>
 
             {searchError && <Typography color="error">{searchError}</Typography>}
@@ -1008,118 +1217,26 @@ const SuperAdminStudentDashboard1 = () => {
             <br />
 
 
-            <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                width="100%"
-                mb={2}
-            >
-
-                {/* LEFT SIDE — Download Template */}
-                <div style={{ position: "relative" }}>
-                    <button
-                        onClick={() => {
-                            window.location.href = `${API_BASE_URL}/student_data`;
-                        }}
-                        style={{
-                            padding: "5px 20px",
-                            border: "2px solid black",
-                            backgroundColor: "#f0f0f0",
-                            color: "black",
-                            borderRadius: "5px",
-                            cursor: "pointer",
-                            fontSize: "14px",
-                            fontWeight: "bold",
-                            height: "50px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "8px",
-                            width: "225px",
-                        }}
-                    >
-                        📥 Download Template
-                    </button>
-                </div>
-
-                {/* RIGHT SIDE — Choose Excel + Import */}
-                <Box display="flex" alignItems="center" gap={2}>
-
-                    <input
-                        type="file"
-                        accept=".xlsx,.xls"
-                        onChange={handleExcelChange}
-                        style={{ display: "none" }}
-                        id="excel-upload"
-                    />
-
-                    {/* Choose Excel Button */}
-                    <button
-                        onClick={() => document.getElementById("excel-upload").click()}
-                        style={{
-                            padding: "5px 20px",
-                            border: "2px solid green",
-                            backgroundColor: "#f0fdf4",
-                            color: "green",
-                            borderRadius: "5px",
-                            cursor: "pointer",
-                            fontSize: "14px",
-                            fontWeight: "bold",
-                            height: "50px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "8px",
-                            width: "175px",
-                        }}
-                        type="button"
-                    >
-                        <FaFileExcel size={20} />
-                        Choose Excel
-                    </button>
-
-                    {/* Import Button */}
-                    <Button
-                        onClick={handleImportExcel}
-                        variant="contained"
-                        sx={{
-                            backgroundColor: settings?.header_color || "#1976d2",
-                            border: `2px solid ${borderColor}`,
-                            color: "white",
-                            height: "50px",
-                            width: "175px",
-                            fontWeight: "bold",
-                        }}
-                    >
-                        Import
-                    </Button>
-
-                </Box>
-
-
-            </Box>
-            <br />
-
 
             <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
                 <Table>
                     <TableHead sx={{ backgroundColor: settings?.header_color || "#1976d2", border: `2px solid ${borderColor}`, }}>
                         <TableRow>
-                            {/* Left cell: Student Number */}
+                            {/* Left cell: Applicant ID */}
                             <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: "Poppins, sans-serif", border: 'none' }}>
-                                Student Number:&nbsp;
+                                Applicant ID:&nbsp;
                                 <span style={{ fontFamily: "Poppins, sans-serif", fontWeight: "normal", textDecoration: "underline" }}>
-                                    {person?.student_number || "N/A"}
+                                    {person?.applicant_number || "N/A"}
+
                                 </span>
                             </TableCell>
 
-                            {/* Right cell: Student Name */}
+                            {/* Right cell: Applicant Name */}
                             <TableCell
                                 align="right"
                                 sx={{ color: 'white', fontSize: '20px', fontFamily: "Poppins, sans-serif", border: 'none' }}
                             >
-                                Student Name:&nbsp;
+                                Applicant Name:&nbsp;
                                 <span style={{ fontFamily: "Poppins, sans-serif", fontWeight: "normal", textDecoration: "underline" }}>
                                     {person?.last_name?.toUpperCase()}, {person?.first_name?.toUpperCase()}{" "}
                                     {person?.middle_name?.toUpperCase()} {person?.extension?.toUpperCase() || ""}
@@ -1206,7 +1323,6 @@ const SuperAdminStudentDashboard1 = () => {
 
 
 
-
                 {/* Cards Section */}
                 <Box
                     sx={{
@@ -1231,8 +1347,6 @@ const SuperAdminStudentDashboard1 = () => {
                                     minHeight: 60,
                                     borderRadius: 2,
                                     border: `2px solid ${borderColor}`,
-
-
                                     backgroundColor: "#fff",
                                     display: "flex",
                                     flexDirection: "row",
@@ -1284,6 +1398,7 @@ const SuperAdminStudentDashboard1 = () => {
                         </motion.div>
                     ))}
                 </Box>
+
 
 
 
@@ -1445,7 +1560,6 @@ const SuperAdminStudentDashboard1 = () => {
                                         </MenuItem>
                                     ))}
                                 </Select>
-
                                 {errors.campus && (
                                     <FormHelperText>This field is required.</FormHelperText>
                                 )}
@@ -1576,7 +1690,6 @@ const SuperAdminStudentDashboard1 = () => {
                                         <FormControl fullWidth size="small" required error={!!errors.program}>
                                             <InputLabel>Course Applied</InputLabel>
                                             <Select
-
                                                 name="program"
                                                 value={person.program || ""}
                                                 onBlur={() => handleUpdate(person)} onChange={handleChange}
@@ -1727,7 +1840,7 @@ const SuperAdminStudentDashboard1 = () => {
                             >
                                 {person.profile_img && person.profile_img !== "" ? (
                                     <img
-                                        src={`${API_BASE_URL}/uploads/Student1by1/${person.profile_img}?t=${Date.now()}`}
+                                        src={`${API_BASE_URL}/uploads/Applicant1by1/${person.profile_img}?t=${Date.now()}`}
                                         alt="Profile"
                                         style={{
                                             width: "100%",
@@ -2116,6 +2229,7 @@ const SuperAdminStudentDashboard1 = () => {
                                     Age
                                 </Typography>
                                 <TextField
+
                                     fullWidth
                                     size="small"
                                     name="age"
@@ -2126,7 +2240,6 @@ const SuperAdminStudentDashboard1 = () => {
                                     onChange={handleChange}
                                     error={!!errors.age}
                                     helperText={errors.age ? "This field is required." : ""}
-
                                 />
                             </Box>
                             <Box flex={1}>
@@ -2506,7 +2619,7 @@ const SuperAdminStudentDashboard1 = () => {
                                         handleChange({
                                             target: {
                                                 name: "emailAddress",
-                                                value: finalValue
+                                                value: finalValuep
                                             }
                                         });
                                     }}
@@ -2515,6 +2628,7 @@ const SuperAdminStudentDashboard1 = () => {
 
                             </Box>
                         </Box>
+
 
 
 
@@ -2558,7 +2672,6 @@ const SuperAdminStudentDashboard1 = () => {
                                 <TextField
                                     fullWidth
 
-
                                     size="small"
                                     name="presentStreet"
                                     value={person.presentStreet || ""}
@@ -2573,7 +2686,6 @@ const SuperAdminStudentDashboard1 = () => {
                                 <Typography mb={1} fontWeight="medium">Present Zip Code</Typography>
                                 <TextField
                                     fullWidth
-
                                     type="number"
                                     size="small"
                                     name="presentZipCode"
@@ -2739,7 +2851,6 @@ const SuperAdminStudentDashboard1 = () => {
                         <Box mb={2}>
                             <Typography mb={1} fontWeight="medium">Present DSWD Household Number</Typography>
                             <TextField
-
 
                                 fullWidth
                                 size="small"
@@ -2970,8 +3081,8 @@ const SuperAdminStudentDashboard1 = () => {
                                 <Typography mb={1} fontWeight="medium">Permanent Zip Code</Typography>
                                 <TextField
                                     fullWidth
-                                    type="number"
                                     size="small"
+                                    type="number"
                                     name="permanentZipCode"
                                     placeholder="Enter your Permanent Zip Code"
                                     value={person.permanentZipCode || ""}
@@ -2999,7 +3110,6 @@ const SuperAdminStudentDashboard1 = () => {
                                 helperText={errors.permanentDswdHouseholdNumber && "This field is required."}
                             />
                         </Box>
-
 
                         <Modal open={open} onClose={handleClose}>
                             <Box
@@ -3032,8 +3142,10 @@ const SuperAdminStudentDashboard1 = () => {
                                             top: 8,
                                             right: 8,
                                             color: "#fff",
-                                            border: `2px solid ${borderColor}`,
                                             backgroundColor: settings?.header_color || "#1976d2",
+
+
+                                            border: `2px solid ${borderColor}`,
 
                                             "&:hover": {
                                                 bgcolor: "#000",
@@ -3047,7 +3159,10 @@ const SuperAdminStudentDashboard1 = () => {
                                     <Box
                                         sx={{
                                             backgroundColor: settings?.header_color || "#1976d2",
+
+
                                             border: `2px solid ${borderColor}`,
+
                                             color: "white",
                                             py: 2,
                                             px: 3,
@@ -3076,7 +3191,7 @@ const SuperAdminStudentDashboard1 = () => {
                                                 src={
                                                     preview
                                                         ? preview
-                                                        : `${API_BASE_URL}/uploads/Student1by1/${person.profile_img}`
+                                                        : `${API_BASE_URL}/uploads/Applicant1by1/${person.profile_img}`
                                                 }
                                                 alt="Preview"
                                                 sx={{
@@ -3091,16 +3206,26 @@ const SuperAdminStudentDashboard1 = () => {
                                             {/* ❌ REMOVE BUTTON */}
                                             <Button
                                                 size="small"
-                                                onClick={() => {
+                                                onClick={async () => {
                                                     setSelectedFile(null);
                                                     setPreview(null);
 
-                                                    // ✅ IMPORTANT: remove existing image
-                                                    setPerson((prev) => ({
-                                                        ...prev,
+                                                    const updatedPerson = {
+                                                        ...person,
                                                         profile_img: "",
-                                                    }));
+                                                    };
+
+                                                    setPerson(updatedPerson);
+
+                                                    await handleUpdate(updatedPerson); // saves to DB
+
+                                                    setSnackbar({
+                                                        open: true,
+                                                        message: "Image removed successfully.",
+                                                        severity: "info",
+                                                    });
                                                 }}
+
                                                 sx={{
                                                     position: "absolute",
                                                     top: -8,
@@ -3120,6 +3245,7 @@ const SuperAdminStudentDashboard1 = () => {
                                             </Button>
                                         </Box>
                                     )}
+
                                     {/* Guidelines Section */}
                                     <Box
                                         sx={{
@@ -3195,7 +3321,10 @@ const SuperAdminStudentDashboard1 = () => {
                                         onClick={handleUpload}
                                         sx={{
                                             backgroundColor: settings?.header_color || "#1976d2",
+
+
                                             border: `2px solid ${borderColor}`,
+
                                             color: "white",
                                             fontWeight: "bold",
                                             "&:hover": {
@@ -3277,7 +3406,7 @@ const SuperAdminStudentDashboard1 = () => {
                                 variant="contained"
                                 onClick={() => {
                                     handleUpdate();
-                                    navigate(`/super_admin_student_dashboard2?person_id=${userID}`);
+                                    navigate("/super_admin_applicant_dashboard2");
                                 }}
                                 endIcon={
                                     <ArrowForwardIcon
@@ -3304,23 +3433,26 @@ const SuperAdminStudentDashboard1 = () => {
                             </Button>
                         </Box>
 
+
+
+
+                        <Snackbar
+                            open={snackbar.open}
+                            autoHideDuration={3000}
+                            onClose={handleCloseSnackbar}
+                            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                        >
+                            <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
+                                {snackbar.message}
+                            </Alert>
+                        </Snackbar>
+
+
                     </Container>
                 </form>
             </Container >
-
-            <Snackbar
-                open={snack.open}
-
-                onClose={handleSnackClose}
-                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-            >
-                <Alert onClose={handleSnackClose} severity={snack.severity} sx={{ width: '100%' }}>
-                    {snack.message}
-                </Alert>
-            </Snackbar>
-
         </Box >
     );
 };
 
-export default SuperAdminStudentDashboard1;
+export default SuperAdminApplicantDashboard1;

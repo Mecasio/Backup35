@@ -466,7 +466,7 @@ const PersonalDataForm = () => {
                                     {/* Office Name */}
                                     <div style={{
                                         textAlign: "center",
-                                        fontSize: "14px",
+                                        fontSize: "12px",
                                         fontWeight: "bold",
                                         fontFamily: "Arial",
                                         marginLeft: "-130px",
@@ -624,7 +624,7 @@ const PersonalDataForm = () => {
                                 {/* SURNAME */}
                                 {/* SURNAME */}
                                 <tr>
-                                    <td colSpan={6} style={{ border: "1px solid black", textAlign: "center", padding: "8px", fontWeight: "bold", fontSize: "14px", fontFamily: "Arial" }}>
+                                    <td colSpan={6} style={{ border: "1px solid black", textAlign: "center", padding: "8px", fontWeight: "bold", fontSize: "12px", fontFamily: "Arial" }}>
                                         SURNAME
                                     </td>
                                     <td colSpan={34} style={{ border: "1px solid black", padding: "8px" }}>
@@ -647,7 +647,7 @@ const PersonalDataForm = () => {
 
                                 {/* FIRST NAME */}
                                 <tr>
-                                    <td colSpan={6} style={{ border: "1px solid black", textAlign: "center", padding: "8px", fontWeight: "bold", fontSize: "14px", fontFamily: "Arial" }}>
+                                    <td colSpan={6} style={{ border: "1px solid black", textAlign: "center", padding: "8px", fontWeight: "bold", fontSize: "12px", fontFamily: "Arial" }}>
                                         FIRST NAME
                                     </td>
                                     <td colSpan={34} style={{ border: "1px solid black", padding: "8px" }}>
@@ -678,7 +678,7 @@ const PersonalDataForm = () => {
 
                                         textAlign: "Center",
                                         fontWeight: "bold",
-                                        fontSize: "14px",
+                                        fontSize: "12px",
                                         fontFamily: "Arial"
 
                                     }}>
@@ -713,7 +713,7 @@ const PersonalDataForm = () => {
                                         textAlign: "left",
 
                                         fontWeight: "bold",
-                                        fontSize: "14px",
+                                        fontSize: "12px",
                                         verticalAlign: "top",
                                         fontFamily: "Arial",
 
@@ -728,7 +728,7 @@ const PersonalDataForm = () => {
                                                 width: "100%",
                                                 border: "none",
                                                 outline: "none",
-                                                fontSize: "14px",
+                                                fontSize: "12px",
                                                 fontFamily: "Arial",
                                             }}
                                         />
@@ -744,7 +744,7 @@ const PersonalDataForm = () => {
                                         style={{
                                             border: "1px solid black",
                                             textAlign: "left",
-                                            fontSize: "14px",
+                                            fontSize: "12px",
                                             fontFamily: "Arial",
                                             verticalAlign: "top",
                                         }}
@@ -782,7 +782,7 @@ const PersonalDataForm = () => {
 
 
                                         fontFamily: "Arial",
-                                        fontSize: "14px",
+                                        fontSize: "12px",
                                         verticalAlign: "top"
                                     }}>
                                         <div style={{ fontWeight: "bold" }}>YEAR LEVEL (1,2,3,4,5)</div>
@@ -813,7 +813,7 @@ const PersonalDataForm = () => {
                                         textAlign: "left",
                                         fontFamily: "Arial",
 
-                                        fontSize: "14px",
+                                        fontSize: "12px",
                                         verticalAlign: "top"
                                     }}>
                                         <div style={{ fontWeight: "bold" }}>DATE OF BIRTH (e.g. June 15, 2019)</div>
@@ -848,7 +848,7 @@ const PersonalDataForm = () => {
                                         textAlign: "left",
 
 
-                                        fontSize: "14px",
+                                        fontSize: "12px",
                                         verticalAlign: "top",
                                         fontFamily: "Arial",
                                     }}>
@@ -876,7 +876,7 @@ const PersonalDataForm = () => {
                                         textAlign: "left",
 
                                         fontFamily: "Arial",
-                                        fontSize: "14px",
+                                        fontSize: "12px",
                                         verticalAlign: "top"
                                     }}>
                                         <div style={{ fontWeight: "bold" }}>ETHNICITY (e.g. Tagbanua, Palaw’an)<br />
@@ -906,7 +906,7 @@ const PersonalDataForm = () => {
                                             textAlign: "left",
                                             fontFamily: "Arial",
                                             fontWeight: "bold",
-                                            fontSize: "14px",
+                                            fontSize: "12px",
                                             verticalAlign: "top"
                                         }}
                                     >
@@ -938,7 +938,7 @@ const PersonalDataForm = () => {
                                             textAlign: "left",
                                             fontFamily: "Arial",
 
-                                            fontSize: "14px",
+                                            fontSize: "12px",
                                             verticalAlign: "top"
                                         }}>
                                         <div style={{ fontWeight: "bold" }}>LEARNER’S REFERENCE NUMBER</div>
@@ -965,7 +965,7 @@ const PersonalDataForm = () => {
                                         textAlign: "left",
 
                                         fontFamily: "Arial",
-                                        fontSize: "14px",
+                                        fontSize: "12px",
                                         verticalAlign: "top"
                                     }}>
                                         <div style={{ fontWeight: "bold" }}>DISABILITY</div>
@@ -996,7 +996,7 @@ const PersonalDataForm = () => {
                                             textAlign: "left",
 
                                             fontWeight: "bold",
-                                            fontSize: "14px",
+                                            fontSize: "12px",
                                             verticalAlign: "top",
                                             fontFamily: "Arial",
                                         }}
@@ -1099,7 +1099,7 @@ const PersonalDataForm = () => {
                                         border: "1px solid black",
                                         textAlign: "left",
 
-                                        fontSize: "14px",
+                                        fontSize: "12px",
                                         verticalAlign: "top",
                                         fontFamily: "Arial",
                                     }}>
@@ -1122,7 +1122,7 @@ const PersonalDataForm = () => {
                                         border: "1px solid black",
                                         textAlign: "left",
 
-                                        fontSize: "14px",
+                                        fontSize: "12px",
                                         verticalAlign: "top",
                                         fontFamily: "Arial",
                                     }}>
@@ -1150,7 +1150,7 @@ const PersonalDataForm = () => {
                                         style={{
                                             border: "1px solid black",
                                             verticalAlign: "top",
-                                            fontSize: "14px",
+                                            fontSize: "12px",
 
                                             padding: "8px",
                                             fontFamily: "Arial",
@@ -1279,7 +1279,7 @@ const PersonalDataForm = () => {
                                         style={{
                                             border: "1px solid black",
                                             verticalAlign: "top",
-                                            fontSize: "14px",
+                                            fontSize: "12px",
                                             fontFamily: "Arial",
                                             textAlign: "left",
                                         }}
@@ -1313,7 +1313,7 @@ const PersonalDataForm = () => {
                                                 borderTop: "1px solid black",
                                                 paddingTop: "8px",
 
-                                                fontSize: "14px",
+                                                fontSize: "12px",
                                             }}
                                         >
                                             <div style={{ fontWeight: "bold" }}>HOUSEHOLD</div>
@@ -1342,7 +1342,7 @@ const PersonalDataForm = () => {
                                     <td colSpan={6} style={{
                                         border: "1px solid black",
                                         verticalAlign: "top",
-                                        fontSize: "14px",
+                                        fontSize: "12px",
 
 
                                         fontFamily: "Arial"
@@ -1376,7 +1376,7 @@ const PersonalDataForm = () => {
 
                                         fontFamily: "Arial",
 
-                                        fontSize: "14px"
+                                        fontSize: "12px"
                                     }}>
                                         <div style={{ fontWeight: "bold" }}>CITIZENSHIP</div>
                                         <input
@@ -1399,7 +1399,7 @@ const PersonalDataForm = () => {
                                         border: "1px solid black",
                                         textAlign: "left",
                                         fontFamily: "Arial",
-                                        fontSize: "14px"
+                                        fontSize: "12px"
                                     }}>
                                         <div style={{ fontWeight: "bold" }}>HEIGHT (m)</div>
                                         <input
@@ -1422,7 +1422,7 @@ const PersonalDataForm = () => {
                                         border: "1px solid black",
                                         textAlign: "left",
                                         fontFamily: "Arial",
-                                        fontSize: "14px"
+                                        fontSize: "12px"
                                     }}>
                                         <div style={{ fontWeight: "bold" }}>WEIGHT (kg)</div>
                                         <input
@@ -1446,7 +1446,7 @@ const PersonalDataForm = () => {
                                         textAlign: "left",
 
                                         fontFamily: "Arial",
-                                        fontSize: "14px"
+                                        fontSize: "12px"
                                     }}>
                                         <div style={{ fontWeight: "bold" }}>BLOOD TYPE</div>
                                         <input
@@ -1469,7 +1469,7 @@ const PersonalDataForm = () => {
                                         textAlign: "left",
                                         fontFamily: "Arial",
 
-                                        fontSize: "14px"
+                                        fontSize: "12px"
                                     }}>
                                         <div style={{ fontWeight: "bold" }}> PERMANENT CONTACT NUMBER</div>
 
@@ -1523,7 +1523,7 @@ const PersonalDataForm = () => {
                                             paddingLeft: "10px",
                                             fontWeight: "bold",
                                             fontFamily: "Arial",
-                                            fontSize: "14px"
+                                            fontSize: "12px"
                                         }}>
                                         FATHER'S NAME
 
@@ -1620,7 +1620,7 @@ const PersonalDataForm = () => {
                                             textAlign: "left",
                                             paddingLeft: "10px",
                                             fontWeight: "bold",
-                                            fontSize: "14px",
+                                            fontSize: "12px",
                                             fontFamily: "Arial",
                                         }}>
                                         MOTHER`S NAME
@@ -1780,7 +1780,7 @@ const PersonalDataForm = () => {
                                         textAlign: "center",
                                         padding: "2px",
                                         fontWeight: "bold",
-                                        fontSize: "14px",
+                                        fontSize: "12px",
                                         fontFamily: "Arial"
                                     }}>
                                         Father
@@ -1821,7 +1821,7 @@ const PersonalDataForm = () => {
                                             textAlign: "left",
                                             padding: "2px",
                                             fontFamily: "Arial",
-                                            fontSize: "14px"
+                                            fontSize: "12px"
                                         }}>
                                         <input
                                             type="text"
@@ -1845,7 +1845,7 @@ const PersonalDataForm = () => {
                                         textAlign: "left",
                                         padding: "2px",
                                         fontFamily: "Arial",
-                                        fontSize: "14px"
+                                        fontSize: "12px"
                                     }}>
                                         <input
                                             type="text"
@@ -1873,7 +1873,7 @@ const PersonalDataForm = () => {
                                         padding: "2px",  // Reduced padding to fit in 10px height
                                         fontWeight: "bold",
                                         fontFamily: "Arial",
-                                        fontSize: "14px"
+                                        fontSize: "12px"
                                     }}>
                                         Mother
 
@@ -1911,7 +1911,7 @@ const PersonalDataForm = () => {
                                         textAlign: "left",
                                         padding: "2px",  // Reduced padding to fit in 10px height
                                         fontFamily: "Arial",
-                                        fontSize: "14px"
+                                        fontSize: "12px"
                                     }}>
                                         <input
                                             type="text"
@@ -1937,7 +1937,7 @@ const PersonalDataForm = () => {
                                         textAlign: "left",
                                         padding: "2px",  // Reduced padding to fit in 10px height
                                         fontFamily: "Arial",
-                                        fontSize: "14px"
+                                        fontSize: "12px"
                                     }}>
                                         <input
                                             type="text"
@@ -1966,7 +1966,7 @@ const PersonalDataForm = () => {
                                         textAlign: "center",
                                         padding: "2px",  // Reduced padding to fit in 10px height
                                         fontWeight: "bold",
-                                        fontSize: "14px",
+                                        fontSize: "12px",
                                         fontFamily: "Arial",
                                     }}>
                                         Siblings

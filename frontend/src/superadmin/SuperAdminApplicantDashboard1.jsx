@@ -648,73 +648,73 @@ const SuperAdminApplicantDashboard1 = () => {
         reader.readAsDataURL(file);
     };
 
-   const MAX_SIZE = 2 * 1024 * 1024;
+    const MAX_SIZE = 2 * 1024 * 1024;
 
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      setSnackbar({
-        open: true,
-        message: "Please select a file first.",
-        severity: "warning",
-      });
-      return;
-    }
-    if (selectedFile.size > MAX_SIZE) {
-      setSnackbar({
-        open: true,
-        message: "File must be 2MB or less.",
-        severity: "error",
-      });
-      return;
-    }
+    const handleUpload = async () => {
+        if (!selectedFile) {
+            setSnackbar({
+                open: true,
+                message: "Please select a file first.",
+                severity: "warning",
+            });
+            return;
+        }
+        if (selectedFile.size > MAX_SIZE) {
+            setSnackbar({
+                open: true,
+                message: "File must be 2MB or less.",
+                severity: "error",
+            });
+            return;
+        }
 
-    const formData = new FormData();
-    formData.append("profile_picture", selectedFile);
-    formData.append("person_id", userID);
+        const formData = new FormData();
+        formData.append("profile_picture", selectedFile);
+        formData.append("person_id", userID);
 
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/form/upload-profile-picture`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        },
-      );
+        try {
+            const response = await axios.post(
+                `${API_BASE_URL}/form/upload-profile-picture`,
+                formData,
+                {
+                    headers: { "Content-Type": "multipart/form-data" },
+                },
+            );
 
-      const fileName = response.data.filename || response.data.profile_img;
+            const fileName = response.data.filename || response.data.profile_img;
 
-      // ✅ Set image AND trigger auto-save
-      const updatedPerson = {
-        ...person,
-        profile_img: fileName,
-      };
+            // ✅ Set image AND trigger auto-save
+            const updatedPerson = {
+                ...person,
+                profile_img: fileName,
+            };
 
-      setPerson(updatedPerson);
-      await handleUpdate(updatedPerson); // ✅ this pushes the profile_img change into DB
+            setPerson(updatedPerson);
+            await handleUpdate(updatedPerson); // ✅ this pushes the profile_img change into DB
 
-      setUploadedImage(`${API_BASE_URL}/uploads/${fileName}`);
-      setSnackbar({
-        open: true,
-        message: "Upload successful!",
-        severity: "success",
-      });
-      handleClose();
-    } catch (error) {
-      console.error("Upload failed:", error);
-      const errorMessage =
-        error.response?.data?.error ||
-        error.response?.data?.message ||
-        "Upload failed.";
+            setUploadedImage(`${API_BASE_URL}/uploads/${fileName}`);
+            setSnackbar({
+                open: true,
+                message: "Upload successful!",
+                severity: "success",
+            });
+            handleClose();
+        } catch (error) {
+            console.error("Upload failed:", error);
+            const errorMessage =
+                error.response?.data?.error ||
+                error.response?.data?.message ||
+                "Upload failed.";
 
-      setSnackbar({
-        open: true,
-        message: errorMessage,
-        severity: "error",
-      });
-    }
-  };
+            setSnackbar({
+                open: true,
+                message: errorMessage,
+                severity: "error",
+            });
+        }
+    };
 
-  
+
     const [isLrnNA, setIsLrnNA] = useState(false);
 
     const handlePwdCheck = (event) => {
@@ -1124,10 +1124,10 @@ const SuperAdminApplicantDashboard1 = () => {
     ];
 
 
-  
-   
 
-  
+
+
+
 
 
     const [canPrintPermit, setCanPrintPermit] = useState(false);
@@ -1207,7 +1207,7 @@ const SuperAdminApplicantDashboard1 = () => {
                     }}
                 />
 
-             
+
             </Box>
 
             {searchError && <Typography color="error">{searchError}</Typography>}
@@ -3206,16 +3206,26 @@ const SuperAdminApplicantDashboard1 = () => {
                                             {/* ❌ REMOVE BUTTON */}
                                             <Button
                                                 size="small"
-                                                onClick={() => {
+                                                onClick={async () => {
                                                     setSelectedFile(null);
                                                     setPreview(null);
 
-                                                    // ✅ IMPORTANT: remove existing image
-                                                    setPerson((prev) => ({
-                                                        ...prev,
+                                                    const updatedPerson = {
+                                                        ...person,
                                                         profile_img: "",
-                                                    }));
+                                                    };
+
+                                                    setPerson(updatedPerson);
+
+                                                    await handleUpdate(updatedPerson); // saves to DB
+
+                                                    setSnackbar({
+                                                        open: true,
+                                                        message: "Image removed successfully.",
+                                                        severity: "info",
+                                                    });
                                                 }}
+
                                                 sx={{
                                                     position: "absolute",
                                                     top: -8,
@@ -3424,7 +3434,7 @@ const SuperAdminApplicantDashboard1 = () => {
                         </Box>
 
 
-                     
+
 
                         <Snackbar
                             open={snackbar.open}

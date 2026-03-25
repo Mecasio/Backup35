@@ -3375,16 +3375,26 @@ const Dashboard1 = (props) => {
                       {/* ❌ REMOVE BUTTON */}
                       <Button
                         size="small"
-                        onClick={() => {
+                        onClick={async () => {
                           setSelectedFile(null);
                           setPreview(null);
 
-                          // ✅ IMPORTANT: remove existing image
-                          setPerson((prev) => ({
-                            ...prev,
+                          const updatedPerson = {
+                            ...person,
                             profile_img: "",
-                          }));
+                          };
+
+                          setPerson(updatedPerson);
+
+                          await handleUpdate(updatedPerson); // saves to DB
+
+                          setSnackbar({
+                            open: true,
+                            message: "Image removed successfully.",
+                            severity: "info",
+                          });
                         }}
+
                         sx={{
                           position: "absolute",
                           top: -8,

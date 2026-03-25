@@ -20,6 +20,7 @@
     "@vitejs/plugin-basic-ssl": "^1.2.0",
     "axios": "^1.8.3",
     "dayjs": "^1.11.20",
+    "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.30.0",
     "html2canvas": "^1.4.1",

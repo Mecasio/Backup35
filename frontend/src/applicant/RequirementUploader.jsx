@@ -213,6 +213,40 @@ const RequirementUploader = () => {
     }
   };
 
+  const isFormValid = () => {
+    // ✅ Get MAIN required requirements
+    const requiredMain = requirements.filter(
+      (r) => r.category === "Main" && Number(r.is_required) === 1
+    );
+
+    // ✅ Get uploaded requirement IDs
+    const uploadedIds = new Set(
+      uploads.map((u) => Number(u.requirements_id))
+    );
+
+    // ✅ Find missing ones
+    const missing = requiredMain.filter(
+      (req) => !uploadedIds.has(Number(req.id))
+    );
+
+    if (missing.length > 0) {
+      const names = missing
+        .map((m) => m.description)
+        .join(", ");
+
+      setSnack({
+        open: true,
+        severity: "warning",
+        message: `Please upload all required MAIN requirements: ${names}`,
+      });
+
+      return false;
+    }
+
+    return true;
+  };
+
+
   const handleClose = (_, reason) => {
     if (reason === "clickaway") return;
     setSnack(prev => ({ ...prev, open: false }));
@@ -527,9 +561,13 @@ const RequirementUploader = () => {
             variant="contained"
             color="success"
             onClick={() => {
+              // ✅ VALIDATION CHECK
+              if (!isFormValid()) {
+                return; // STOP submission
+              }
+
               setOpenConfirmModal(false);
 
-              // ✅ mark as completed ONLY after final confirmation
               localStorage.setItem("requirementsCompleted", "1");
 
               setSnack({
