@@ -574,6 +574,7 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
     },
     {
       key: "accountCreation", label: "Account Creation", icon: PersonAdd, items: [
+
         { title: "Add Faculty Accounts", link: "/register_prof", icon: PersonAdd, page_id: 70 },
         { title: "Add Registrar Account", link: "/register_registrar", icon: PersonAdd, page_id: 71 },
         { title: "Add Student Account", link: "/register_student", icon: PersonAdd, page_id: 72 },
@@ -582,6 +583,7 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
     },
     {
       key: "accountInformation", label: "Account Information", icon: Info, items: [
+        { title: "Application Process Admin", link: "/application_process_admin", icon: PersonAdd, page_id: 139 },
         { title: "Applicant Information", link: "/super_admin_applicant_dashboard1", icon: Info, page_id: 75 },
         { title: "Upload Requirements", link: "/super_admin_requirements_uploader", icon: Info, page_id: 84 },
         { title: "Student Information", link: "/super_admin_student_dashboard1", icon: Info, page_id: 86 },
@@ -664,9 +666,9 @@ const SideBar = ({ setIsAuthenticated, profileImage, setProfileImage }) => {
                     ? `Faculty · ${personData?.employee_id || ""}`
                     : role === "applicant"
                       ? `Applicant · ${personData?.applicant_number || ""}`
-                        : role
-                          ? role.charAt(0).toUpperCase() + role.slice(1)
-                          : ""}
+                      : role
+                        ? role.charAt(0).toUpperCase() + role.slice(1)
+                        : ""}
             </div>
             {hasDepartment && (
               <div className="sb-profile-dprtmnt">{personData.dprtmnt_code} Department</div>

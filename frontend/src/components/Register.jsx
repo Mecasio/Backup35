@@ -615,7 +615,7 @@ const checkBranchStatus = (branchIdToCheck) => {
               </div>
 
               <div className="TextField" style={{ position: "relative" }}>
-                <label>Birthday</label>
+                <label>Birth of Date</label>
                 <input
                   type="date"
                   required

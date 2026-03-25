@@ -111,11 +111,11 @@ router.post("/register", async (req, res) => {
 
   // 🔍 Check if applicant already exists by name + birthday
 
- 
+
 
   // 🔍 STEP 1: EMAIL MUST BE UNIQUE
   const [existingEmail] = await db.query(
-    "SELECT * FROM user_accounts WHERE email = ?",
+    "SELECT 1 FROM user_accounts WHERE email = ?",
     [normalizedEmail]
   );
 
@@ -126,8 +126,8 @@ router.post("/register", async (req, res) => {
     });
   }
 
-  // 🔍 STEP 2A: CHECK FULL MATCH (first + last + birthday)
-  const [fullMatch] = await db.query(
+  // 🔍 STEP 2: STRICT MATCH (FIRST + LAST + BIRTHDAY)
+  const [personMatch] = await db.query(
     `SELECT person_id 
    FROM person_table
    WHERE first_name = ?
@@ -137,9 +137,10 @@ router.post("/register", async (req, res) => {
     [firstName.trim(), lastName.trim(), birthday]
   );
 
-  if (fullMatch.length > 0) {
-    const personId = fullMatch[0].person_id;
+  if (personMatch.length > 0) {
+    const personId = personMatch[0].person_id;
 
+    // 🔍 STEP 3: GET APPLICANT NUMBER
     const [applicant] = await db.query(
       `SELECT applicant_number 
      FROM applicant_numbering_table 
@@ -151,6 +152,7 @@ router.post("/register", async (req, res) => {
     if (applicant.length > 0) {
       const applicantNumber = applicant[0].applicant_number;
 
+      // 🔍 STEP 4: CHECK EMAIL SENT
       const [exam] = await db.query(
         `SELECT email_sent
        FROM exam_applicants
@@ -163,7 +165,7 @@ router.post("/register", async (req, res) => {
         return res.status(400).json({
           success: false,
           message:
-            "This applicant already received an email. Duplicate registration is not allowed.",
+            "This applicant is already scheduled for examination. Duplicate registration is not allowed.",
         });
       }
     }
@@ -211,7 +213,7 @@ router.post("/register", async (req, res) => {
     }
   }
 
-  
+
 
   if (!normalizedEmail || !password) {
     return res.json({
@@ -497,6 +499,83 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     });
   }
 });
+
+// DELETE ACCOUNT
+router.delete("/delete-account/:person_id", async (req, res) => {
+  const { person_id } = req.params;
+
+  if (!person_id) {
+    return res.status(400).json({
+      success: false,
+      message: "Person ID is required",
+    });
+  }
+
+  try {
+    // 1. Get applicant number
+    const [applicant] = await db.query(
+      `SELECT applicant_number 
+       FROM applicant_numbering_table 
+       WHERE person_id = ?`,
+      [person_id]
+    );
+
+    let applicantNumber = null;
+
+    if (applicant.length > 0) {
+      applicantNumber = applicant[0].applicant_number;
+    }
+
+    // 2. Delete dependent records
+    if (applicantNumber) {
+      await db.query(
+        `DELETE FROM interview_applicants 
+         WHERE applicant_id = ?`,
+        [applicantNumber]
+      );
+
+      await db.query(
+        `DELETE FROM person_status_table 
+         WHERE applicant_id = ?`,
+        [applicantNumber]
+      );
+
+      await db.query(
+        `DELETE FROM applicant_numbering_table 
+         WHERE applicant_number = ?`,
+        [applicantNumber]
+      );
+    }
+
+    // 3. Delete user account
+    await db.query(
+      `DELETE FROM user_accounts 
+       WHERE person_id = ?`,
+      [person_id]
+    );
+
+    // 4. Delete person record
+    await db.query(
+      `DELETE FROM person_table 
+       WHERE person_id = ?`,
+      [person_id]
+    );
+
+    res.json({
+      success: true,
+      message: "Account deleted successfully",
+    });
+
+  } catch (error) {
+    console.error("Delete account error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete account",
+    });
+  }
+});
+
 
 // POST LOGIN (FACULTY, ADMIN, STFF AND STUDENT)
 router.post("/login", async (req, res) => {

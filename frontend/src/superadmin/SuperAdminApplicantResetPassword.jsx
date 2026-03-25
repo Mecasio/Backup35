@@ -108,9 +108,13 @@ const SuperAdminApplicantResetPassword = () => {
   const [hasAccess, setHasAccess] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [userInfo, setUserInfo] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // for table/search
+  const [resetLoading, setResetLoading] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
   const pageId = 81;
+  const [accessLoading, setAccessLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(false);
 
   const [employeeID, setEmployeeID] = useState("");
 
@@ -140,20 +144,16 @@ const SuperAdminApplicantResetPassword = () => {
   const checkAccess = async (employeeID) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/api/page_access/${employeeID}/${pageId}`);
-      if (response.data && response.data.page_privilege === 1) {
+
+      if (response.data?.page_privilege === 1) {
         setHasAccess(true);
       } else {
         setHasAccess(false);
       }
     } catch (error) {
-      console.error('Error checking access:', error);
       setHasAccess(false);
-      if (error.response && error.response.data.message) {
-        console.log(error.response.data.message);
-      } else {
-        console.log("An unexpected error occurred.");
-      }
-      setLoading(false);
+    } finally {
+      setAccessLoading(false); // ✅ ONLY here
     }
   };
 
@@ -205,14 +205,12 @@ const SuperAdminApplicantResetPassword = () => {
   const handleReset = async () => {
     if (!userInfo) return;
 
-    setLoading(true);
+    setResetLoading(true);
 
     try {
       const res = await axios.post(
         `${API_BASE_URL}/superadmin-reset-applicant`,
-        {
-          email: userInfo.email,
-        }
+        { email: userInfo.email }
       );
 
       setSnackbar({
@@ -224,15 +222,13 @@ const SuperAdminApplicantResetPassword = () => {
     } catch (err) {
       setSnackbar({
         open: true,
-        message:
-          err.response?.data?.message || "Error resetting password.",
+        message: err.response?.data?.message || "Error resetting password.",
         severity: "error",
       });
     } finally {
-      setLoading(false);
+      setResetLoading(false);
     }
   };
-
 
   const handleStatusChange = async (e) => {
     const newStatus = parseInt(e.target.value, 10);
@@ -302,11 +298,24 @@ const SuperAdminApplicantResetPassword = () => {
   };
 
 
-  const handleNameClick = (applicant) => {
-    // You can search by email (safest because it's unique)
+  const handleNameClick = async (applicant) => {
     setSearchQuery(applicant.email);
+    setPageLoading(true);
+    setSearchError("");
 
-    // Optional: scroll to info panel
+    try {
+      const res = await axios.post(`${API_BASE_URL}/superadmin-get-applicant`, {
+        email: applicant.email,
+      });
+
+      setUserInfo(res.data);
+    } catch (err) {
+      setSearchError(err.response?.data?.message || "No applicant found.");
+      setUserInfo(null);
+    } finally {
+      setPageLoading(false);
+    }
+
     window.scrollTo({
       top: document.body.scrollHeight,
       behavior: "smooth",
@@ -323,15 +332,54 @@ const SuperAdminApplicantResetPassword = () => {
     });
   };
 
+  const handleUpdateStatus = async () => {
+    if (!userInfo) return;
 
-  // ✅ Access Guards
-  if (loading || hasAccess === null) {
-    return <LoadingOverlay open={loading} message="Checking Access..." />;
+    setStatusLoading(true);
+
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/superadmin-update-status-applicant`,
+        {
+          email: userInfo.email,
+          status: userInfo.status,
+        }
+      );
+
+      // ✅ UPDATE TABLE STATE (IMPORTANT)
+      setApplicants((prev) =>
+        prev.map((applicant) =>
+          applicant.email === userInfo.email
+            ? { ...applicant, status: userInfo.status }
+            : applicant
+        )
+      );
+
+      setSnackbar({
+        open: true,
+        message: res.data.message || "Status updated successfully",
+        severity: "success",
+      });
+
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: err.response?.data?.message || "Failed to update status",
+        severity: "error",
+      });
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
+  if (accessLoading) {
+    return <LoadingOverlay open message="Checking Access..." />;
   }
 
   if (!hasAccess) {
     return <Unauthorized />;
   }
+
   return (
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
       {/* Header */}
@@ -583,10 +631,10 @@ const SuperAdminApplicantResetPassword = () => {
                     sx={{
                       border: `2px solid ${borderColor}`,
                       fontWeight: "bold",
-                      color: applicant.status === 0 ? "green" : "red",
+                      color: applicant.status === 1 ? "green" : "red",
                     }}
                   >
-                    {applicant.status === 0 ? "Active" : "Inactive"}
+                    {applicant.status === 1 ? "Active" : "Inactive"}
                   </TableCell>
                 </TableRow>
               ))
@@ -718,7 +766,7 @@ const SuperAdminApplicantResetPassword = () => {
         <Box display="grid" gridTemplateColumns={{ xs: "1fr", sm: "1fr 1fr" }} gap={2}>
           <TextField
             label="Applicant Number"
-            value={userInfo ? userInfo.applicant_number || "" : ""}
+            value={userInfo?.applicant_number || ""}
             fullWidth
             InputProps={{ readOnly: true }}
           />
@@ -739,28 +787,43 @@ const SuperAdminApplicantResetPassword = () => {
             value={userInfo ? userInfo.birthdate : ""}
             fullWidth
             InputProps={{ readOnly: true }}
-           />
+          />
           <TextField
             select
             label="Status"
             value={userInfo ? userInfo.status ?? "" : ""}
             fullWidth
-            onChange={handleStatusChange}
+            onChange={(e) =>
+              setUserInfo((prev) => ({
+                ...prev,
+                status: parseInt(e.target.value, 10),
+              }))
+            }
           >
             <MenuItem value={1}>Active</MenuItem>
             <MenuItem value={0}>Inactive</MenuItem>
           </TextField>
         </Box>
 
-        <Box mt={3}>
+        <Box mt={3} display="flex" gap={2}>
+          {/* UPDATE STATUS */}
           <Button
-            sx={{ mt: 2 }}
             variant="contained"
-
-            onClick={handleReset}
-            disabled={!userInfo || loading}
+            color="primary"
+            onClick={handleUpdateStatus}
+            disabled={!userInfo || statusLoading || resetLoading}
           >
-            {loading ? "Processing..." : "Reset Password"}
+            {statusLoading ? "Updating..." : "Update Status"}
+          </Button>
+
+          {/* RESET PASSWORD */}
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleReset}
+            disabled={!userInfo || resetLoading || statusLoading}
+          >
+            {resetLoading ? "Processing..." : "Reset Password"}
           </Button>
         </Box>
       </Paper>

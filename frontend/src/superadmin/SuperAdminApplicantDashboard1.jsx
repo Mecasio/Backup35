@@ -1124,62 +1124,10 @@ const SuperAdminApplicantDashboard1 = () => {
     ];
 
 
-    const [openAddApplicant, setOpenAddApplicant] = useState(false);
+  
+   
 
-    const [applicantForm, setApplicantForm] = useState({
-        last_name: "",
-        first_name: "",
-        middle_name: "",
-        birthOfDate: "",
-        applyingAs: "",
-        academicProgram: "",
-        email: "",
-        password: ""
-    });
-
-    const handleApplicantChange = (e) => {
-        setApplicantForm({
-            ...applicantForm,
-            [e.target.name]: e.target.value
-        });
-    };
-
-    const handleAddApplicant = async () => {
-        try {
-
-            const payload = {
-                email: applicantForm.email,
-                password: applicantForm.password,
-                first_name: applicantForm.first_name,
-                middle_name: applicantForm.middle_name,
-                last_name: applicantForm.last_name,
-                birthOfDate: applicantForm.birthOfDate,
-                academicProgram: applicantForm.academicProgram,
-                applyingAs: applicantForm.applyingAs
-            };
-
-            const res = await axios.post(`${API_BASE_URL}/form/add-applicant`, payload);
-
-            setSnackbar(`Applicant created! Applicant Number: ${res.data.applicant_number}`);
-
-            setOpenAddApplicant(false);
-
-            setApplicantForm({
-                last_name: "",
-                first_name: "",
-                middle_name: "",
-                birthOfDate: "",
-                applyingAs: "",
-                academicProgram: "",
-                email: "",
-                password: ""
-            });
-
-        } catch (error) {
-            console.error(error);
-            setSnackbar(error.response?.data?.message || "Error adding applicant");
-        }
-    };
+  
 
 
     const [canPrintPermit, setCanPrintPermit] = useState(false);
@@ -1259,13 +1207,7 @@ const SuperAdminApplicantDashboard1 = () => {
                     }}
                 />
 
-                <Button
-                    variant="contained"
-                    onClick={() => setOpenAddApplicant(true)}
-                >
-                    Add Applicant
-                </Button>
-
+             
             </Box>
 
             {searchError && <Typography color="error">{searchError}</Typography>}
@@ -3482,154 +3424,7 @@ const SuperAdminApplicantDashboard1 = () => {
                         </Box>
 
 
-                        <Modal open={openAddApplicant} onClose={() => setOpenAddApplicant(false)}>
-                            <Box
-                                sx={{
-                                    width: 500,
-                                    bgcolor: "white",
-                                    p: 4,
-                                    borderRadius: 2,
-                                    mx: "auto",
-                                    mt: "10%"
-                                }}
-                            >
-
-                                <Typography variant="h6" mb={2}>
-                                    Add Applicant
-                                </Typography>
-
-                                <TextField
-                                    label="Last Name"
-                                    name="last_name"
-                                    fullWidth
-                                    margin="normal"
-                                    value={applicantForm.last_name}
-                                    onChange={handleApplicantChange}
-                                />
-
-                                <TextField
-                                    label="First Name"
-                                    name="first_name"
-                                    fullWidth
-                                    margin="normal"
-                                    value={applicantForm.first_name}
-                                    onChange={handleApplicantChange}
-                                />
-
-                                <TextField
-                                    label="Middle Name"
-                                    name="middle_name"
-                                    fullWidth
-                                    margin="normal"
-                                    value={applicantForm.middle_name}
-                                    onChange={handleApplicantChange}
-                                />
-
-                                <DateField
-                                    label="Birthdate"
-                                    name="birthOfDate"
-                                    fullWidth
-                                    margin="normal"
-                                    value={applicantForm.birthOfDate}
-                                    onChange={handleApplicantChange}
-                                />
-                                <FormControl fullWidth margin="normal">
-                                    <InputLabel id="applying-as-label">Applying As</InputLabel>
-                                    <Select
-                                        labelId="applying-as-label"
-                                        name="applyingAs"
-                                        value={applicantForm.applyingAs}
-                                        label="Applying As"
-                                        onChange={handleApplicantChange}
-                                    >
-                                        <MenuItem value="">
-                                            <em>Select Applying</em>
-                                        </MenuItem>
-
-                                        <MenuItem value="Senior High School Graduate">
-                                            Senior High School Graduate
-                                        </MenuItem>
-
-                                        <MenuItem value="Senior High School Graduating Student">
-                                            Senior High School Graduating Student
-                                        </MenuItem>
-
-                                        <MenuItem value="ALS Passer">
-                                            ALS (Alternative Learning System) Passer
-                                        </MenuItem>
-
-                                        <MenuItem value="Transferee">
-                                            Transferee from other University/College
-                                        </MenuItem>
-
-                                        <MenuItem value="Cross Enrolee">
-                                            Cross Enrolee Student
-                                        </MenuItem>
-
-                                        <MenuItem value="Foreign Applicant">
-                                            Foreign Applicant/Student
-                                        </MenuItem>
-
-                                        <MenuItem value="Baccalaureate Graduate">
-                                            Baccalaureate Graduate
-                                        </MenuItem>
-
-                                        <MenuItem value="Master Degree Graduate">
-                                            Master Degree Graduate
-                                        </MenuItem>
-                                    </Select>
-                                </FormControl>
-
-                                <FormControl fullWidth margin="normal">
-                                    <InputLabel id="academic-program-label">Academic Program</InputLabel>
-                                    <Select
-                                        labelId="academic-program-label"
-                                        name="academicProgram"
-                                        value={applicantForm.academicProgram}
-                                        label="Academic Program"
-                                        onChange={handleApplicantChange}
-                                    >
-                                        <MenuItem value="">
-                                            <em>Select Program</em>
-                                        </MenuItem>
-
-                                        <MenuItem value="0">Undergraduate</MenuItem>
-                                        <MenuItem value="1">Graduate</MenuItem>
-                                        <MenuItem value="2">Techvoc</MenuItem>
-                                    </Select>
-                                </FormControl>
-
-                                <TextField
-                                    label="Email"
-                                    name="email"
-                                    fullWidth
-                                    margin="normal"
-                                    value={applicantForm.email}
-                                    onChange={handleApplicantChange}
-                                />
-
-                                <TextField
-                                    label="Password"
-                                    type="password"
-                                    name="password"
-                                    fullWidth
-                                    margin="normal"
-                                    value={applicantForm.password}
-                                    onChange={handleApplicantChange}
-                                />
-
-                                <Button
-                                    variant="contained"
-                                    fullWidth
-                                    sx={{ mt: 2 }}
-                                    onClick={handleAddApplicant}
-                                >
-                                    Create Applicant
-                                </Button>
-
-                            </Box>
-                        </Modal>
-
+                     
 
                         <Snackbar
                             open={snackbar.open}

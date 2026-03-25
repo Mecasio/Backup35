@@ -823,31 +823,31 @@ const SuperAdminApplicantList = () => {
   const [applicants, setApplicants] = useState([]);
   const divToPrintRef = useRef();
 
- const printDiv = () => {
-     // ✅ Determine dynamic campus address (dropdown or custom)
-     let campusAddress = "";
-     if (settings?.campus_address && settings.campus_address.trim() !== "") {
-       campusAddress = settings.campus_address;
-     } else if (settings?.address && settings.address.trim() !== "") {
-       campusAddress = settings.address;
-     } else {
-       campusAddress = "No address set in Settings";
-     }
- 
-     // ✅ Dynamic logo and company name
-     const logoSrc = fetchedLogo || EaristLogo;
-     const name = companyName?.trim() || "";
- 
-     // ✅ Split company name into two balanced lines
-     const words = name.split(" ");
-     const middleIndex = Math.ceil(words.length / 2);
-     const firstLine = words.slice(0, middleIndex).join(" ");
-     const secondLine = words.slice(middleIndex).join(" ");
- 
-     // ✅ Generate printable HTML
-     const newWin = window.open("", "Print-Window");
-     newWin.document.open();
-     newWin.document.write(`
+  const printDiv = () => {
+    // ✅ Determine dynamic campus address (dropdown or custom)
+    let campusAddress = "";
+    if (settings?.campus_address && settings.campus_address.trim() !== "") {
+      campusAddress = settings.campus_address;
+    } else if (settings?.address && settings.address.trim() !== "") {
+      campusAddress = settings.address;
+    } else {
+      campusAddress = "No address set in Settings";
+    }
+
+    // ✅ Dynamic logo and company name
+    const logoSrc = fetchedLogo || EaristLogo;
+    const name = companyName?.trim() || "";
+
+    // ✅ Split company name into two balanced lines
+    const words = name.split(" ");
+    const middleIndex = Math.ceil(words.length / 2);
+    const firstLine = words.slice(0, middleIndex).join(" ");
+    const secondLine = words.slice(middleIndex).join(" ");
+
+    // ✅ Generate printable HTML
+    const newWin = window.open("", "Print-Window");
+    newWin.document.open();
+    newWin.document.write(`
        <html>
          <head>
            <title>Applicant List</title>
@@ -947,19 +947,19 @@ const SuperAdminApplicantList = () => {
    
                  <!-- ✅ Dynamic company name -->
                  ${name
-         ? `
+        ? `
                        <b style="letter-spacing: 1px; font-size: 20px; font-family: Arial, sans-serif;">
                          ${firstLine}
                        </b>
                        ${secondLine
-           ? `<div style="letter-spacing: 1px; font-size: 20px; font-family: Arial, sans-serif;">
+          ? `<div style="letter-spacing: 1px; font-size: 20px; font-family: Arial, sans-serif;">
                                <b>${secondLine}</b>
                              </div>`
-           : ""
-         }
+          : ""
+        }
                      `
-         : ""
-       }
+        : ""
+      }
    
                  <!-- ✅ Dynamic campus address -->
                  <div style="font-size: 13px; font-family: Arial">${campusAddress}</div>
@@ -986,8 +986,8 @@ const SuperAdminApplicantList = () => {
                </thead>
                <tbody>
                  ${filteredPersons
-         .map(
-           (person) => `
+        .map(
+          (person) => `
                        <tr>
                          <td style="width:10%">${person.applicant_number || ""}</td>
                          <td style="width:40%">${person.last_name}, ${person.first_name} ${person.middle_name || ""} ${person.extension || ""}</td>
@@ -995,25 +995,25 @@ const SuperAdminApplicantList = () => {
                          
                          <td style="width:10%">${person.generalAverage1 || ""}</td>
                          <td style="width:10%">${new Date(
-             person.created_at.split("T")[0],
-           ).toLocaleDateString("en-PH", {
-             year: "numeric",
-             month: "short",
-             day: "2-digit",
-           })}</td>
+            person.created_at.split("T")[0],
+          ).toLocaleDateString("en-PH", {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+          })}</td>
                          <td style="width:15%">${getApplicantStatus(person)}</td>
                        </tr>
                      `,
-         )
-         .join("")}
+        )
+        .join("")}
                </tbody>
              </table>
            </div>
          </body>
        </html>
      `);
-     newWin.document.close();
-   };
+    newWin.document.close();
+  };
 
   // Put this at the very bottom before the return
   if (loading || hasAccess === null) {
@@ -1881,7 +1881,7 @@ const SuperAdminApplicantList = () => {
 
                   color: "black",
 
-                  "& td": {
+                  "& td:not(.clickable-cell)": {
                     color: "black",
                   },
 
@@ -1947,6 +1947,7 @@ const SuperAdminApplicantList = () => {
 
                 {/* Applicant ID */}
                 <TableCell
+                  className="clickable-cell"
                   sx={{
                     textAlign: "center",
                     border: `2px solid ${borderColor}`,
@@ -1961,6 +1962,7 @@ const SuperAdminApplicantList = () => {
 
                 {/* Name */}
                 <TableCell
+                  className="clickable-cell"
                   sx={{
                     textAlign: "left",
                     border: `2px solid ${borderColor}`,

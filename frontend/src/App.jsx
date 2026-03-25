@@ -30,6 +30,7 @@ import ProtectedRoute, { isTokenValid } from "./components/ProtectedRoute";
 
 import API_BASE_URL from "./apiConfig";
 import StudentListForEnrollment from "./registrar/StudentListForEnrollment";
+import ApplicationProcessAdmin from "./superadmin/ApplicationProcessAdmin";
 
 // ✅ Create a Context so all components can access settings
 export const SettingsContext = createContext(null);
@@ -428,6 +429,9 @@ const AdminBranches = lazy(
 
 const CourseTaggingForCollege = lazy(
   () => import("./registrar/CourseTaggingForCollege"),
+);
+const CourseTaggingForSummer = lazy(
+  () => import("./registrar/CourseTaggingForSummer"),
 );
 const LoadingOverlay = lazy(() => import("./components/LoadingOverlay"));
 
@@ -1109,6 +1113,14 @@ function App() {
                           </ProtectedRoute>
                         }
                       />
+                       <Route
+                        path="/course_tagging_for_summer"
+                        element={
+                          <ProtectedRoute>
+                            <CourseTaggingForSummer />
+                          </ProtectedRoute>
+                        }
+                      />
                       <Route
                         path="/schedule_checker/:dprtmnt_id"
                         element={
@@ -1394,6 +1406,14 @@ function App() {
                         element={
                           <ProtectedRoute>
                             <SuperAdminApplicantList />
+                          </ProtectedRoute>
+                        }
+                      />
+                        <Route
+                        path="/application_process_admin"
+                        element={
+                          <ProtectedRoute>
+                            <ApplicationProcessAdmin />
                           </ProtectedRoute>
                         }
                       />

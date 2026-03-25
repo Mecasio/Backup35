@@ -1153,7 +1153,7 @@ const StudentRequirements = () => {
               size="small"
               name="strand"
               value={person.strand || ""}
-              sx={{ width: "300px" }}
+              sx={{ width: "350px" }}
               InputProps={{
                 sx: {
                   height: 35, // control outer height
@@ -1265,7 +1265,7 @@ const StudentRequirements = () => {
                 name="applyingAs"
                 value={person.applyingAs || ""}
                 placeholder="Select applyingAs"
-                sx={{ width: "300px" }}
+                sx={{ width: "400px" }}
                 InputProps={{ sx: { height: 35 } }}
                 inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
               >
