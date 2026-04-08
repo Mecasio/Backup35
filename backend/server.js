@@ -128,8 +128,9 @@ const studentAccountRoute = require("./routes/student_routes/studentAccounts");
 const curriculum = require("./routes/system_routes/curriculumRoute");
 const schoolYear = require("./routes/system_routes/schoolYear");
 const statistics = require("./routes/system_routes/statistics");
-const payment = require("./routes/payment/payment")
-const evaluation = require("./routes/system_routes/evaluation")
+const payment = require("./routes/payment/payment");
+const evaluation = require("./routes/system_routes/evaluation");
+const yearLevelRoute = require("./routes/system_routes/yearLevel");
 app.use("/", evaluation);
 app.use("/", payment);
 app.use("/", statistics);
@@ -179,6 +180,7 @@ app.use("/", courseTaggingRoute);
 app.use("/api", settingsRoute);
 app.use("/", section);
 app.use("/api", studentAccountRoute);
+app.use("/", yearLevelRoute);
 
 const uploadPath = path.join(__dirname, "uploads");
 
@@ -5465,7 +5467,7 @@ app.get("/get_course", async (req, res) => {
 
 // YEAR LEVEL PANEL (UPDATED!)
 app.post("/years_level", async (req, res) => {
-  const { year_level_description } = req.body;
+  const { year_level_description, level_type } = req.body;
 
   if (!year_level_description) {
     return res
@@ -5474,13 +5476,18 @@ app.post("/years_level", async (req, res) => {
   }
 
   const query =
-    "INSERT INTO year_level_table (year_level_description) VALUES (?)";
+    "INSERT INTO year_level_table (year_level_description, level_type) VALUES (?, ?)";
 
   try {
-    const [result] = await db3.query(query, [year_level_description]);
+    const [result] = await db3.query(query, [
+      year_level_description,
+      level_type || "year", // fallback
+    ]);
+
     res.status(201).json({
       year_level_id: result.insertId,
       year_level_description,
+      level_type,
     });
   } catch (err) {
     console.error("Insert error:", err);
@@ -10949,17 +10956,7 @@ app.get("/prof_dropdown", async (req, res) => {
 //  NEWLY ADDED API 1/13/2025
 
 //  GET all year levels
-app.get("/api/year-levels", async (req, res) => {
-  try {
-    const [rows] = await db3.query(
-      "SELECT year_level_id, year_level_description FROM year_level_table ORDER BY year_level_id",
-    );
-    res.json(rows);
-  } catch (err) {
-    console.error("Error fetching year levels:", err);
-    res.status(500).json({ message: "Failed to fetch year levels" });
-  }
-});
+// GET only YEAR levels
 
 // ================= POST =================
 

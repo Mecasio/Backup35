@@ -42,7 +42,9 @@ const parseStudentName = (fullName) => {
     return { lastName: "", firstName: "", middleName: "" };
   }
 
-  const [lastPart = "", restPart = ""] = text.split(",").map((part) => part.trim());
+  const [lastPart = "", restPart = ""] = text
+    .split(",")
+    .map((part) => part.trim());
   if (!restPart) {
     return { lastName: lastPart, firstName: "", middleName: "" };
   }
@@ -77,7 +79,9 @@ const parseAcademicYear = (academicYearText) => {
     return { yearDescription: "", semesterDescription: "" };
   }
 
-  const [yearRaw = "", semesterRaw = ""] = text.split(",").map((part) => part.trim());
+  const [yearRaw = "", semesterRaw = ""] = text
+    .split(",")
+    .map((part) => part.trim());
   const yearMatch = normalizeText(yearRaw).match(/^(\d{4})\s*-\s*\d{4}$/);
   const normalizedYear = yearMatch ? yearMatch[1] : normalizeText(yearRaw);
 
@@ -160,7 +164,10 @@ const getBranchComponentMap = async () => {
       }
     }
   } catch (error) {
-    console.error("[IMPORT] Failed to load branch map from company_settings:", error.message);
+    console.error(
+      "[IMPORT] Failed to load branch map from company_settings:",
+      error.message,
+    );
   }
 
   branchCache.map = map;
@@ -171,7 +178,10 @@ const getBranchComponentMap = async () => {
 const normalizeCampusComponent = (value, branchComponentMap = new Map()) => {
   const text = normalizeCampusKey(value);
   if (!text) return null;
-  console.log("[IMPORT] Normalizing campus value", { original: value, normalized: text });
+  console.log("[IMPORT] Normalizing campus value", {
+    original: value,
+    normalized: text,
+  });
   const numericValue = Number(text);
   if (Number.isInteger(numericValue) && numericValue >= 0) {
     return numericValue;
@@ -187,24 +197,33 @@ const normalizeCampusComponent = (value, branchComponentMap = new Map()) => {
 const getUploadedRows = (req, res) => {
   const fileValidation = validateSpreadsheetUpload(req.file);
   if (!fileValidation.valid) {
-    res.status(fileValidation.status).json({ success: false, error: fileValidation.error });
+    res
+      .status(fileValidation.status)
+      .json({ success: false, error: fileValidation.error });
     return null;
   }
 
   const workbook = readWorkbookSafely(req.file);
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   if (!sheet) {
-    res.status(400).json({ success: false, error: "Spreadsheet has no worksheet" });
+    res
+      .status(400)
+      .json({ success: false, error: "Spreadsheet has no worksheet" });
     return null;
   }
   if (hasFormulaCell(sheet)) {
-    res.status(400).json({ success: false, error: "Formulas are not allowed in uploads" });
+    res
+      .status(400)
+      .json({ success: false, error: "Formulas are not allowed in uploads" });
     return null;
   }
 
-  const { rows: parsedRows, truncatedByMaxRows } = getSheetRowsWithLimits(sheet, {
-    sheetToJsonOptions: { defval: "" },
-  });
+  const { rows: parsedRows, truncatedByMaxRows } = getSheetRowsWithLimits(
+    sheet,
+    {
+      sheetToJsonOptions: { defval: "" },
+    },
+  );
   const { cleanRows, flaggedRows } = removeFormulaLikeRows(parsedRows);
   const { rowsToInsert } = prepareRowsForInsert(cleanRows, req.file.size || 0);
   req.xlsxWarnings = {
@@ -261,7 +280,9 @@ const convertGradeToNumericLegacy = (grade) => {
 };
 
 const normalizeCourseCodeForMatching = (courseCode) =>
-  normalizeText(courseCode).toUpperCase().replace(/[^A-Z0-9]/g, "");
+  normalizeText(courseCode)
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
 
 const normalizeImportedCourseCode = (courseCode) =>
   normalizeText(courseCode).toUpperCase();
@@ -311,10 +332,14 @@ const transformNstpSubject = (courseCode, semesterDescription) => {
   }
 
   let normalizedCourseCode = "NSTPROG";
-  if (/NSTPROG1|NSTPCWTS1/.test(normalizedSource)) normalizedCourseCode = "NSTPROG1";
-  else if (/NSTPROG2|NSTPCWTS2/.test(normalizedSource)) normalizedCourseCode = "NSTPROG2";
-  else if (/FIRST\s+SEMESTER/i.test(semesterDescription || "")) normalizedCourseCode = "NSTPROG1";
-  else if (/SECOND\s+SEMESTER/i.test(semesterDescription || "")) normalizedCourseCode = "NSTPROG2";
+  if (/NSTPROG1|NSTPCWTS1/.test(normalizedSource))
+    normalizedCourseCode = "NSTPROG1";
+  else if (/NSTPROG2|NSTPCWTS2/.test(normalizedSource))
+    normalizedCourseCode = "NSTPROG2";
+  else if (/FIRST\s+SEMESTER/i.test(semesterDescription || ""))
+    normalizedCourseCode = "NSTPROG1";
+  else if (/SECOND\s+SEMESTER/i.test(semesterDescription || ""))
+    normalizedCourseCode = "NSTPROG2";
 
   return {
     courseCode: normalizedCourseCode,
@@ -322,7 +347,8 @@ const transformNstpSubject = (courseCode, semesterDescription) => {
     normalizedSource,
     isNstp: true,
     hasKnownComponentKeyword: hasKnownNstpComponentKeyword(normalizedSource),
-    hasUnknownComponentKeyword: hasUnknownNstpComponentKeyword(normalizedSource),
+    hasUnknownComponentKeyword:
+      hasUnknownNstpComponentKeyword(normalizedSource),
   };
 };
 
@@ -352,402 +378,440 @@ function parseStudentNameLegacy(fullName) {
 }
 
 // -------------------------------------------- FOR FILE UPLOAD IN ENROLLED SUBJECT --------------------------------- //
-router.post("/import-xlsx-into-enrolled-subject", upload.single("file"), async (req, res) => {
-  const campus = normalizeText(req.body.campus) || null;
-
-  try {
-    console.log("[IMPORT] Starting import-xlsx-into-enrolled-subject", {
-      campus,
-      hasFile: !!req.file,
-      originalName: req.file?.originalname,
-      size: req.file?.size,
-    });
-
-    const rawRows = getUploadedRows(req, res);
-    if (!rawRows) return;
-
-    const rows = rawRows.filter((row) => {
-      const studentNumber = normalizeText(
-        pickValue(row, ["Student Number", "StudentNumber", "student_number"]),
-      );
-      const courseCode = normalizeText(
-        pickValue(row, ["Course ", "Course", "Course Code", "course_code"]),
-      );
-      return studentNumber || courseCode;
-    });
-
-    if (!rows.length) {
-      return res.status(400).json({ success: false, error: "No valid rows found" });
-    }
-
-    console.log("[IMPORT] Parsed Excel rows", {
-      rawRowCount: rawRows.length,
-      validRowCount: rows.length,
-    });
-
-    // Step 1: Group by student number + academic year.
-    const groupedMap = new Map();
-    for (const row of rows) {
-      const studentNumber = normalizeText(
-        pickValue(row, ["Student Number", "StudentNumber", "student_number"]),
-      );
-      const academicYear = normalizeText(
-        pickValue(row, ["Academic Year", "AcademicYear", "academic_year"]),
-      );
-
-      if (!studentNumber || !academicYear) continue;
-
-      const key = `${studentNumber}__${academicYear}`;
-      if (!groupedMap.has(key)) {
-        groupedMap.set(key, { studentNumber, academicYear, rows: [] });
-      }
-      groupedMap.get(key).rows.push(row);
-    }
-
-    if (!groupedMap.size) {
-      return res.status(400).json({
-        success: false,
-        error: "No rows with both Student Number and Academic Year were found",
-      });
-    }
-
-    console.log("[IMPORT] Grouped rows", {
-      groupedRecords: groupedMap.size,
-    });
-
-    const connection = await db3.getConnection();
-    let createdPersons = 0;
-    let processedStudents = 0;
-    let insertedSubjects = 0;
-    let updatedSubjects = 0;
-    const skippedItems = [];
-    const seenRowSignatures = new Set();
+router.post(
+  "/import-xlsx-into-enrolled-subject",
+  upload.single("file"),
+  async (req, res) => {
+    const campus = normalizeText(req.body.campus) || null;
 
     try {
-      await connection.beginTransaction();
+      console.log("[IMPORT] Starting import-xlsx-into-enrolled-subject", {
+        campus,
+        hasFile: !!req.file,
+        originalName: req.file?.originalname,
+        size: req.file?.size,
+      });
 
-      for (const group of groupedMap.values()) {
-        const firstRow = group.rows[0];
-        const studentNumber = group.studentNumber;
-        const studentName = pickValue(firstRow, ["Student Name", "StudentName", "student_name"]);
-        const programDescription = pickValue(firstRow, [
-          "Program Description",
-          "ProgramDescription",
-          "program_description",
-        ]);
-        const yearLevelDescription = normalizeText(
-          pickValue(firstRow, ["Year Level", "YearLevel", "year_level_description"]),
+      const rawRows = getUploadedRows(req, res);
+      if (!rawRows) return;
+
+      const rows = rawRows.filter((row) => {
+        const studentNumber = normalizeText(
+          pickValue(row, ["Student Number", "StudentNumber", "student_number"]),
+        );
+        const courseCode = normalizeText(
+          pickValue(row, ["Course ", "Course", "Course Code", "course_code"]),
+        );
+        return studentNumber || courseCode;
+      });
+
+      if (!rows.length) {
+        return res
+          .status(400)
+          .json({ success: false, error: "No valid rows found" });
+      }
+
+      console.log("[IMPORT] Parsed Excel rows", {
+        rawRowCount: rawRows.length,
+        validRowCount: rows.length,
+      });
+
+      // Step 1: Group by student number + academic year.
+      const groupedMap = new Map();
+      for (const row of rows) {
+        const studentNumber = normalizeText(
+          pickValue(row, ["Student Number", "StudentNumber", "student_number"]),
+        );
+        const academicYear = normalizeText(
+          pickValue(row, ["Academic Year", "AcademicYear", "academic_year"]),
         );
 
-        const { yearDescription: schoolYearDescription, semesterDescription } = parseAcademicYear(
-          group.academicYear,
-        );
-        const { programCode, yearDescription: curriculumYearDescription } =
-          parseProgramDescription(programDescription);
-        const { firstName, middleName, lastName } = parseStudentName(studentName);
+        if (!studentNumber || !academicYear) continue;
 
-        console.log("[IMPORT][GROUP] Extracted metadata", {
-          studentNumber,
-          studentName,
-          parsedName: { lastName, firstName, middleName },
-          programDescription,
-          parsedProgram: { programCode, curriculumYearDescription },
-          yearLevelDescription,
-          academicYearRaw: group.academicYear,
-          parsedAcademicYear: { schoolYearDescription, semesterDescription },
-          rowsInGroup: group.rows.length,
+        const key = `${studentNumber}__${academicYear}`;
+        if (!groupedMap.has(key)) {
+          groupedMap.set(key, { studentNumber, academicYear, rows: [] });
+        }
+        groupedMap.get(key).rows.push(row);
+      }
+
+      if (!groupedMap.size) {
+        return res.status(400).json({
+          success: false,
+          error:
+            "No rows with both Student Number and Academic Year were found",
         });
+      }
 
-        if (
-          !studentNumber ||
-          !programCode ||
-          !curriculumYearDescription ||
-          !yearLevelDescription ||
-          !schoolYearDescription ||
-          !semesterDescription
-        ) {
-          skippedItems.push({
+      console.log("[IMPORT] Grouped rows", {
+        groupedRecords: groupedMap.size,
+      });
+
+      const connection = await db3.getConnection();
+      let createdPersons = 0;
+      let processedStudents = 0;
+      let insertedSubjects = 0;
+      let updatedSubjects = 0;
+      const skippedItems = [];
+      const seenRowSignatures = new Set();
+
+      try {
+        await connection.beginTransaction();
+
+        for (const group of groupedMap.values()) {
+          const firstRow = group.rows[0];
+          const studentNumber = group.studentNumber;
+          const studentName = pickValue(firstRow, [
+            "Student Name",
+            "StudentName",
+            "student_name",
+          ]);
+          const programDescription = pickValue(firstRow, [
+            "Program Description",
+            "ProgramDescription",
+            "program_description",
+          ]);
+          const yearLevelDescription = normalizeText(
+            pickValue(firstRow, [
+              "Year Level",
+              "YearLevel",
+              "year_level_description",
+            ]),
+          );
+
+          const {
+            yearDescription: schoolYearDescription,
+            semesterDescription,
+          } = parseAcademicYear(group.academicYear);
+          const { programCode, yearDescription: curriculumYearDescription } =
+            parseProgramDescription(programDescription);
+          const { firstName, middleName, lastName } =
+            parseStudentName(studentName);
+
+          console.log("[IMPORT][GROUP] Extracted metadata", {
             studentNumber,
-            reason: "Missing required student metadata (program/year level/school year/semester)",
+            studentName,
+            parsedName: { lastName, firstName, middleName },
+            programDescription,
+            parsedProgram: { programCode, curriculumYearDescription },
+            yearLevelDescription,
+            academicYearRaw: group.academicYear,
+            parsedAcademicYear: { schoolYearDescription, semesterDescription },
+            rowsInGroup: group.rows.length,
           });
-          continue;
-        }
 
-        // Step 5 + 6: Resolve curriculum from program code + curriculum year description.
-        const [programRows] = await connection.query(
-          `SELECT program_id FROM program_table WHERE UPPER(TRIM(program_code)) = UPPER(TRIM(?)) LIMIT 1`,
-          [programCode],
-        );
+          if (
+            !studentNumber ||
+            !programCode ||
+            !curriculumYearDescription ||
+            !yearLevelDescription ||
+            !schoolYearDescription ||
+            !semesterDescription
+          ) {
+            skippedItems.push({
+              studentNumber,
+              reason:
+                "Missing required student metadata (program/year level/school year/semester)",
+            });
+            continue;
+          }
 
-        if (!programRows.length) {
-          console.log("[IMPORT][GROUP] Program not found", { studentNumber, programCode });
-          skippedItems.push({ studentNumber, reason: `Program not found: ${programCode}` });
-          continue;
-        }
+          // Step 5 + 6: Resolve curriculum from program code + curriculum year description.
+          const [programRows] = await connection.query(
+            `SELECT program_id FROM program_table WHERE UPPER(TRIM(program_code)) = UPPER(TRIM(?)) LIMIT 1`,
+            [programCode],
+          );
 
-        const [currYearRows] = await connection.query(
-          `SELECT year_id FROM year_table WHERE TRIM(year_description) = TRIM(?) LIMIT 1`,
-          [curriculumYearDescription],
-        );
+          if (!programRows.length) {
+            console.log("[IMPORT][GROUP] Program not found", {
+              studentNumber,
+              programCode,
+            });
+            skippedItems.push({
+              studentNumber,
+              reason: `Program not found: ${programCode}`,
+            });
+            continue;
+          }
 
-        if (!currYearRows.length) {
-          console.log("[IMPORT][GROUP] Curriculum year not found", {
-            studentNumber,
-            curriculumYearDescription,
-          });
-          skippedItems.push({
-            studentNumber,
-            reason: `Curriculum year not found: ${curriculumYearDescription}`,
-          });
-          continue;
-        }
+          const [currYearRows] = await connection.query(
+            `SELECT year_id FROM year_table WHERE TRIM(year_description) = TRIM(?) LIMIT 1`,
+            [curriculumYearDescription],
+          );
 
-        const [curriculumRows] = await connection.query(
-          `SELECT curriculum_id
+          if (!currYearRows.length) {
+            console.log("[IMPORT][GROUP] Curriculum year not found", {
+              studentNumber,
+              curriculumYearDescription,
+            });
+            skippedItems.push({
+              studentNumber,
+              reason: `Curriculum year not found: ${curriculumYearDescription}`,
+            });
+            continue;
+          }
+
+          const [curriculumRows] = await connection.query(
+            `SELECT curriculum_id
            FROM curriculum_table
            WHERE year_id = ? AND program_id = ?
            LIMIT 1`,
-          [currYearRows[0].year_id, programRows[0].program_id],
-        );
-        if (!curriculumRows.length) {
-          console.log("[IMPORT][GROUP] Curriculum not found", {
-            studentNumber,
-            programCode,
-            curriculumYearDescription,
-          });
-          skippedItems.push({
-            studentNumber,
-            reason: `Curriculum not found for program=${programCode} year=${curriculumYearDescription}`,
-          });
-          continue;
-        }
+            [currYearRows[0].year_id, programRows[0].program_id],
+          );
+          if (!curriculumRows.length) {
+            console.log("[IMPORT][GROUP] Curriculum not found", {
+              studentNumber,
+              programCode,
+              curriculumYearDescription,
+            });
+            skippedItems.push({
+              studentNumber,
+              reason: `Curriculum not found for program=${programCode} year=${curriculumYearDescription}`,
+            });
+            continue;
+          }
 
-        const curriculumId = curriculumRows[0].curriculum_id;
-        console.log("[IMPORT][GROUP] Resolved curriculum", {
-          studentNumber,
-          programId: programRows[0].program_id,
-          curriculumYearId: currYearRows[0].year_id,
-          curriculumId,
-        });
+          const curriculumId = curriculumRows[0].curriculum_id;
+          console.log("[IMPORT][GROUP] Resolved curriculum", {
+            studentNumber,
+            programId: programRows[0].program_id,
+            curriculumYearId: currYearRows[0].year_id,
+            curriculumId,
+          });
 
-        // Step 7: Resolve year level id.
-        const [yearLevelRows] = await connection.query(
-          `SELECT year_level_id
+          // Step 7: Resolve year level id.
+          const [yearLevelRows] = await connection.query(
+            `SELECT year_level_id
            FROM year_level_table
            WHERE UPPER(TRIM(year_level_description)) = UPPER(TRIM(?))
            LIMIT 1`,
-          [yearLevelDescription],
-        );
-        if (!yearLevelRows.length) {
-          console.log("[IMPORT][GROUP] Year level not found", {
+            [yearLevelDescription],
+          );
+          if (!yearLevelRows.length) {
+            console.log("[IMPORT][GROUP] Year level not found", {
+              studentNumber,
+              yearLevelDescription,
+            });
+            skippedItems.push({
+              studentNumber,
+              reason: `Year level not found: ${yearLevelDescription}`,
+            });
+            continue;
+          }
+
+          const yearLevelId = yearLevelRows[0].year_level_id;
+          console.log("[IMPORT][GROUP] Resolved year level", {
             studentNumber,
             yearLevelDescription,
+            yearLevelId,
           });
-          skippedItems.push({
-            studentNumber,
-            reason: `Year level not found: ${yearLevelDescription}`,
-          });
-          continue;
-        }
 
-        const yearLevelId = yearLevelRows[0].year_level_id;
-        console.log("[IMPORT][GROUP] Resolved year level", {
-          studentNumber,
-          yearLevelDescription,
-          yearLevelId,
-        });
+          // Step 8: Resolve active school year id using year + semester description.
+          const [schoolYearRows] = await connection.query(
+            `SELECT year_id FROM year_table WHERE TRIM(year_description) = TRIM(?) LIMIT 1`,
+            [schoolYearDescription],
+          );
+          if (!schoolYearRows.length) {
+            console.log("[IMPORT][GROUP] School year not found", {
+              studentNumber,
+              schoolYearDescription,
+            });
+            skippedItems.push({
+              studentNumber,
+              reason: `School year not found: ${schoolYearDescription}`,
+            });
+            continue;
+          }
 
-        // Step 8: Resolve active school year id using year + semester description.
-        const [schoolYearRows] = await connection.query(
-          `SELECT year_id FROM year_table WHERE TRIM(year_description) = TRIM(?) LIMIT 1`,
-          [schoolYearDescription],
-        );
-        if (!schoolYearRows.length) {
-          console.log("[IMPORT][GROUP] School year not found", {
-            studentNumber,
-            schoolYearDescription,
-          });
-          skippedItems.push({
-            studentNumber,
-            reason: `School year not found: ${schoolYearDescription}`,
-          });
-          continue;
-        }
-
-        const [semesterRows] = await connection.query(
-          `SELECT semester_id
+          const [semesterRows] = await connection.query(
+            `SELECT semester_id
            FROM semester_table
            WHERE UPPER(TRIM(semester_description)) = UPPER(TRIM(?))
            LIMIT 1`,
-          [semesterDescription],
-        );
-        if (!semesterRows.length) {
-          console.log("[IMPORT][GROUP] Semester not found", {
-            studentNumber,
-            semesterDescription,
-          });
-          skippedItems.push({
-            studentNumber,
-            reason: `Semester not found: ${semesterDescription}`,
-          });
-          continue;
-        }
+            [semesterDescription],
+          );
+          if (!semesterRows.length) {
+            console.log("[IMPORT][GROUP] Semester not found", {
+              studentNumber,
+              semesterDescription,
+            });
+            skippedItems.push({
+              studentNumber,
+              reason: `Semester not found: ${semesterDescription}`,
+            });
+            continue;
+          }
 
-        const [activeSchoolYearRows] = await connection.query(
-          `SELECT id
+          const [activeSchoolYearRows] = await connection.query(
+            `SELECT id
            FROM active_school_year_table
            WHERE year_id = ? AND semester_id = ?
            LIMIT 1`,
-          [schoolYearRows[0].year_id, semesterRows[0].semester_id],
-        );
-        if (!activeSchoolYearRows.length) {
-          console.log("[IMPORT][GROUP] Active school year not found", {
-            studentNumber,
-            schoolYearDescription,
-            semesterDescription,
-          });
-          skippedItems.push({
-            studentNumber,
-            reason: `Active school year not found for ${schoolYearDescription}, ${semesterDescription}`,
-          });
-          continue;
-        }
-
-        const activeSchoolYearId = activeSchoolYearRows[0].id;
-        console.log("[IMPORT][GROUP] Resolved active school year", {
-          studentNumber,
-          schoolYearId: schoolYearRows[0].year_id,
-          semesterId: semesterRows[0].semester_id,
-          activeSchoolYearId,
-        });
-
-        // Step 10/11/12: Resolve section, course, remarks, and pre-check duplicates first.
-        const rowsToInsert = [];
-        for (const row of group.rows) {
-          const sectionDescription = normalizeText(
-            pickValue(row, ["Section", "section", "Section Description"]),
+            [schoolYearRows[0].year_id, semesterRows[0].semester_id],
           );
-          const courseCode = normalizeText(
-            pickValue(row, ["Course ", "Course", "Course Code", "course_code"]),
-          );
-
-          if (!sectionDescription || !courseCode) {
-            console.log("[IMPORT][ROW] Missing section/course", {
+          if (!activeSchoolYearRows.length) {
+            console.log("[IMPORT][GROUP] Active school year not found", {
               studentNumber,
-              sectionDescription,
-              courseCode,
+              schoolYearDescription,
+              semesterDescription,
             });
             skippedItems.push({
               studentNumber,
-              reason: "Missing section or course code in row",
+              reason: `Active school year not found for ${schoolYearDescription}, ${semesterDescription}`,
             });
             continue;
           }
 
-          const [sectionRows] = await connection.query(
-            `SELECT id FROM section_table WHERE UPPER(TRIM(description)) = UPPER(TRIM(?)) LIMIT 1`,
-            [sectionDescription],
-          );
-          if (!sectionRows.length) {
-            console.log("[IMPORT][ROW] Section not found", {
-              studentNumber,
-              sectionDescription,
-            });
-            skippedItems.push({
-              studentNumber,
-              reason: `Section not found: ${sectionDescription}`,
-            });
-            continue;
-          }
+          const activeSchoolYearId = activeSchoolYearRows[0].id;
+          console.log("[IMPORT][GROUP] Resolved active school year", {
+            studentNumber,
+            schoolYearId: schoolYearRows[0].year_id,
+            semesterId: semesterRows[0].semester_id,
+            activeSchoolYearId,
+          });
 
-          const [departmentSectionRows] = await connection.query(
-            `SELECT id
+          // Step 10/11/12: Resolve section, course, remarks, and pre-check duplicates first.
+          const rowsToInsert = [];
+          for (const row of group.rows) {
+            const sectionDescription = normalizeText(
+              pickValue(row, ["Section", "section", "Section Description"]),
+            );
+            const courseCode = normalizeText(
+              pickValue(row, [
+                "Course ",
+                "Course",
+                "Course Code",
+                "course_code",
+              ]),
+            );
+
+            if (!sectionDescription || !courseCode) {
+              console.log("[IMPORT][ROW] Missing section/course", {
+                studentNumber,
+                sectionDescription,
+                courseCode,
+              });
+              skippedItems.push({
+                studentNumber,
+                reason: "Missing section or course code in row",
+              });
+              continue;
+            }
+
+            const [sectionRows] = await connection.query(
+              `SELECT id FROM section_table WHERE UPPER(TRIM(description)) = UPPER(TRIM(?)) LIMIT 1`,
+              [sectionDescription],
+            );
+            if (!sectionRows.length) {
+              console.log("[IMPORT][ROW] Section not found", {
+                studentNumber,
+                sectionDescription,
+              });
+              skippedItems.push({
+                studentNumber,
+                reason: `Section not found: ${sectionDescription}`,
+              });
+              continue;
+            }
+
+            const [departmentSectionRows] = await connection.query(
+              `SELECT id
              FROM dprtmnt_section_table
              WHERE section_id = ? AND curriculum_id = ?
              LIMIT 1`,
-            [sectionRows[0].id, curriculumId],
-          );
-          if (!departmentSectionRows.length) {
-            console.log("[IMPORT][ROW] Department section mapping not found", {
+              [sectionRows[0].id, curriculumId],
+            );
+            if (!departmentSectionRows.length) {
+              console.log(
+                "[IMPORT][ROW] Department section mapping not found",
+                {
+                  studentNumber,
+                  sectionId: sectionRows[0].id,
+                  curriculumId,
+                },
+              );
+              skippedItems.push({
+                studentNumber,
+                reason: `Department section mapping not found for section=${sectionDescription} curriculum=${curriculumId}`,
+              });
+              continue;
+            }
+
+            const [courseRows] = await connection.query(
+              `SELECT course_id FROM course_table WHERE UPPER(TRIM(course_code)) = UPPER(TRIM(?)) LIMIT 1`,
+              [courseCode],
+            );
+            if (!courseRows.length) {
+              console.log("[IMPORT][ROW] Course not found", {
+                studentNumber,
+                courseRows,
+              });
+              skippedItems.push({
+                studentNumber,
+                reason: `Course not found: ${courseRows}`,
+              });
+              continue;
+            }
+
+            const midterm = toNullableNumber(
+              pickValue(row, ["Midterm", "midterm"]),
+            );
+            const finals = toNullableNumber(
+              pickValue(row, ["Finals", "finals"]),
+            );
+            const finalGrade = toNullableNumber(
+              pickValue(row, ["Final Grade", "FinalGrade", "final_grade"]),
+            );
+            const enRemarks = mapRemarkToNumeric(
+              pickValue(row, ["Remarks", "Remark", "remarks", "remark"]),
+            );
+
+            console.log("[IMPORT][ROW] Extracted row payload", {
               studentNumber,
+              courseCode,
+              courseId: courseRows[0].course_id,
+              sectionDescription,
               sectionId: sectionRows[0].id,
+              departmentSectionId: departmentSectionRows[0].id,
               curriculumId,
+              yearLevelId,
+              activeSchoolYearId,
+              midterm,
+              finals,
+              finalGrade,
+              enRemarks,
             });
-            skippedItems.push({
+
+            const rowSignature = [
               studentNumber,
-              reason: `Department section mapping not found for section=${sectionDescription} curriculum=${curriculumId}`,
-            });
-            continue;
-          }
+              curriculumId,
+              courseRows[0].course_id,
+              yearLevelId,
+              departmentSectionRows[0].id,
+              activeSchoolYearId,
+              normalizeText(lastName).toUpperCase(),
+              normalizeText(firstName).toUpperCase(),
+              normalizeText(middleName).toUpperCase(),
+            ].join("|");
 
-          const [courseRows] = await connection.query(
-            `SELECT course_id FROM course_table WHERE UPPER(TRIM(course_code)) = UPPER(TRIM(?)) LIMIT 1`,
-            [courseCode],
-          );
-          if (!courseRows.length) {
-            console.log("[IMPORT][ROW] Course not found", {
-              studentNumber,
-              courseRows,
-            });
-            skippedItems.push({
-              studentNumber,
-              reason: `Course not found: ${courseRows}`,
-            });
-            continue;
-          }
+            // Prevent duplicate rows within the same uploaded file.
+            if (seenRowSignatures.has(rowSignature)) {
+              console.log(
+                "[IMPORT][ROW] Duplicate in uploaded file, skipping",
+                {
+                  studentNumber,
+                  rowSignature,
+                },
+              );
+              skippedItems.push({
+                studentNumber,
+                reason: `${studentNumber}'s Data Already exist`,
+              });
+              continue;
+            }
 
-          const midterm = toNullableNumber(pickValue(row, ["Midterm", "midterm"]));
-          const finals = toNullableNumber(pickValue(row, ["Finals", "finals"]));
-          const finalGrade = toNullableNumber(
-            pickValue(row, ["Final Grade", "FinalGrade", "final_grade"]),
-          );
-          const enRemarks = mapRemarkToNumeric(
-            pickValue(row, ["Remarks", "Remark", "remarks", "remark"]),
-          );
-
-          console.log("[IMPORT][ROW] Extracted row payload", {
-            studentNumber,
-            courseCode,
-            courseId: courseRows[0].course_id,
-            sectionDescription,
-            sectionId: sectionRows[0].id,
-            departmentSectionId: departmentSectionRows[0].id,
-            curriculumId,
-            yearLevelId,
-            activeSchoolYearId,
-            midterm,
-            finals,
-            finalGrade,
-            enRemarks,
-          });
-
-          const rowSignature = [
-            studentNumber,
-            curriculumId,
-            courseRows[0].course_id,
-            yearLevelId,
-            departmentSectionRows[0].id,
-            activeSchoolYearId,
-            normalizeText(lastName).toUpperCase(),
-            normalizeText(firstName).toUpperCase(),
-            normalizeText(middleName).toUpperCase(),
-          ].join("|");
-
-          // Prevent duplicate rows within the same uploaded file.
-          if (seenRowSignatures.has(rowSignature)) {
-            console.log("[IMPORT][ROW] Duplicate in uploaded file, skipping", {
-              studentNumber,
-              rowSignature,
-            });
-            skippedItems.push({
-              studentNumber,
-              reason: `${studentNumber}'s Data Already exist`,
-            });
-            continue;
-          }
-
-          const [existingExactData] = await connection.query(
-            `SELECT es.id
+            const [existingExactData] = await connection.query(
+              `SELECT es.id
              FROM enrolled_subject es
              INNER JOIN student_status_table sst ON sst.student_number = es.student_number
              INNER JOIN student_numbering_table snt ON snt.student_number = es.student_number
@@ -762,305 +826,339 @@ router.post("/import-xlsx-into-enrolled-subject", upload.single("file"), async (
                AND UPPER(TRIM(pt.first_name)) = UPPER(TRIM(?))
                AND UPPER(TRIM(COALESCE(pt.middle_name, ''))) = UPPER(TRIM(?))
              LIMIT 1`,
-            [
+              [
+                studentNumber,
+                curriculumId,
+                courseRows[0].course_id,
+                activeSchoolYearId,
+                departmentSectionRows[0].id,
+                yearLevelId,
+                lastName,
+                firstName,
+                middleName || "",
+              ],
+            );
+
+            if (existingExactData.length > 0) {
+              console.log("[IMPORT][ROW] Duplicate in database, skipping", {
+                studentNumber,
+                existingId: existingExactData[0].id,
+              });
+              skippedItems.push({
+                studentNumber,
+                reason: `${studentNumber}'s Data Already exist`,
+              });
+              seenRowSignatures.add(rowSignature);
+              continue;
+            }
+
+            rowsToInsert.push({
               studentNumber,
               curriculumId,
-              courseRows[0].course_id,
+              courseId: courseRows[0].course_id,
               activeSchoolYearId,
-              departmentSectionRows[0].id,
-              yearLevelId,
-              lastName,
-              firstName,
-              middleName || "",
-            ],
-          );
-
-          if (existingExactData.length > 0) {
-            console.log("[IMPORT][ROW] Duplicate in database, skipping", {
-              studentNumber,
-              existingId: existingExactData[0].id,
-            });
-            skippedItems.push({
-              studentNumber,
-              reason: `${studentNumber}'s Data Already exist`,
+              midterm,
+              finals,
+              finalGrade,
+              enRemarks,
+              departmentSectionId: departmentSectionRows[0].id,
             });
             seenRowSignatures.add(rowSignature);
+          }
+
+          // Do not touch any student/person/status rows if all entries are duplicates/skipped.
+          if (rowsToInsert.length === 0) {
+            console.log(
+              "[IMPORT][GROUP] No new rows to insert, no update/insert performed",
+              {
+                studentNumber,
+              },
+            );
+            processedStudents += 1;
             continue;
           }
 
-          rowsToInsert.push({
-            studentNumber,
-            curriculumId,
-            courseId: courseRows[0].course_id,
-            activeSchoolYearId,
-            midterm,
-            finals,
-            finalGrade,
-            enRemarks,
-            departmentSectionId: departmentSectionRows[0].id,
-          });
-          seenRowSignatures.add(rowSignature);
-        }
-
-        // Do not touch any student/person/status rows if all entries are duplicates/skipped.
-        if (rowsToInsert.length === 0) {
-          console.log("[IMPORT][GROUP] No new rows to insert, no update/insert performed", {
-            studentNumber,
-          });
-          processedStudents += 1;
-          continue;
-        }
-
-        // Step 2 + 3 + 4: Insert only (no updates) person, person status, student numbering.
-        let personId = null;
-        const [existingStudentNumber] = await connection.query(
-          `SELECT person_id FROM student_numbering_table WHERE student_number = ? LIMIT 1`,
-          [studentNumber],
-        );
-
-        if (existingStudentNumber.length > 0) {
-          personId = existingStudentNumber[0].person_id;
-          console.log("[IMPORT][GROUP] Existing student_number found (no update)", {
-            studentNumber,
-            personId,
-          });
-        } else {
-          const [personInsert] = await connection.query(
-            `INSERT INTO person_table (campus, last_name, first_name, middle_name)
-             VALUES (?, ?, ?, ?)`,
-            [campus, lastName, firstName, middleName || null],
+          // Step 2 + 3 + 4: Insert only (no updates) person, person status, student numbering.
+          let personId = null;
+          const [existingStudentNumber] = await connection.query(
+            `SELECT person_id FROM student_numbering_table WHERE student_number = ? LIMIT 1`,
+            [studentNumber],
           );
-          personId = personInsert.insertId;
-          createdPersons += 1;
+
+          if (existingStudentNumber.length > 0) {
+            personId = existingStudentNumber[0].person_id;
+            console.log(
+              "[IMPORT][GROUP] Existing student_number found (no update)",
+              {
+                studentNumber,
+                personId,
+              },
+            );
+          } else {
+            const [personInsert] = await connection.query(
+              `INSERT INTO person_table (campus, last_name, first_name, middle_name)
+             VALUES (?, ?, ?, ?)`,
+              [campus, lastName, firstName, middleName || null],
+            );
+            personId = personInsert.insertId;
+            createdPersons += 1;
+
+            await connection.query(
+              `INSERT INTO student_numbering_table (student_number, person_id)
+             VALUES (?, ?)`,
+              [studentNumber, personId],
+            );
+
+            console.log(
+              "[IMPORT][GROUP] Inserted new person + student_number",
+              {
+                studentNumber,
+                personId,
+                campus,
+              },
+            );
+          }
 
           await connection.query(
-            `INSERT INTO student_numbering_table (student_number, person_id)
-             VALUES (?, ?)`,
-            [studentNumber, personId],
+            `INSERT INTO person_status_table (person_id, student_registration_status)
+           VALUES (?, 1) ON DUPLICATE KEY UPDATE student_registration_status = student_registration_status`,
+            [personId],
           );
 
-          console.log("[IMPORT][GROUP] Inserted new person + student_number", {
-            studentNumber,
-            personId,
-            campus,
-          });
-        }
+          console.log(
+            "[IMPORT][GROUP] Inserted person_status if missing (no update)",
+            {
+              studentNumber,
+              personId,
+              student_registration_status: 1,
+            },
+          );
 
-        await connection.query(
-          `INSERT INTO person_status_table (person_id, student_registration_status)
-           VALUES (?, 1) ON DUPLICATE KEY UPDATE student_registration_status = student_registration_status`,
-          [personId],
-        );
-
-        console.log("[IMPORT][GROUP] Inserted person_status if missing (no update)", {
-          studentNumber,
-          personId,
-          student_registration_status: 1,
-        });
-
-        // Step 9: Insert student status only if missing (no updates).
-        await connection.query(
-          `INSERT IGNORE INTO student_status_table
+          // Step 9: Insert student status only if missing (no updates).
+          await connection.query(
+            `INSERT IGNORE INTO student_status_table
             (student_number, active_curriculum, enrolled_status, year_level_id, active_school_year_id, control_status)
            VALUES (?, ?, 1, ?, ?, 0)`,
-          [studentNumber, curriculumId, yearLevelId, activeSchoolYearId],
-        );
-
-        console.log("[IMPORT][GROUP] Inserted student_status if missing (no update)", {
-          studentNumber,
-          active_curriculum: curriculumId,
-          year_level_id: yearLevelId,
-          active_school_year_id: activeSchoolYearId,
-          enrolled_status: 1,
-        });
-
-        for (const payload of rowsToInsert) {
-          await connection.query(
-            `INSERT INTO enrolled_subject
-              (student_number, curriculum_id, course_id, active_school_year_id, midterm, finals, final_grade, en_remarks, department_section_id, status)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
-            [
-              payload.studentNumber,
-              payload.curriculumId,
-              payload.courseId,
-              payload.activeSchoolYearId,
-              payload.midterm,
-              payload.finals,
-              payload.finalGrade,
-              payload.enRemarks,
-              payload.departmentSectionId,
-            ],
+            [studentNumber, curriculumId, yearLevelId, activeSchoolYearId],
           );
 
-          console.log("[IMPORT][ROW] Inserted enrolled_subject", {
-            studentNumber: payload.studentNumber,
-            curriculumId: payload.curriculumId,
-            courseId: payload.courseId,
-            activeSchoolYearId: payload.activeSchoolYearId,
-            departmentSectionId: payload.departmentSectionId,
-          });
+          console.log(
+            "[IMPORT][GROUP] Inserted student_status if missing (no update)",
+            {
+              studentNumber,
+              active_curriculum: curriculumId,
+              year_level_id: yearLevelId,
+              active_school_year_id: activeSchoolYearId,
+              enrolled_status: 1,
+            },
+          );
 
-          insertedSubjects += 1;
+          for (const payload of rowsToInsert) {
+            await connection.query(
+              `INSERT INTO enrolled_subject
+              (student_number, curriculum_id, course_id, active_school_year_id, midterm, finals, final_grade, en_remarks, department_section_id, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+              [
+                payload.studentNumber,
+                payload.curriculumId,
+                payload.courseId,
+                payload.activeSchoolYearId,
+                payload.midterm,
+                payload.finals,
+                payload.finalGrade,
+                payload.enRemarks,
+                payload.departmentSectionId,
+              ],
+            );
+
+            console.log("[IMPORT][ROW] Inserted enrolled_subject", {
+              studentNumber: payload.studentNumber,
+              curriculumId: payload.curriculumId,
+              courseId: payload.courseId,
+              activeSchoolYearId: payload.activeSchoolYearId,
+              departmentSectionId: payload.departmentSectionId,
+            });
+
+            insertedSubjects += 1;
+          }
+
+          processedStudents += 1;
+          console.log("[IMPORT][GROUP] Finished group", {
+            studentNumber,
+            processedStudents,
+            insertedSubjects,
+            skippedCount: skippedItems.length,
+          });
         }
 
-        processedStudents += 1;
-        console.log("[IMPORT][GROUP] Finished group", {
-          studentNumber,
+        await connection.commit();
+        console.log("[IMPORT] Transaction committed", {
+          groupedRecords: groupedMap.size,
           processedStudents,
+          createdPersons,
           insertedSubjects,
+          updatedSubjects,
           skippedCount: skippedItems.length,
         });
+      } catch (transactionErr) {
+        await connection.rollback();
+        console.log("[IMPORT] Transaction rolled back", {
+          message: transactionErr.message,
+        });
+        throw transactionErr;
+      } finally {
+        connection.release();
+        console.log("[IMPORT] Connection released");
       }
 
-      await connection.commit();
-      console.log("[IMPORT] Transaction committed", {
+      res.json({
+        success: true,
+        message: "Excel imported successfully",
         groupedRecords: groupedMap.size,
         processedStudents,
         createdPersons,
         insertedSubjects,
         updatedSubjects,
         skippedCount: skippedItems.length,
+        skippedItems: skippedItems.slice(0, 50),
+        warnings: req.xlsxWarnings || {},
       });
-    } catch (transactionErr) {
-      await connection.rollback();
-      console.log("[IMPORT] Transaction rolled back", {
-        message: transactionErr.message,
-      });
-      throw transactionErr;
-    } finally {
-      connection.release();
-      console.log("[IMPORT] Connection released");
+    } catch (err) {
+      console.error("Excel import error:", err);
+      res.status(500).json({ error: "Failed to import Excel" });
     }
+  },
+);
 
-    res.json({
-      success: true,
-      message: "Excel imported successfully",
-      groupedRecords: groupedMap.size,
-      processedStudents,
-      createdPersons,
-      insertedSubjects,
-      updatedSubjects,
-      skippedCount: skippedItems.length,
-      skippedItems: skippedItems.slice(0, 50),
-      warnings: req.xlsxWarnings || {},
-    });
-  } catch (err) {
-    console.error("Excel import error:", err);
-    res.status(500).json({ error: "Failed to import Excel" });
-  }
-});
+router.post(
+  "/import-curriculum-xlsx",
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      const rows = getUploadedRows(req, res);
+      if (!rows) return;
 
-router.post("/import-curriculum-xlsx", upload.single("file"), async (req, res) => {
-  try {
-    const rows = getUploadedRows(req, res);
-    if (!rows) return;
+      let importedCount = 0;
+      const skippedItems = [];
 
-    let importedCount = 0;
-    const skippedItems = [];
+      await runInTransaction(async (connection) => {
+        for (let index = 0; index < rows.length; index += 1) {
+          const row = rows[index];
 
-    await runInTransaction(async (connection) => {
-      for (let index = 0; index < rows.length; index += 1) {
-        const row = rows[index];
+          const programCode = normalizeText(
+            pickValue(row, ["Program Code", "program_code", "Program", "Code"]),
+          );
+          const programDescription = normalizeText(
+            pickValue(row, ["Program Description", "program_description"]),
+          );
+          const major = normalizeText(pickValue(row, ["Major", "major"]));
 
-        const programCode = normalizeText(
-          pickValue(row, ["Program Code", "program_code", "Program", "Code"]),
-        );
-        const programDescription = normalizeText(
-          pickValue(row, ["Program Description", "program_description"]),
-        );
-        const major = normalizeText(pickValue(row, ["Major", "major"]));
+          const yearRawValue = pickValue(row, [
+            "Year",
+            "year",
+            "Academic Year",
+            "year_description",
+          ]);
+          const normalizedYearDescription =
+            normalizeAcademicYearValue(yearRawValue);
 
-        const yearRawValue = pickValue(row, ["Year", "year", "Academic Year", "year_description"]);
-        const normalizedYearDescription = normalizeAcademicYearValue(yearRawValue);
-
-        let programId = null;
-        if (programCode) {
-          const [programRows] = await connection.query(
-            `SELECT program_id
+          let programId = null;
+          if (programCode) {
+            const [programRows] = await connection.query(
+              `SELECT program_id
              FROM program_table
              WHERE UPPER(TRIM(program_code)) = UPPER(TRIM(?))
              LIMIT 1`,
-            [programCode],
-          );
-          if (programRows.length) {
-            programId = programRows[0].program_id;
+              [programCode],
+            );
+            if (programRows.length) {
+              programId = programRows[0].program_id;
+            }
           }
-        }
 
-        if (!programId && programDescription) {
-          const [programRows] = await connection.query(
-            `SELECT program_id
+          if (!programId && programDescription) {
+            const [programRows] = await connection.query(
+              `SELECT program_id
              FROM program_table
              WHERE UPPER(TRIM(program_description)) = UPPER(TRIM(?))
                AND UPPER(TRIM(COALESCE(major, ''))) = UPPER(TRIM(?))
              LIMIT 1`,
-            [programDescription, major],
-          );
-          if (programRows.length) {
-            programId = programRows[0].program_id;
+              [programDescription, major],
+            );
+            if (programRows.length) {
+              programId = programRows[0].program_id;
+            }
           }
-        }
 
-        let yearId = null;
-        if (normalizedYearDescription) {
-          const [yearRows] = await connection.query(
-            `SELECT year_id
+          let yearId = null;
+          if (normalizedYearDescription) {
+            const [yearRows] = await connection.query(
+              `SELECT year_id
              FROM year_table
              WHERE TRIM(year_description) = TRIM(?)
              LIMIT 1`,
-            [normalizedYearDescription],
-          );
-          if (yearRows.length) {
-            yearId = yearRows[0].year_id;
+              [normalizedYearDescription],
+            );
+            if (yearRows.length) {
+              yearId = yearRows[0].year_id;
+            }
           }
-        }
 
-        if (!programId) {
-          skippedItems.push({
-            row: index + 2,
-            reason: `There's no matching Program found: ${programCode || programDescription || "N/A"}`,
-          });
-          continue;
-        }
+          if (!programId) {
+            skippedItems.push({
+              row: index + 2,
+              reason: `There's no matching Program found: ${programCode || programDescription || "N/A"}`,
+            });
+            continue;
+          }
 
-        if (!yearId) {
-          skippedItems.push({
-            row: index + 2,
-            reason: `There's no matching Year found: ${normalizedYearDescription || yearRawValue || "N/A"}`,
-          });
-          continue;
-        }
+          if (!yearId) {
+            skippedItems.push({
+              row: index + 2,
+              reason: `There's no matching Year found: ${normalizedYearDescription || yearRawValue || "N/A"}`,
+            });
+            continue;
+          }
 
-        const [existingRows] = await connection.query(
-          `SELECT curriculum_id
+          const [existingRows] = await connection.query(
+            `SELECT curriculum_id
            FROM curriculum_table
            WHERE program_id = ? AND year_id = ?
            LIMIT 1`,
-          [programId, yearId],
-        );
+            [programId, yearId],
+          );
 
-        if (existingRows.length) {
-          skippedItems.push({
-            row: index + 2,
-            reason: "Curriculum already exists",
-          });
-          continue;
+          if (existingRows.length) {
+            skippedItems.push({
+              row: index + 2,
+              reason: "Curriculum already exists",
+            });
+            continue;
+          }
+
+          await connection.query(
+            `INSERT INTO curriculum_table (program_id, year_id) VALUES (?, ?)`,
+            [programId, yearId],
+          );
+          importedCount += 1;
         }
+      });
 
-        await connection.query(
-          `INSERT INTO curriculum_table (program_id, year_id) VALUES (?, ?)`,
-          [programId, yearId],
-        );
-        importedCount += 1;
-      }
-    });
-
-    return res.json(buildImportResponse("Curriculum import finished", importedCount, skippedItems));
-  } catch (err) {
-    console.error("Curriculum import error:", err);
-    return res.status(500).json({ success: false, error: "Failed to import curriculum file" });
-  }
-});
+      return res.json(
+        buildImportResponse(
+          "Curriculum import finished",
+          importedCount,
+          skippedItems,
+        ),
+      );
+    } catch (err) {
+      console.error("Curriculum import error:", err);
+      return res
+        .status(500)
+        .json({ success: false, error: "Failed to import curriculum file" });
+    }
+  },
+);
 
 router.post("/import-program-xlsx", upload.single("file"), async (req, res) => {
   try {
@@ -1076,20 +1174,38 @@ router.post("/import-program-xlsx", upload.single("file"), async (req, res) => {
         const row = rows[index];
 
         const programCode = normalizeText(
-          pickValue(row, ["Program Code", "program_code", "Code", "programCode"]),
+          pickValue(row, [
+            "Program Code",
+            "program_code",
+            "Code",
+            "programCode",
+          ]),
         );
         const programDescription = normalizeText(
-          pickValue(row, ["Program Description", "program_description", "Description"]),
+          pickValue(row, [
+            "Program Description",
+            "program_description",
+            "Description",
+          ]),
         );
         const majorValue = normalizeText(pickValue(row, ["Major", "major"]));
         const major = majorValue || null;
-        const rawComponent = pickValue(row, ["Campus", "components", "component", "Components"]);
-        const component = normalizeCampusComponent(rawComponent, branchComponentMap);
+        const rawComponent = pickValue(row, [
+          "Campus",
+          "components",
+          "component",
+          "Components",
+        ]);
+        const component = normalizeCampusComponent(
+          rawComponent,
+          branchComponentMap,
+        );
 
         if (!programCode || !programDescription || component === null) {
           skippedItems.push({
             row: index + 2,
-            reason: "Missing/invalid program_code, program_description, or campus",
+            reason:
+              "Missing/invalid program_code, program_description, or campus",
           });
           continue;
         }
@@ -1119,10 +1235,18 @@ router.post("/import-program-xlsx", upload.single("file"), async (req, res) => {
       }
     });
 
-    return res.json(buildImportResponse("Program import finished", importedCount, skippedItems));
+    return res.json(
+      buildImportResponse(
+        "Program import finished",
+        importedCount,
+        skippedItems,
+      ),
+    );
   } catch (err) {
     console.error("Program import error:", err);
-    return res.status(500).json({ success: false, error: "Failed to import program file" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to import program file" });
   }
 });
 
@@ -1142,10 +1266,19 @@ router.post("/import-course-xlsx", upload.single("file"), async (req, res) => {
           pickValue(row, ["course_code", "Course Code", "Course", "Code"]),
         );
         const courseDescription = normalizeText(
-          pickValue(row, ["course_description", "Course Description", "Description"]),
+          pickValue(row, [
+            "course_description",
+            "Course Description",
+            "Description",
+          ]),
         );
         const courseUnit = toNullableNumber(
-          pickValue(row, ["course_unit", "Course Unit", "Credit Unit", "Units"]),
+          pickValue(row, [
+            "course_unit",
+            "Course Unit",
+            "Credit Unit",
+            "Units",
+          ]),
         );
         const lecUnit = toNullableNumber(
           pickValue(row, ["lec_unit", "Lecture Unit", "Lec Unit", "Lec"]),
@@ -1202,250 +1335,295 @@ router.post("/import-course-xlsx", upload.single("file"), async (req, res) => {
       }
     });
 
-    return res.json(buildImportResponse("Course import finished", importedCount, skippedItems));
+    return res.json(
+      buildImportResponse(
+        "Course import finished",
+        importedCount,
+        skippedItems,
+      ),
+    );
   } catch (err) {
     console.error("Course import error:", err);
-    return res.status(500).json({ success: false, error: "Failed to import course file" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to import course file" });
   }
 });
 
-router.post("/import-program-tagging-xlsx", upload.single("file"), async (req, res) => {
-  try {
-    const rows = getUploadedRows(req, res);
-    if (!rows) return;
-    const branchComponentMap = await getBranchComponentMap();
+router.post(
+  "/import-program-tagging-xlsx",
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      const rows = getUploadedRows(req, res);
+      if (!rows) return;
+      const branchComponentMap = await getBranchComponentMap();
 
-    let importedCount = 0;
-    const skippedItems = [];
+      let importedCount = 0;
+      const skippedItems = [];
 
-    await runInTransaction(async (connection) => {
-      for (let index = 0; index < rows.length; index += 1) {
-        const row = rows[index];
+      await runInTransaction(async (connection) => {
+        for (let index = 0; index < rows.length; index += 1) {
+          const row = rows[index];
 
-        // 1) Extract metadata first.
-        const programCode = normalizeText(
-          pickValue(row, ["Program Code", "program_code", "Program", "Code"]),
-        );
-        const campusRaw = pickValue(row, ["Campus", "campus", "Components", "components"]);
-        const campusComponent = normalizeCampusComponent(campusRaw, branchComponentMap);
-        const yearRaw = pickValue(row, ["Year", "year", "Academic Year", "year_description"]);
-        const normalizedYearDescription = normalizeAcademicYearValue(yearRaw); // 2018-2019 -> 2018
-        const yearLevelDescription = normalizeText(
-          pickValue(row, ["Year Level", "year_level_description", "Year Level Description"]),
-        );
-        const semesterDescription = normalizeText(
-          pickValue(row, ["Semester", "semester_description", "Semester Description"]),
-        );
-        const courseCode = normalizeText(
-          pickValue(row, ["Course Code", "course_code", "Course"]),
-        );
-        const courseDescription = normalizeText(
-          pickValue(row, ["Course Description", "course_description", "Description"]),
-        );
+          // 1) Extract metadata first.
+          const programCode = normalizeText(
+            pickValue(row, ["Program Code", "program_code", "Program", "Code"]),
+          );
+          const campusRaw = pickValue(row, [
+            "Campus",
+            "campus",
+            "Components",
+            "components",
+          ]);
+          const campusComponent = normalizeCampusComponent(
+            campusRaw,
+            branchComponentMap,
+          );
+          const yearRaw = pickValue(row, [
+            "Year",
+            "year",
+            "Academic Year",
+            "year_description",
+          ]);
+          const normalizedYearDescription = normalizeAcademicYearValue(yearRaw); // 2018-2019 -> 2018
+          const yearLevelDescription = normalizeText(
+            pickValue(row, [
+              "Year Level",
+              "year_level_description",
+              "Year Level Description",
+            ]),
+          );
+          const semesterDescription = normalizeText(
+            pickValue(row, [
+              "Semester",
+              "semester_description",
+              "Semester Description",
+            ]),
+          );
+          const courseCode = normalizeText(
+            pickValue(row, ["Course Code", "course_code", "Course"]),
+          );
+          const courseDescription = normalizeText(
+            pickValue(row, [
+              "Course Description",
+              "course_description",
+              "Description",
+            ]),
+          );
 
-        // 2) Resolve IDs using metadata.
-        let yearId = null;
-        if (normalizedYearDescription) {
-          const [yearRows] = await connection.query(
-            `SELECT year_id
+          // 2) Resolve IDs using metadata.
+          let yearId = null;
+          if (normalizedYearDescription) {
+            const [yearRows] = await connection.query(
+              `SELECT year_id
                FROM year_table
               WHERE TRIM(year_description) = TRIM(?)
               LIMIT 1`,
-            [normalizedYearDescription],
-          );
-          if (yearRows.length) {
-            yearId = yearRows[0].year_id;
+              [normalizedYearDescription],
+            );
+            if (yearRows.length) {
+              yearId = yearRows[0].year_id;
+            }
           }
-        }
-        if (!yearId) {
-          skippedItems.push({
-            row: index + 2,
-            reason: `There's no matching Year found: ${normalizedYearDescription || yearRaw || "N/A"}`,
-          });
-          continue;
-        }
+          if (!yearId) {
+            skippedItems.push({
+              row: index + 2,
+              reason: `There's no matching Year found: ${normalizedYearDescription || yearRaw || "N/A"}`,
+            });
+            continue;
+          }
 
-        let programId = null;
-        if (programCode) {
-          if (campusComponent !== null) {
-            const [programRows] = await connection.query(
-              `SELECT program_id
+          let programId = null;
+          if (programCode) {
+            if (campusComponent !== null) {
+              const [programRows] = await connection.query(
+                `SELECT program_id
                  FROM program_table
                 WHERE UPPER(TRIM(program_code)) = UPPER(TRIM(?))
                   AND components = ?
                 LIMIT 1`,
-              [programCode, campusComponent],
-            );
-            if (programRows.length) {
-              programId = programRows[0].program_id;
+                [programCode, campusComponent],
+              );
+              if (programRows.length) {
+                programId = programRows[0].program_id;
+              }
+            }
+
+            if (!programId) {
+              const [programRows] = await connection.query(
+                `SELECT program_id
+                 FROM program_table
+                WHERE UPPER(TRIM(program_code)) = UPPER(TRIM(?))
+                LIMIT 1`,
+                [programCode],
+              );
+              if (programRows.length) {
+                programId = programRows[0].program_id;
+              }
             }
           }
 
           if (!programId) {
-            const [programRows] = await connection.query(
-              `SELECT program_id
-                 FROM program_table
-                WHERE UPPER(TRIM(program_code)) = UPPER(TRIM(?))
-                LIMIT 1`,
-              [programCode],
-            );
-            if (programRows.length) {
-              programId = programRows[0].program_id;
-            }
+            skippedItems.push({
+              row: index + 2,
+              reason: `There's no matching Program found: ${programCode || "N/A"}`,
+            });
+            continue;
           }
-        }
 
-        if (!programId) {
-          skippedItems.push({
-            row: index + 2,
-            reason: `There's no matching Program found: ${programCode || "N/A"}`,
-          });
-          continue;
-        }
-
-        let curriculumId = null;
-        if (yearId && programId) {
-          const [curriculumRows] = await connection.query(
-            `SELECT curriculum_id
+          let curriculumId = null;
+          if (yearId && programId) {
+            const [curriculumRows] = await connection.query(
+              `SELECT curriculum_id
                FROM curriculum_table
               WHERE year_id = ?
                 AND program_id = ?
               LIMIT 1`,
-            [yearId, programId],
-          );
-          if (curriculumRows.length) {
-            curriculumId = curriculumRows[0].curriculum_id;
+              [yearId, programId],
+            );
+            if (curriculumRows.length) {
+              curriculumId = curriculumRows[0].curriculum_id;
+            }
           }
-        }
-        if (!curriculumId) {
-          skippedItems.push({
-            row: index + 2,
-            reason: `There's no matching Curriculum found for Program ${programCode || programId} and Year ${normalizedYearDescription || yearId}`,
-          });
-          continue;
-        }
+          if (!curriculumId) {
+            skippedItems.push({
+              row: index + 2,
+              reason: `There's no matching Curriculum found for Program ${programCode || programId} and Year ${normalizedYearDescription || yearId}`,
+            });
+            continue;
+          }
 
-        let yearLevelId = null;
-        if (yearLevelDescription) {
-          const [yearLevelRows] = await connection.query(
-            `SELECT year_level_id
+          let yearLevelId = null;
+          if (yearLevelDescription) {
+            const [yearLevelRows] = await connection.query(
+              `SELECT year_level_id
                FROM year_level_table
               WHERE UPPER(TRIM(year_level_description)) = UPPER(TRIM(?))
               LIMIT 1`,
-            [yearLevelDescription],
-          );
-          if (yearLevelRows.length) {
-            yearLevelId = yearLevelRows[0].year_level_id;
+              [yearLevelDescription],
+            );
+            if (yearLevelRows.length) {
+              yearLevelId = yearLevelRows[0].year_level_id;
+            }
           }
-        }
-        if (!yearLevelId) {
-          skippedItems.push({
-            row: index + 2,
-            reason: `There's no matching Year Level found: ${yearLevelDescription || "N/A"}`,
-          });
-          continue;
-        }
+          if (!yearLevelId) {
+            skippedItems.push({
+              row: index + 2,
+              reason: `There's no matching Year Level found: ${yearLevelDescription || "N/A"}`,
+            });
+            continue;
+          }
 
-        let semesterId = null;
-        if (semesterDescription) {
-          const [semesterRows] = await connection.query(
-            `SELECT semester_id
+          let semesterId = null;
+          if (semesterDescription) {
+            const [semesterRows] = await connection.query(
+              `SELECT semester_id
                FROM semester_table
               WHERE UPPER(TRIM(semester_description)) = UPPER(TRIM(?))
               LIMIT 1`,
-            [semesterDescription],
-          );
-          if (semesterRows.length) {
-            semesterId = semesterRows[0].semester_id;
+              [semesterDescription],
+            );
+            if (semesterRows.length) {
+              semesterId = semesterRows[0].semester_id;
+            }
           }
-        }
-        if (!semesterId) {
-          skippedItems.push({
-            row: index + 2,
-            reason: `There's no matching Semester found: ${semesterDescription || "N/A"}`,
-          });
-          continue;
-        }
+          if (!semesterId) {
+            skippedItems.push({
+              row: index + 2,
+              reason: `There's no matching Semester found: ${semesterDescription || "N/A"}`,
+            });
+            continue;
+          }
 
-        let courseId = null;
-        if (courseCode) {
-          const [courseRows] = await connection.query(
-            `SELECT course_id
+          let courseId = null;
+          if (courseCode) {
+            const [courseRows] = await connection.query(
+              `SELECT course_id
                FROM course_table
               WHERE UPPER(TRIM(course_code)) = UPPER(TRIM(?))
               LIMIT 1`,
-            [courseCode],
-          );
-          if (courseRows.length) {
-            courseId = courseRows[0].course_id;
+              [courseCode],
+            );
+            if (courseRows.length) {
+              courseId = courseRows[0].course_id;
+            }
           }
-        }
-        if (!courseId && courseDescription) {
-          const [courseRows] = await connection.query(
-            `SELECT course_id
+          if (!courseId && courseDescription) {
+            const [courseRows] = await connection.query(
+              `SELECT course_id
                FROM course_table
               WHERE UPPER(TRIM(course_description)) = UPPER(TRIM(?))
               LIMIT 1`,
-            [courseDescription],
-          );
-          if (courseRows.length) {
-            courseId = courseRows[0].course_id;
+              [courseDescription],
+            );
+            if (courseRows.length) {
+              courseId = courseRows[0].course_id;
+            }
           }
-        }
-        if (!courseId) {
-          skippedItems.push({
-            row: index + 2,
-            reason: `There's no matching Course found: ${courseCode || courseDescription || "N/A"}`,
-          });
-          continue;
-        }
+          if (!courseId) {
+            skippedItems.push({
+              row: index + 2,
+              reason: `There's no matching Course found: ${courseCode || courseDescription || "N/A"}`,
+            });
+            continue;
+          }
 
-        const [existingRows] = await connection.query(
-          `SELECT program_tagging_id
+          const [existingRows] = await connection.query(
+            `SELECT program_tagging_id
              FROM program_tagging_table
             WHERE curriculum_id = ?
               AND year_level_id = ?
               AND semester_id = ?
               AND course_id = ?
             LIMIT 1`,
-          [curriculumId, yearLevelId, semesterId, courseId],
-        );
+            [curriculumId, yearLevelId, semesterId, courseId],
+          );
 
-        if (existingRows.length) {
-          skippedItems.push({
-            row: index + 2,
-            reason: "Program tag already exists",
-          });
-          continue;
-        }
+          if (existingRows.length) {
+            skippedItems.push({
+              row: index + 2,
+              reason: "Program tag already exists",
+            });
+            continue;
+          }
 
-        await connection.query(
-          `INSERT INTO program_tagging_table
+          await connection.query(
+            `INSERT INTO program_tagging_table
             (curriculum_id, year_level_id, semester_id, course_id)
            VALUES (?, ?, ?, ?)`,
-          [
-            curriculumId,
-            yearLevelId,
-            semesterId,
-            courseId,
-          ],
-        );
-        importedCount += 1;
-      }
-    });
+            [curriculumId, yearLevelId, semesterId, courseId],
+          );
+          importedCount += 1;
+        }
+      });
 
-    return res.json(buildImportResponse("Program tagging import finished", importedCount, skippedItems));
-  } catch (err) {
-    console.error("Program tagging import error:", err);
-    return res.status(500).json({ success: false, error: "Failed to import program tagging file" });
-  }
-});
+      return res.json(
+        buildImportResponse(
+          "Program tagging import finished",
+          importedCount,
+          skippedItems,
+        ),
+      );
+    } catch (err) {
+      console.error("Program tagging import error:", err);
+      return res
+        .status(500)
+        .json({
+          success: false,
+          error: "Failed to import program tagging file",
+        });
+    }
+  },
+);
 
 router.post("/api/exam/import", upload.single("file"), async (req, res) => {
   try {
     const fileValidation = validateSpreadsheetUpload(req.file);
     if (!fileValidation.valid) {
-      return res.status(fileValidation.status).json({ error: fileValidation.error });
+      return res
+        .status(fileValidation.status)
+        .json({ error: fileValidation.error });
     }
 
     const workbook = readWorkbookSafely(req.file);
@@ -1456,16 +1634,20 @@ router.post("/api/exam/import", upload.single("file"), async (req, res) => {
     }
 
     if (hasFormulaCell(sheet)) {
-      return res.status(400).json({ error: "Formulas are not allowed in uploads" });
+      return res
+        .status(400)
+        .json({ error: "Formulas are not allowed in uploads" });
     }
 
-    const { rows: parsedRows, truncatedByMaxRows } = getSheetRowsWithLimits(sheet, {
-      sheetToJsonOptions: { defval: "" },
-    });
+    const { rows: parsedRows, truncatedByMaxRows } = getSheetRowsWithLimits(
+      sheet,
+      {
+        sheetToJsonOptions: { defval: "" },
+      },
+    );
     const { cleanRows, flaggedRows } = removeFormulaLikeRows(parsedRows);
-    const { validRows, skippedMissingMandatory } = filterRowsWithMandatoryColumns(cleanRows, [
-      "applicant id",
-    ]);
+    const { validRows, skippedMissingMandatory } =
+      filterRowsWithMandatoryColumns(cleanRows, ["applicant id"]);
     const { rowsToInsert } = prepareRowsForInsert(validRows, req.file.size);
 
     // 1️⃣ Collect applicant numbers
@@ -1579,7 +1761,7 @@ router.post("/api/exam/import", upload.single("file"), async (req, res) => {
       ],
     );
 
-    (req.app.get("io") || { emit: () => { } }).emit("notification", {
+    (req.app.get("io") || { emit: () => {} }).emit("notification", {
       type: "upload",
       message: "📊 Bulk Entrance Exam Scores uploaded",
       applicant_number: null,
@@ -1607,7 +1789,9 @@ router.post("/import_xslx_student", upload.single("file"), async (req, res) => {
   try {
     const fileValidation = validateSpreadsheetUpload(req.file);
     if (!fileValidation.valid) {
-      return res.status(fileValidation.status).json({ error: fileValidation.error });
+      return res
+        .status(fileValidation.status)
+        .json({ error: fileValidation.error });
     }
 
     // ✅ Read from memory buffer instead of path
@@ -1618,18 +1802,24 @@ router.post("/import_xslx_student", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "Spreadsheet has no worksheet" });
     }
     if (hasFormulaCell(sheet)) {
-      return res.status(400).json({ error: "Formulas are not allowed in uploads" });
+      return res
+        .status(400)
+        .json({ error: "Formulas are not allowed in uploads" });
     }
 
-    const { rows: parsedRows, truncatedByMaxRows } = getSheetRowsWithLimits(sheet, {
-      sheetToJsonOptions: { defval: "" },
-    });
+    const { rows: parsedRows, truncatedByMaxRows } = getSheetRowsWithLimits(
+      sheet,
+      {
+        sheetToJsonOptions: { defval: "" },
+      },
+    );
     const { cleanRows, flaggedRows } = removeFormulaLikeRows(parsedRows);
-    const { validRows, skippedMissingMandatory } = filterRowsWithMandatoryColumns(cleanRows, [
-      "student number",
-      "first name",
-      "last name",
-    ]);
+    const { validRows, skippedMissingMandatory } =
+      filterRowsWithMandatoryColumns(cleanRows, [
+        "student number",
+        "first name",
+        "last name",
+      ]);
     const { rowsToInsert } = prepareRowsForInsert(validRows, req.file.size);
 
     let insertedCount = 0;
@@ -1707,8 +1897,7 @@ router.post("/import_xslx_student", upload.single("file"), async (req, res) => {
 
 router.post("/api/person/import", upload.single("file"), async (req, res) => {
   try {
-    if (!req.file)
-      return res.status(400).json({ error: "No file uploaded" });
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
     const XLSX = require("xlsx");
 
@@ -1745,11 +1934,9 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
       let age = now.getFullYear() - d.getFullYear();
       const m = now.getMonth() - d.getMonth();
 
-      if (m < 0 || (m === 0 && now.getDate() < d.getDate()))
-        age--;
+      if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
 
       return age;
-
     }
 
     function normalizeSchoolLevel(value) {
@@ -1761,26 +1948,23 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
         "SENIOR HIGH SCHOOL": "Senior High School",
         "UNDERGRADUATE": "Undergraduate",
         "GRADUATE": "Graduate",
-        "ALS": "ALS"
+        "ALS": "ALS",
       };
 
       return mapping[v] || value;
     }
-
-
 
     // ---------------------------------------
     // READ EXCEL
     // ---------------------------------------
 
     const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
-
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
     const rows = XLSX.utils.sheet_to_json(sheet, {
       header: 1,
-      defval: null
+      defval: null,
     });
+
     // ---------------------------------------
     // COUNTERS
     // ---------------------------------------
@@ -1790,6 +1974,8 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
     let totalInvalid = 0;
     let totalUpdated = 0;
     let totalSkipped = 0;
+    let totalNotFound = 0;
+    const skippedNotFoundStudents = [];
 
     // ---------------------------------------
     // VALIDATION
@@ -1948,16 +2134,62 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
       "symptomsToday",
       "remarks",
       "termsOfAgreement",
-      "created_at"
-    ];
+      "created_at",
+    ]; 
+
+    // ---------------------------------------
+    // PROGRAM + CAMPUS MAP (BULK)
+    // ---------------------------------------
+
+    const studentNumbers = rows
+      .slice(1)
+      .map((r) => r[0]?.toString().trim())
+      .filter((value) => STUD_NUM_REGEX.test(value));
+
+    const programMapRows = studentNumbers.length
+      ? (
+          await db3.query(
+            `
+            SELECT 
+              snt.student_number,
+              MAX(sst.active_curriculum) AS curriculum_id,
+              MAX(pt.components) AS campus_component,
+              MAX(pt.academic_program) AS academic_program,
+              MAX(sst.year_level_id) AS year_level_id
+            FROM student_numbering_table snt
+            JOIN student_status_table sst 
+              ON snt.student_number = sst.student_number
+            JOIN curriculum_table ct 
+              ON sst.active_curriculum = ct.curriculum_id
+            JOIN program_table pt 
+              ON ct.program_id = pt.program_id
+            WHERE snt.student_number IN (?)
+            GROUP BY snt.student_number
+            `,
+            [studentNumbers],
+          )
+        )[0]
+      : [];
+
+    const programMap = {};
+    for (const row of programMapRows) {
+      programMap[row.student_number] = {
+        curriculum_id: row.curriculum_id,
+        campus_component: row.campus_component,
+        academic_program: row.academic_program,
+        year_level_id: row.year_level_id,
+      };
+    }
+
+    console.log(`Program map built for ${Object.keys(programMap).length} students`); // Debug log
+    
     // ---------------------------------------
     // PROCESS ROWS
     // ---------------------------------------
 
     for (let i = 1; i < rows.length; i++) {
-
       const row = rows[i];
-      if (!Object.values(row).some(v => v)) continue;
+      if (!Object.values(row).some((v) => v)) continue;
 
       totalRows++;
 
@@ -1968,7 +2200,7 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
         console.log(`⚠️ Invalid student number format: ${studentNumber}`);
         notUpdatedStudents.push({
           studentNumber,
-          reason: "Invalid student number format"
+          reason: "Invalid student number format",
         });
         totalInvalid++;
         continue;
@@ -1987,14 +2219,23 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
         WHERE student_number = ?
         LIMIT 1
         `,
-        [studentNumber]
+        [studentNumber],
       );
 
       if (studentRows.length === 0) {
-        console.log(`❌ Student not found in numbering table: ${studentNumber}`);
+        console.log(
+          `❌ Student not found in numbering table: ${studentNumber}`,
+        );
         notUpdatedStudents.push({
           studentNumber,
-          reason: "Not found in student_numbering_table"
+          reason: "Not found in student_numbering_table",
+        });
+        totalNotFound++;
+        skippedNotFoundStudents.push({
+          studentNumber,
+          firstName: row[2]?.toString().trim() || "",
+          lastName: row[1]?.toString().trim() || "",
+          course: row[6]?.toString().trim() || row[7]?.toString().trim() || "",
         });
         totalSkipped++;
         continue;
@@ -2008,25 +2249,56 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
 
       const [personCheck] = await db3.query(
         `
-        SELECT person_id
+        SELECT person_id, campus, program, academicProgram, yearLevel
         FROM person_table
         WHERE person_id = ?
         LIMIT 1
         `,
-        [person_id]
+        [person_id],
       );
 
       if (personCheck.length === 0) {
-        console.log(`❌ person_id ${person_id} missing in person_table for ${studentNumber}`);
+        console.log(
+          `❌ person_id ${person_id} missing in person_table for ${studentNumber}`,
+        );
         notUpdatedStudents.push({
           studentNumber,
-          reason: "person_id missing in person_table"
+          reason: "person_id missing in person_table",
         });
         totalSkipped++;
         continue;
       }
 
-      // ✅ STRICT VALIDATION PASSED HERE
+      // ---------------------------------------
+      // RESOLVE CAMPUS + PROGRAM BEFORE UPDATE
+      // ---------------------------------------
+
+      const existingPerson = personCheck[0];
+
+      const resolvedProgram =
+        programMap[studentNumber]?.curriculum_id ??
+        existingPerson.program ??
+        null;
+      const resolvedCampus =
+        programMap[studentNumber]?.campus_component ??
+        existingPerson.campus ??
+        null;
+      const resolvedAcademicProgram =
+        programMap[studentNumber]?.academic_program ??
+        existingPerson.academicProgram ??
+        null;
+      const resolvedYearLevelId =
+        programMap[studentNumber]?.year_level_id ??
+        existingPerson.yearLevel ??
+        null;
+
+      console.log("[IMPORT] Resolved campus/program", {
+        studentNumber,
+        campus: resolvedCampus,
+        program: resolvedProgram,
+        academicProgram: resolvedAcademicProgram,
+        yearLevelId: resolvedYearLevelId,
+      });
 
       // ---------------------------------------
       // BUILD VALUES
@@ -2047,7 +2319,7 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
           return {
             family: last.trim(),
             given: parts[0] || null,
-            middle: parts.slice(1).join(" ") || null
+            middle: parts.slice(1).join(" ") || null,
           };
         }
 
@@ -2057,7 +2329,7 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
         return {
           family: parts.length > 1 ? parts[parts.length - 1] : null,
           given: parts[0] || null,
-          middle: parts.slice(1, -1).join(" ") || null
+          middle: parts.slice(1, -1).join(" ") || null,
         };
       }
 
@@ -2122,7 +2394,7 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
         51: "mother_income",
 
         // ✅ GUARDIAN (FIXED SHIFT)
-        61: "annual_income",     // Family Annual Income
+        61: "annual_income", // Family Annual Income
         62: "guardian_fullname",
         64: "guardian_contact",
 
@@ -2136,8 +2408,6 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
       const guardianParsed = splitFullName(row[62]); // FIXED
 
       const personValues = columns.map((col) => {
-
-
         // ---------------------------------------
         // HANDLE CUSTOM NAME FIELDS FIRST
         // ---------------------------------------
@@ -2154,8 +2424,6 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
         if (col === "guardian_given_name") return guardianParsed.given;
         if (col === "guardian_middle_name") return guardianParsed.middle;
 
-
-
         // ---------------------------------------
         // NORMAL MAPPING
         // ---------------------------------------
@@ -2164,9 +2432,15 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
           dbToExcelMap[value] = Number(key);
         }
 
+        // Columns that do not come from Excel directly
+        if (col === "student_number") return studentNumber;
+        if (col === "program") return resolvedProgram;
+        if (col === "campus") return resolvedCampus;
+        if (col === "academicProgram") return resolvedAcademicProgram;
+        if (col === "yearLevel") return resolvedYearLevelId;
+        if (col === "created_at") return new Date();
+
         const excelIndex = dbToExcelMap[col];
-
-
 
         if (excelIndex === undefined) return null;
 
@@ -2176,9 +2450,7 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
           v = normalizeSchoolLevel(v);
         }
 
-        if (col === "student_number") v = studentNumber;
         if (col === "gender") v = normalizeGender(v);
-
 
         if (col === "birthOfDate") {
           v = excelDateToJSDate(v);
@@ -2189,8 +2461,6 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
           const ageVal = calculateAge(birthTmp);
           v = isNaN(ageVal) ? null : ageVal;
         }
-
-        if (col === "created_at") v = new Date();
 
         if (typeof v === "number" && isNaN(v)) v = null;
 
@@ -2207,54 +2477,25 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
         : null;
 
       // ---------------------------------------
-      // PROGRAM RESOLUTION
-      // ---------------------------------------
-
-      const programCols = ["program", "program2", "program3"];
-
-      for (let p = 0; p < programCols.length; p++) {
-
-        const colIdx = columns.indexOf(programCols[p]);
-
-        const rawProg = row[6 + p]
-          ? row[6 + p].toString().trim()
-          : null;
-
-        if (!rawProg) {
-          personValues[colIdx] = null;
-          continue;
-        }
-
-        const match = rawProg.match(/\((.*?)\)/);
-        const programCode = match ? match[1].trim() : null;
-
-        if (!programCode) {
-          personValues[colIdx] = null;
-          continue;
-        }
-
-        const [progResult] = await db3.query(
-          `
-          SELECT program_id
-          FROM program_table
-          WHERE program_code = ?
-          LIMIT 1
-          `,
-          [programCode]
-        );
-
-        personValues[colIdx] =
-          progResult.length > 0
-            ? progResult[0].program_id
-            : null;
-      }
-
-      // ---------------------------------------
       // UPDATE QUERY
       // ---------------------------------------
 
-      const updateFields = columns
-        .map(col => `${col} = ?`)
+      const personValueMap = {};
+      columns.forEach((col, idx) => {
+        personValueMap[col] = personValues[idx];
+      });
+
+      const columnsToUpdate = columns.filter((col) => {
+        if (col === "campus" && resolvedCampus == null) return false;
+        if (col === "program" && resolvedProgram == null) return false;
+        if (col === "academicProgram" && resolvedAcademicProgram == null)
+          return false;
+        if (col === "yearLevel" && resolvedYearLevelId == null) return false;
+        return true;
+      });
+
+      const updateFields = columnsToUpdate
+        .map((col) => `${col} = ?`)
         .join(",");
 
       await db3.query(
@@ -2263,11 +2504,14 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
         SET ${updateFields}
         WHERE person_id = ?
         `,
-        [...personValues, person_id]
+        [...columnsToUpdate.map((col) => personValueMap[col]), person_id],
       );
 
       totalUpdated++;
     }
+
+    // studentCampusMap was unused; campus is resolved via programMap above.
+
 
     // ---------------------------------------
 
@@ -2276,26 +2520,28 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
       message: `Imported: ${totalRows}, Updated: ${totalUpdated}, Skipped: ${totalSkipped}, Invalid: ${totalInvalid}`,
       updated: totalUpdated,
       skipped: totalSkipped,
+      skippedNotFoundCount: totalNotFound,
+      skippedNotFoundStudents,
       totalValid,
       totalInvalid,
-      totalRows
+      totalRows,
     });
-
   } catch (err) {
     console.error("IMPORT ERROR:", err);
 
     res.status(500).json({
-      error: err.message
+      error: err.message,
     });
   }
 });
-
 
 router.post("/api/grades/import", upload.single("file"), async (req, res) => {
   try {
     const fileValidation = validateSpreadsheetUpload(req.file);
     if (!fileValidation.valid) {
-      return res.status(fileValidation.status).json({ error: fileValidation.error });
+      return res
+        .status(fileValidation.status)
+        .json({ error: fileValidation.error });
     }
 
     const { course_id, active_school_year_id, department_section_id } =
@@ -2314,17 +2560,21 @@ router.post("/api/grades/import", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "Spreadsheet has no worksheet" });
     }
     if (hasFormulaCell(sheet)) {
-      return res.status(400).json({ error: "Formulas are not allowed in uploads" });
+      return res
+        .status(400)
+        .json({ error: "Formulas are not allowed in uploads" });
     }
 
     // Start parsing headers from Row 3 (index 2)
-    const { rows: parsedRows, truncatedByMaxRows } = getSheetRowsWithLimits(sheet, {
-      sheetToJsonOptions: { range: 2, defval: "" },
-    });
+    const { rows: parsedRows, truncatedByMaxRows } = getSheetRowsWithLimits(
+      sheet,
+      {
+        sheetToJsonOptions: { range: 2, defval: "" },
+      },
+    );
     const { cleanRows, flaggedRows } = removeFormulaLikeRows(parsedRows);
-    const { validRows, skippedMissingMandatory } = filterRowsWithMandatoryColumns(cleanRows, [
-      "student number",
-    ]);
+    const { validRows, skippedMissingMandatory } =
+      filterRowsWithMandatoryColumns(cleanRows, ["student number"]);
     const { rowsToInsert } = prepareRowsForInsert(validRows, req.file.size);
 
     const studentNumbers = rowsToInsert
@@ -2464,7 +2714,9 @@ router.post("/api/import-xlsx", upload.single("file"), async (req, res) => {
   try {
     const fileValidation = validateSpreadsheetUpload(req.file);
     if (!fileValidation.valid) {
-      return res.status(fileValidation.status).json({ error: fileValidation.error });
+      return res
+        .status(fileValidation.status)
+        .json({ error: fileValidation.error });
     }
 
     // Parse Excel
@@ -2474,16 +2726,21 @@ router.post("/api/import-xlsx", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "Spreadsheet has no worksheet" });
     }
     if (hasFormulaCell(sheet)) {
-      return res.status(400).json({ error: "Formulas are not allowed in uploads" });
+      return res
+        .status(400)
+        .json({ error: "Formulas are not allowed in uploads" });
     }
 
-    const { rows: parsedRows, truncatedByMaxRows } = getSheetRowsWithLimits(sheet, {
-      sheetToJsonOptions: {
-        header: "A",
-        defval: "",
-        raw: true,
+    const { rows: parsedRows, truncatedByMaxRows } = getSheetRowsWithLimits(
+      sheet,
+      {
+        sheetToJsonOptions: {
+          header: "A",
+          defval: "",
+          raw: true,
+        },
       },
-    });
+    );
     const { cleanRows, flaggedRows } = removeFormulaLikeRows(parsedRows);
     const { rowsToInsert } = prepareRowsForInsert(cleanRows, req.file.size);
 
@@ -2528,7 +2785,8 @@ router.post("/api/import-xlsx", upload.single("file"), async (req, res) => {
 
       if (/^School Year/i.test(text)) {
         if (/first semester/i.test(text)) detectedSemester = "First Semester";
-        else if (/second semester/i.test(text)) detectedSemester = "Second Semester";
+        else if (/second semester/i.test(text))
+          detectedSemester = "Second Semester";
         else if (/summer/i.test(text)) detectedSemester = "Summer";
         else detectedSemester = null;
         continue;
@@ -2570,7 +2828,8 @@ router.post("/api/import-xlsx", upload.single("file"), async (req, res) => {
       });
     }
 
-    const { lastName, firstName, middleName } = parseStudentNameLegacy(studentName);
+    const { lastName, firstName, middleName } =
+      parseStudentNameLegacy(studentName);
 
     // --- Step 2: Insert New student data in person table ---
     await db3.query(
@@ -2605,10 +2864,13 @@ router.post("/api/import-xlsx", upload.single("file"), async (req, res) => {
 
     const person_id = person.person_id;
 
-    await db3.query(`
+    await db3.query(
+      `
       INSERT INTO person_status_table (person_id, student_registration_status)
       VALUES (?, ?);
-    `, [person_id, 1]);
+    `,
+      [person_id, 1],
+    );
 
     await db3.query(
       `
@@ -2735,17 +2997,19 @@ router.post("/api/import-xlsx", upload.single("file"), async (req, res) => {
       }
     }
 
-    const uniqueCodes = [...new Set(allCourseCodes.filter(c => c !== "(blank course code)"))];
+    const uniqueCodes = [
+      ...new Set(allCourseCodes.filter((c) => c !== "(blank course code)")),
+    ];
 
     const [existingCourses] = await db3.query(
       `SELECT course_code FROM course_table WHERE course_code IN (?)`,
       [uniqueCodes],
     );
 
-    const existingCodesSet = new Set(existingCourses.map(c => c.course_code));
+    const existingCodesSet = new Set(existingCourses.map((c) => c.course_code));
 
-    const missingCourseCodes = allCourseCodes.filter(code =>
-      code === "(blank course code)" || !existingCodesSet.has(code)
+    const missingCourseCodes = allCourseCodes.filter(
+      (code) => code === "(blank course code)" || !existingCodesSet.has(code),
     );
 
     console.log("missing course codes", missingCourseCodes);
@@ -3069,7 +3333,7 @@ router.post("/api/qualifying_exam/import", async (req, res) => {
       ["upload", message, null, registrarEmail, registrarFullName],
     );
 
-    (req.app.get("io") || { emit: () => { } }).emit("notification", {
+    (req.app.get("io") || { emit: () => {} }).emit("notification", {
       type: "upload",
       message,
       applicant_number: null,

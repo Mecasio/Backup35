@@ -174,6 +174,30 @@ const MedicalDashboard1 = () => {
     fetchYearLevels();
   }, []);
 
+  const getYearLevelSelectValue = () => {
+    const current = person?.yearLevel;
+    if (current === null || current === undefined || current === "") return "";
+
+    const currentText = String(current).trim();
+    const byId = yearLevelOptions.find(
+      (yl) => String(yl.year_level_id) === currentText,
+    );
+    if (byId) return String(byId.year_level_id);
+
+    const byDesc = yearLevelOptions.find(
+      (yl) =>
+        String(yl.year_level_description || "")
+          .trim()
+          .toLowerCase() === currentText.toLowerCase(),
+    );
+    if (byDesc) return String(byDesc.year_level_id);
+
+    return currentText;
+  };
+
+
+
+
 
   const handleNavigateStep = (index, to) => {
     setCurrentStep(index);
@@ -1038,7 +1062,7 @@ const MedicalDashboard1 = () => {
     fetchStudent();
   }, [searchQuery]);
 
-   useEffect(() => {
+  useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const personIdFromUrl = queryParams.get("person_id");
 
@@ -1795,33 +1819,33 @@ const MedicalDashboard1 = () => {
                   onChange={handleChange}
                   onBlur={handleBlur}
                 >
-                     <MenuItem value="">
-                                     <em>Select Applying</em>
-                                   </MenuItem>
-                                   <MenuItem value="1">
-                                     Senior High School Graduate
-                                   </MenuItem>
-                                   <MenuItem value="2">
-                                     Senior High School Graduating Student
-                                   </MenuItem>
-                                   <MenuItem value="3">
-                                     ALS (Alternative Learning System) Passer
-                                   </MenuItem>
-                                   <MenuItem value="4">
-                                     Transferee from other University/College
-                                   </MenuItem>
-                                   <MenuItem value="5">
-                                     Cross Enrolee Student
-                                   </MenuItem>
-                                   <MenuItem value="6">
-                                     Foreign Applicant/Student
-                                   </MenuItem>
-                                   <MenuItem value="7">
-                                     Baccalaureate Graduate
-                                   </MenuItem>
-                                   <MenuItem value="8">
-                                     Master Degree Graduate
-                                   </MenuItem>
+                  <MenuItem value="">
+                    <em>Select Applying</em>
+                  </MenuItem>
+                  <MenuItem value="1">
+                    Senior High School Graduate
+                  </MenuItem>
+                  <MenuItem value="2">
+                    Senior High School Graduating Student
+                  </MenuItem>
+                  <MenuItem value="3">
+                    ALS (Alternative Learning System) Passer
+                  </MenuItem>
+                  <MenuItem value="4">
+                    Transferee from other University/College
+                  </MenuItem>
+                  <MenuItem value="5">
+                    Cross Enrolee Student
+                  </MenuItem>
+                  <MenuItem value="6">
+                    Foreign Applicant/Student
+                  </MenuItem>
+                  <MenuItem value="7">
+                    Baccalaureate Graduate
+                  </MenuItem>
+                  <MenuItem value="8">
+                    Master Degree Graduate
+                  </MenuItem>
                 </Select>
                 {errors.applyingAs && (
                   <FormHelperText>This field is required.</FormHelperText>
@@ -1949,11 +1973,13 @@ const MedicalDashboard1 = () => {
                     <label className="w-40 mt:[2] font-medium ">Year Level:</label>
                     <FormControl fullWidth size="small" required error={!!errors.yearLevel}>
                       <InputLabel id="year-level-label">Year Level</InputLabel>
+
+
                       <Select
                         labelId="year-level-label"
                         id="year-level-select"
                         name="yearLevel"
-                        value={person.yearLevel || ""}
+                        value={getYearLevelSelectValue()}
                         label="Year Level"
                         onChange={handleChange}
                         onBlur={() => handleUpdate(person)}
@@ -1965,13 +1991,12 @@ const MedicalDashboard1 = () => {
                         {yearLevelOptions.map((yl) => (
                           <MenuItem
                             key={yl.year_level_id}
-                            value={yl.year_level_description}
+                            value={String(yl.year_level_id)}
                           >
                             {yl.year_level_description}
                           </MenuItem>
                         ))}
                       </Select>
-
                       {errors.yearLevel && (
                         <FormHelperText>This field is required.</FormHelperText>
                       )}
@@ -2412,7 +2437,7 @@ const MedicalDashboard1 = () => {
                   onBlur={handleBlur}
                   error={!!errors.birthOfDate}
                   helperText={errors.birthOfDate ? "This field is required." : ""}
-                 />
+                />
               </Box>
               {/* 👤 Age (auto-filled, read-only) */}
               <Box flex={1}>
@@ -3383,64 +3408,64 @@ const MedicalDashboard1 = () => {
                   </Box>
 
                   {/* Preview Image */}
-              {(preview || person.profile_img) && (
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "center",
-      my: 2,
-      position: "relative",
-    }}
-  >
-    <Box
-      component="img"
-      src={
-        preview
-          ? preview
-          : `${API_BASE_URL}/uploads/Applicant1by1/${person.profile_img}`
-      }
-      alt="Preview"
-      sx={{
-        width: "192px",
-        height: "192px",
-        objectFit: "cover",
-        border: `1px solid ${borderColor}`,
-        borderRadius: 2,
-      }}
-    />
+                  {(preview || person.profile_img) && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        my: 2,
+                        position: "relative",
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={
+                          preview
+                            ? preview
+                            : `${API_BASE_URL}/uploads/Applicant1by1/${person.profile_img}`
+                        }
+                        alt="Preview"
+                        sx={{
+                          width: "192px",
+                          height: "192px",
+                          objectFit: "cover",
+                          border: `1px solid ${borderColor}`,
+                          borderRadius: 2,
+                        }}
+                      />
 
-    {/* ❌ REMOVE BUTTON */}
-    <Button
-      size="small"
-      onClick={() => {
-        setSelectedFile(null);
-        setPreview(null);
+                      {/* ❌ REMOVE BUTTON */}
+                      <Button
+                        size="small"
+                        onClick={() => {
+                          setSelectedFile(null);
+                          setPreview(null);
 
-        // ✅ IMPORTANT: remove existing image
-        setPerson((prev) => ({
-          ...prev,
-          profile_img: "",
-        }));
-      }}
-      sx={{
-        position: "absolute",
-        top: -8,
-        right: "calc(50% - 96px)",
-        minWidth: 0,
-        width: 28,
-        height: 28,
-        fontSize: "18px",
-        p: 0,
-        color: "#fff",
-        bgcolor: "#d32f2f",
-        borderRadius: "50%",
-        "&:hover": { bgcolor: "#b71c1c" },
-      }}
-    >
-      ×
-    </Button>
-  </Box>
-)}
+                          // ✅ IMPORTANT: remove existing image
+                          setPerson((prev) => ({
+                            ...prev,
+                            profile_img: "",
+                          }));
+                        }}
+                        sx={{
+                          position: "absolute",
+                          top: -8,
+                          right: "calc(50% - 96px)",
+                          minWidth: 0,
+                          width: 28,
+                          height: 28,
+                          fontSize: "18px",
+                          p: 0,
+                          color: "#fff",
+                          bgcolor: "#d32f2f",
+                          borderRadius: "50%",
+                          "&:hover": { bgcolor: "#b71c1c" },
+                        }}
+                      >
+                        ×
+                      </Button>
+                    </Box>
+                  )}
 
                   {/* Guidelines Section */}
                   <Box

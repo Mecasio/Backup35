@@ -236,6 +236,31 @@ const AdminDashboard1 = () => {
     fetchYearLevels();
   }, []);
 
+  const getYearLevelSelectValue = () => {
+    const current = person?.yearLevel;
+    if (current === null || current === undefined || current === "") return "";
+
+    const currentText = String(current).trim();
+    const byId = yearLevelOptions.find(
+      (yl) => String(yl.year_level_id) === currentText,
+    );
+    if (byId) return String(byId.year_level_id);
+
+    const byDesc = yearLevelOptions.find(
+      (yl) =>
+        String(yl.year_level_description || "")
+          .trim()
+          .toLowerCase() === currentText.toLowerCase(),
+    );
+    if (byDesc) return String(byDesc.year_level_id);
+
+    return currentText;
+  };
+
+
+
+
+
 
 
   const [hasAccess, setHasAccess] = useState(null);
@@ -287,6 +312,7 @@ const AdminDashboard1 = () => {
       setLoading(false);
     }
   };
+
 
   const queryParams = new URLSearchParams(location.search);
   const queryPersonId = queryParams.get("person_id")?.trim() || "";
@@ -1895,11 +1921,13 @@ const AdminDashboard1 = () => {
                     <label className="w-40 mt:[2] font-medium ">Year Level:</label>
                     <FormControl fullWidth size="small" required error={!!errors.yearLevel}>
                       <InputLabel id="year-level-label">Year Level</InputLabel>
+
+
                       <Select
                         labelId="year-level-label"
                         id="year-level-select"
                         name="yearLevel"
-                        value={person.yearLevel || ""}
+                        value={getYearLevelSelectValue()}
                         label="Year Level"
                         onChange={handleChange}
                         onBlur={() => handleUpdate(person)}
@@ -1911,7 +1939,7 @@ const AdminDashboard1 = () => {
                         {yearLevelOptions.map((yl) => (
                           <MenuItem
                             key={yl.year_level_id}
-                            value={yl.year_level_description}
+                            value={String(yl.year_level_id)}
                           >
                             {yl.year_level_description}
                           </MenuItem>

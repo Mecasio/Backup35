@@ -19,6 +19,9 @@ import {
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 import API_BASE_URL from "../apiConfig";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+
 const YearLevelPanel = () => {
   const settings = useContext(SettingsContext);
 
@@ -36,6 +39,7 @@ const YearLevelPanel = () => {
 
   const [yearLevelDescription, setYearLevelDescription] = useState("");
   const [yearLevelList, setYearLevelList] = useState([]);
+  const [levelType, setLevelType] = useState("year");
 
   // 🌟 Snackbar state
   const [snackbar, setSnackbar] = useState({
@@ -111,6 +115,7 @@ const YearLevelPanel = () => {
     try {
       await axios.post(`${API_BASE_URL}/years_level`, {
         year_level_description: yearLevelDescription,
+        level_type: levelType,
       });
       setYearLevelDescription("");
       fetchYearLevelList();
@@ -125,7 +130,70 @@ const YearLevelPanel = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
+  const [editMode, setEditMode] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
+  const handleEdit = (level) => {
+    setEditMode(true);
+    setSelectedId(level.year_level_id);
+    setYearLevelDescription(level.year_level_description);
+    setLevelType(level.level_type);
+    setOpenYearLevelDialog(true);
+  };
+
+  const handleSave = async () => {
+    if (!yearLevelDescription.trim()) {
+      setSnackbar({ open: true, message: "Required field", severity: "warning" });
+      return;
+    }
+
+    try {
+      if (editMode) {
+        // UPDATE
+        await axios.put(`${API_BASE_URL}/years_level/${selectedId}`, {
+          year_level_description: yearLevelDescription,
+          level_type: levelType,
+        });
+
+        setSnackbar({ open: true, message: "Updated successfully!", severity: "success" });
+      } else {
+        // ADD
+        await axios.post(`${API_BASE_URL}/years_level`, {
+          year_level_description: yearLevelDescription,
+          level_type: levelType,
+        });
+
+        setSnackbar({ open: true, message: "Added successfully!", severity: "success" });
+      }
+
+      resetForm();
+      fetchYearLevelList();
+    } catch (err) {
+      console.error(err);
+      setSnackbar({ open: true, message: "Operation failed", severity: "error" });
+    }
+  };
+
+  const resetForm = () => {
+    setYearLevelDescription("");
+    setLevelType("year");
+    setEditMode(false);
+    setSelectedId(null);
+    setOpenYearLevelDialog(false);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this?")) return;
+
+    try {
+      await axios.delete(`${API_BASE_URL}/years_level/${id}`);
+      fetchYearLevelList();
+      setSnackbar({ open: true, message: "Deleted successfully!", severity: "success" });
+    } catch (err) {
+      console.error(err);
+      setSnackbar({ open: true, message: "Delete failed", severity: "error" });
+    }
+  };
 
   if (loading || hasAccess === null) return <LoadingOverlay open={loading} message="Loading..." />;
   if (!hasAccess) return <Unauthorized />;
@@ -134,7 +202,7 @@ const YearLevelPanel = () => {
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', mb: 2 }}>
         <Typography variant="h4" sx={{ fontWeight: 'bold', color: titleColor, fontSize: '36px' }}>
-          YEAR LEVEL PANEL
+          ACADEMIC LEVEL PANEL
         </Typography>
       </Box>
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
@@ -160,7 +228,13 @@ const YearLevelPanel = () => {
 
                 <Button
                   variant="contained"
-                  onClick={() => setOpenYearLevelDialog(true)}
+                  onClick={() => {
+                    setEditMode(false);
+                    setSelectedId(null);
+                    setYearLevelDescription("");
+                    setLevelType("year");
+                    setOpenYearLevelDialog(true);
+                  }}
                   sx={{
                     backgroundColor: "#1976d2", // ✅ Blue
                     color: "#fff",
@@ -186,12 +260,14 @@ const YearLevelPanel = () => {
       </TableContainer>
 
 
-      <Box sx={{ overflowY: "auto", maxHeight: 400 }}>
+      <Box sx={{ overflowY: "auto",}}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ backgroundColor: "#F5F5F5", color: "#000", border: `1px solid ${borderColor}` }}>
               <th style={styles.tableCell}>Year Level ID</th>
               <th style={styles.tableCell}>Year Level Description</th>
+              <th style={styles.tableCell}>Type</th>
+              <th style={styles.tableCell}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -199,6 +275,57 @@ const YearLevelPanel = () => {
               <tr key={index}>
                 <td style={styles.tableCell}>{level.year_level_id}</td>
                 <td style={styles.tableCell}>{level.year_level_description}</td>
+                <td style={styles.tableCell}>{level.level_type}</td>
+                <td style={styles.tableCell}>
+                  <Box   sx={{
+                
+                        textAlign: "center",
+                    
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: "10px", // space between buttons
+                      }}
+                      >
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => handleEdit(level)}
+                    sx={{
+                      backgroundColor: "green",
+                      color: "white",
+                      borderRadius: "5px",
+                      padding: "8px 14px",
+                      width: "100px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "5px",
+                    }}
+                  >
+                    <EditIcon fontSize="small" /> Edit
+                  </Button>
+
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => handleDelete(level.year_level_id)}
+                    sx={{
+                      backgroundColor: "#9E0000",
+                      color: "white",
+                      borderRadius: "5px",
+                      padding: "8px 14px",
+                      width: "100px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "5px",
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" /> Delete
+                  </Button>
+                  </Box>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -230,11 +357,14 @@ const YearLevelPanel = () => {
             py: 2
           }}
         >
-          Add Year Level
+          {editMode ? "Edit Year Level" : "Add Year Level"}
         </DialogTitle>
 
         {/* ===== CONTENT ===== */}
         <DialogContent sx={{ p: 3 }}>
+
+
+
           <Typography fontWeight="bold" mb={1} mt={2}>
             Year Level Description
           </Typography>
@@ -245,6 +375,22 @@ const YearLevelPanel = () => {
             value={yearLevelDescription}
             onChange={(e) => setYearLevelDescription(e.target.value)}
           />
+
+          <Typography fontWeight="bold" mt={2}>
+            Level Type
+          </Typography>
+
+          <TextField
+            select
+            fullWidth
+            value={levelType}
+            onChange={(e) => setLevelType(e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value="year">Year Level</option>
+            <option value="special">Special Program</option>
+            <option value="graduate">Graduate Level</option>
+          </TextField>
         </DialogContent>
 
         {/* ===== ACTIONS ===== */}
@@ -271,10 +417,7 @@ const YearLevelPanel = () => {
               fontWeight: 600,
               textTransform: "none"
             }}
-            onClick={async () => {
-              await handleAddYearLevel();
-              setOpenYearLevelDialog(false);
-            }}
+            onClick={handleSave}
           >
             Save
           </Button>

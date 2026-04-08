@@ -93,13 +93,13 @@ const OfficialStudentDashboard1 = () => {
     }, [settings]);
 
     const stepsData = [
-      { label: "Student List", to: "/student_list_for_enrollment", icon: <ListAltIcon /> },
-    { label: "Applicant Form", to: "/official_student_dashboard1", icon: <PersonAddIcon /> },
-    { label: "Submitted Documents", to: "/student_official_requirements", icon: <UploadFileIcon /> },
-    { label: "Course Tagging", to: "/course_tagging_for_college", icon: <UploadFileIcon /> },
-    { label: "Search COR", to: "/search_cor_for_college", icon: <MenuBookIcon /> },
+        { label: "Student List", to: "/student_list_for_enrollment", icon: <ListAltIcon /> },
+        { label: "Applicant Form", to: "/official_student_dashboard1", icon: <PersonAddIcon /> },
+        { label: "Submitted Documents", to: "/student_official_requirements", icon: <UploadFileIcon /> },
+        { label: "Course Tagging", to: "/course_tagging_for_college", icon: <UploadFileIcon /> },
+        { label: "Search COR", to: "/search_cor_for_college", icon: <MenuBookIcon /> },
 
-    { label: "Class List", to: "/class_roster_enrollment", icon: <PersonSearchIcon /> },
+        { label: "Class List", to: "/class_roster_enrollment", icon: <PersonSearchIcon /> },
 
     ];
 
@@ -176,6 +176,30 @@ const OfficialStudentDashboard1 = () => {
 
         fetchYearLevels();
     }, []);
+
+    const getYearLevelSelectValue = () => {
+        const current = person?.yearLevel;
+        if (current === null || current === undefined || current === "") return "";
+
+        const currentText = String(current).trim();
+        const byId = yearLevelOptions.find(
+            (yl) => String(yl.year_level_id) === currentText,
+        );
+        if (byId) return String(byId.year_level_id);
+
+        const byDesc = yearLevelOptions.find(
+            (yl) =>
+                String(yl.year_level_description || "")
+                    .trim()
+                    .toLowerCase() === currentText.toLowerCase(),
+        );
+        if (byDesc) return String(byDesc.year_level_id);
+
+        return currentText;
+    };
+
+
+
 
 
     const handleNavigateStep = (index, to) => {
@@ -1789,33 +1813,33 @@ const OfficialStudentDashboard1 = () => {
                                     onChange={handleChange}
                                     onBlur={handleBlur}
                                 >
-                                        <MenuItem value="">
-                                                        <em>Select Applying</em>
-                                                      </MenuItem>
-                                                      <MenuItem value="1">
-                                                        Senior High School Graduate
-                                                      </MenuItem>
-                                                      <MenuItem value="2">
-                                                        Senior High School Graduating Student
-                                                      </MenuItem>
-                                                      <MenuItem value="3">
-                                                        ALS (Alternative Learning System) Passer
-                                                      </MenuItem>
-                                                      <MenuItem value="4">
-                                                        Transferee from other University/College
-                                                      </MenuItem>
-                                                      <MenuItem value="5">
-                                                        Cross Enrolee Student
-                                                      </MenuItem>
-                                                      <MenuItem value="6">
-                                                        Foreign Applicant/Student
-                                                      </MenuItem>
-                                                      <MenuItem value="7">
-                                                        Baccalaureate Graduate
-                                                      </MenuItem>
-                                                      <MenuItem value="8">
-                                                        Master Degree Graduate
-                                                      </MenuItem>
+                                    <MenuItem value="">
+                                        <em>Select Applying</em>
+                                    </MenuItem>
+                                    <MenuItem value="1">
+                                        Senior High School Graduate
+                                    </MenuItem>
+                                    <MenuItem value="2">
+                                        Senior High School Graduating Student
+                                    </MenuItem>
+                                    <MenuItem value="3">
+                                        ALS (Alternative Learning System) Passer
+                                    </MenuItem>
+                                    <MenuItem value="4">
+                                        Transferee from other University/College
+                                    </MenuItem>
+                                    <MenuItem value="5">
+                                        Cross Enrolee Student
+                                    </MenuItem>
+                                    <MenuItem value="6">
+                                        Foreign Applicant/Student
+                                    </MenuItem>
+                                    <MenuItem value="7">
+                                        Baccalaureate Graduate
+                                    </MenuItem>
+                                    <MenuItem value="8">
+                                        Master Degree Graduate
+                                    </MenuItem>
                                 </Select>
                                 {errors.applyingAs && (
                                     <FormHelperText>This field is required.</FormHelperText>
@@ -1943,11 +1967,13 @@ const OfficialStudentDashboard1 = () => {
                                         <label className="w-40 mt:[2] font-medium ">Year Level:</label>
                                         <FormControl fullWidth size="small" required error={!!errors.yearLevel}>
                                             <InputLabel id="year-level-label">Year Level</InputLabel>
+
+
                                             <Select
                                                 labelId="year-level-label"
                                                 id="year-level-select"
                                                 name="yearLevel"
-                                                value={person.yearLevel || ""}
+                                                value={getYearLevelSelectValue()}
                                                 label="Year Level"
                                                 onChange={handleChange}
                                                 onBlur={() => handleUpdate(person)}
@@ -1959,7 +1985,7 @@ const OfficialStudentDashboard1 = () => {
                                                 {yearLevelOptions.map((yl) => (
                                                     <MenuItem
                                                         key={yl.year_level_id}
-                                                        value={yl.year_level_description}
+                                                        value={String(yl.year_level_id)}
                                                     >
                                                         {yl.year_level_description}
                                                     </MenuItem>
@@ -2406,7 +2432,7 @@ const OfficialStudentDashboard1 = () => {
                                     onBlur={handleBlur}
                                     error={!!errors.birthOfDate}
                                     helperText={errors.birthOfDate ? "This field is required." : ""}
-                                 />
+                                />
                             </Box>
                             {/* 👤 Age (auto-filled, read-only) */}
                             <Box flex={1}>
@@ -3377,64 +3403,64 @@ const OfficialStudentDashboard1 = () => {
                                     </Box>
 
                                     {/* Preview Image */}
-                                {(preview || person.profile_img) && (
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "center",
-      my: 2,
-      position: "relative",
-    }}
-  >
-    <Box
-      component="img"
-      src={
-        preview
-          ? preview
-          : `${API_BASE_URL}/uploads/Applicant1by1/${person.profile_img}`
-      }
-      alt="Preview"
-      sx={{
-        width: "192px",
-        height: "192px",
-        objectFit: "cover",
-        border: `1px solid ${borderColor}`,
-        borderRadius: 2,
-      }}
-    />
+                                    {(preview || person.profile_img) && (
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                justifyContent: "center",
+                                                my: 2,
+                                                position: "relative",
+                                            }}
+                                        >
+                                            <Box
+                                                component="img"
+                                                src={
+                                                    preview
+                                                        ? preview
+                                                        : `${API_BASE_URL}/uploads/Applicant1by1/${person.profile_img}`
+                                                }
+                                                alt="Preview"
+                                                sx={{
+                                                    width: "192px",
+                                                    height: "192px",
+                                                    objectFit: "cover",
+                                                    border: `1px solid ${borderColor}`,
+                                                    borderRadius: 2,
+                                                }}
+                                            />
 
-    {/* ❌ REMOVE BUTTON */}
-    <Button
-      size="small"
-      onClick={() => {
-        setSelectedFile(null);
-        setPreview(null);
+                                            {/* ❌ REMOVE BUTTON */}
+                                            <Button
+                                                size="small"
+                                                onClick={() => {
+                                                    setSelectedFile(null);
+                                                    setPreview(null);
 
-        // ✅ IMPORTANT: remove existing image
-        setPerson((prev) => ({
-          ...prev,
-          profile_img: "",
-        }));
-      }}
-      sx={{
-        position: "absolute",
-        top: -8,
-        right: "calc(50% - 96px)",
-        minWidth: 0,
-        width: 28,
-        height: 28,
-        fontSize: "18px",
-        p: 0,
-        color: "#fff",
-        bgcolor: "#d32f2f",
-        borderRadius: "50%",
-        "&:hover": { bgcolor: "#b71c1c" },
-      }}
-    >
-      ×
-    </Button>
-  </Box>
-)}
+                                                    // ✅ IMPORTANT: remove existing image
+                                                    setPerson((prev) => ({
+                                                        ...prev,
+                                                        profile_img: "",
+                                                    }));
+                                                }}
+                                                sx={{
+                                                    position: "absolute",
+                                                    top: -8,
+                                                    right: "calc(50% - 96px)",
+                                                    minWidth: 0,
+                                                    width: 28,
+                                                    height: 28,
+                                                    fontSize: "18px",
+                                                    p: 0,
+                                                    color: "#fff",
+                                                    bgcolor: "#d32f2f",
+                                                    borderRadius: "50%",
+                                                    "&:hover": { bgcolor: "#b71c1c" },
+                                                }}
+                                            >
+                                                ×
+                                            </Button>
+                                        </Box>
+                                    )}
 
                                     {/* Guidelines Section */}
                                     <Box
@@ -3543,7 +3569,7 @@ const OfficialStudentDashboard1 = () => {
                                     transform: "translate(-50%, -50%)",
                                     width: 400,
                                     bgcolor: "background.paper",
-                                   border: `1px solid ${borderColor}`,
+                                    border: `1px solid ${borderColor}`,
                                     boxShadow: 24,
                                     p: 4,
                                     borderRadius: 2,

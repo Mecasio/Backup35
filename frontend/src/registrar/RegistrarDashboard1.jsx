@@ -91,37 +91,37 @@ const RegistrarDashboard1 = () => {
     }, [settings]);
 
     const stepsData = [
-       {
+        {
             label: "Admission Process For College",
             to: "/applicant_list",
             icon: <SchoolIcon fontSize="large" />,
-          },
-          {
+        },
+        {
             label: "Applicant Form",
             to: "/registrar_dashboard1",
             icon: <AssignmentIcon fontSize="large" />,
-          },
-          {
+        },
+        {
             label: "Student Requirements",
             to: "/registrar_requirements",
             icon: <AssignmentTurnedInIcon fontSize="large" />,
-          },
-          { 
-            label: "Qualifying / Interview Schedule Management", 
-            to: "/assign_schedule_applicants_qualifying_interview", 
-            icon: <ScheduleIcon fontSize="large" /> 
-          },
-          {
+        },
+        {
+            label: "Qualifying / Interview Schedule Management",
+            to: "/assign_schedule_applicants_qualifying_interview",
+            icon: <ScheduleIcon fontSize="large" />
+        },
+        {
             label: "Qualifying / Interview Exam Score",
             to: "/qualifying_interview_exam_scores",
             icon: <ScoreIcon fontSize="large" />,
-          },
-          {
+        },
+        {
             label: "Student Numbering",
             to: "/student_numbering_per_college",
             icon: <DashboardIcon fontSize="large" />,
-          },
-      
+        },
+
 
     ];
 
@@ -230,6 +230,30 @@ const RegistrarDashboard1 = () => {
 
         fetchYearLevels();
     }, []);
+
+    const getYearLevelSelectValue = () => {
+        const current = person?.yearLevel;
+        if (current === null || current === undefined || current === "") return "";
+
+        const currentText = String(current).trim();
+        const byId = yearLevelOptions.find(
+            (yl) => String(yl.year_level_id) === currentText,
+        );
+        if (byId) return String(byId.year_level_id);
+
+        const byDesc = yearLevelOptions.find(
+            (yl) =>
+                String(yl.year_level_description || "")
+                    .trim()
+                    .toLowerCase() === currentText.toLowerCase(),
+        );
+        if (byDesc) return String(byDesc.year_level_id);
+
+        return currentText;
+    };
+
+
+
 
 
     const [hasAccess, setHasAccess] = useState(null);
@@ -1901,11 +1925,13 @@ const RegistrarDashboard1 = () => {
                                         <label className="w-40 mt:[2] font-medium ">Year Level:</label>
                                         <FormControl fullWidth size="small" required error={!!errors.yearLevel}>
                                             <InputLabel id="year-level-label">Year Level</InputLabel>
+
+
                                             <Select
                                                 labelId="year-level-label"
                                                 id="year-level-select"
                                                 name="yearLevel"
-                                                value={person.yearLevel || ""}
+                                                value={getYearLevelSelectValue()}
                                                 label="Year Level"
                                                 onChange={handleChange}
                                                 onBlur={() => handleUpdate(person)}
@@ -1917,13 +1943,12 @@ const RegistrarDashboard1 = () => {
                                                 {yearLevelOptions.map((yl) => (
                                                     <MenuItem
                                                         key={yl.year_level_id}
-                                                        value={yl.year_level_description}
+                                                        value={String(yl.year_level_id)}
                                                     >
                                                         {yl.year_level_description}
                                                     </MenuItem>
                                                 ))}
                                             </Select>
-
                                             {errors.yearLevel && (
                                                 <FormHelperText>This field is required.</FormHelperText>
                                             )}
@@ -2361,7 +2386,7 @@ const RegistrarDashboard1 = () => {
                                     onBlur={handleBlur}
                                     error={!!errors.birthOfDate}
                                     helperText={errors.birthOfDate ? "This field is required." : ""}
-                                 />
+                                />
                             </Box>
 
                             {/* 👤 Age (auto-filled, read-only) */}

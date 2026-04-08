@@ -175,6 +175,30 @@ const ReadmissionDashboard1 = () => {
     fetchYearLevels();
   }, []);
 
+  const getYearLevelSelectValue = () => {
+    const current = person?.yearLevel;
+    if (current === null || current === undefined || current === "") return "";
+
+    const currentText = String(current).trim();
+    const byId = yearLevelOptions.find(
+      (yl) => String(yl.year_level_id) === currentText,
+    );
+    if (byId) return String(byId.year_level_id);
+
+    const byDesc = yearLevelOptions.find(
+      (yl) =>
+        String(yl.year_level_description || "")
+          .trim()
+          .toLowerCase() === currentText.toLowerCase(),
+    );
+    if (byDesc) return String(byDesc.year_level_id);
+
+    return currentText;
+  };
+
+
+
+
 
   const handleNavigateStep = (index, to) => {
     setCurrentStep(index);
@@ -1787,33 +1811,33 @@ const ReadmissionDashboard1 = () => {
                   onChange={handleChange}
                   onBlur={handleBlur}
                 >
-                      <MenuItem value="">
-                                      <em>Select Applying</em>
-                                    </MenuItem>
-                                    <MenuItem value="1">
-                                      Senior High School Graduate
-                                    </MenuItem>
-                                    <MenuItem value="2">
-                                      Senior High School Graduating Student
-                                    </MenuItem>
-                                    <MenuItem value="3">
-                                      ALS (Alternative Learning System) Passer
-                                    </MenuItem>
-                                    <MenuItem value="4">
-                                      Transferee from other University/College
-                                    </MenuItem>
-                                    <MenuItem value="5">
-                                      Cross Enrolee Student
-                                    </MenuItem>
-                                    <MenuItem value="6">
-                                      Foreign Applicant/Student
-                                    </MenuItem>
-                                    <MenuItem value="7">
-                                      Baccalaureate Graduate
-                                    </MenuItem>
-                                    <MenuItem value="8">
-                                      Master Degree Graduate
-                                    </MenuItem>
+                  <MenuItem value="">
+                    <em>Select Applying</em>
+                  </MenuItem>
+                  <MenuItem value="1">
+                    Senior High School Graduate
+                  </MenuItem>
+                  <MenuItem value="2">
+                    Senior High School Graduating Student
+                  </MenuItem>
+                  <MenuItem value="3">
+                    ALS (Alternative Learning System) Passer
+                  </MenuItem>
+                  <MenuItem value="4">
+                    Transferee from other University/College
+                  </MenuItem>
+                  <MenuItem value="5">
+                    Cross Enrolee Student
+                  </MenuItem>
+                  <MenuItem value="6">
+                    Foreign Applicant/Student
+                  </MenuItem>
+                  <MenuItem value="7">
+                    Baccalaureate Graduate
+                  </MenuItem>
+                  <MenuItem value="8">
+                    Master Degree Graduate
+                  </MenuItem>
                 </Select>
                 {errors.applyingAs && (
                   <FormHelperText>This field is required.</FormHelperText>
@@ -1941,11 +1965,13 @@ const ReadmissionDashboard1 = () => {
                     <label className="w-40 mt:[2] font-medium ">Year Level:</label>
                     <FormControl fullWidth size="small" required error={!!errors.yearLevel}>
                       <InputLabel id="year-level-label">Year Level</InputLabel>
+
+
                       <Select
                         labelId="year-level-label"
                         id="year-level-select"
                         name="yearLevel"
-                        value={person.yearLevel || ""}
+                        value={getYearLevelSelectValue()}
                         label="Year Level"
                         onChange={handleChange}
                         onBlur={() => handleUpdate(person)}
@@ -1957,7 +1983,7 @@ const ReadmissionDashboard1 = () => {
                         {yearLevelOptions.map((yl) => (
                           <MenuItem
                             key={yl.year_level_id}
-                            value={yl.year_level_description}
+                            value={String(yl.year_level_id)}
                           >
                             {yl.year_level_description}
                           </MenuItem>
@@ -2404,7 +2430,7 @@ const ReadmissionDashboard1 = () => {
                   onBlur={handleBlur}
                   error={!!errors.birthOfDate}
                   helperText={errors.birthOfDate ? "This field is required." : ""}
-                 />
+                />
               </Box>
               {/* 👤 Age (auto-filled, read-only) */}
               <Box flex={1}>

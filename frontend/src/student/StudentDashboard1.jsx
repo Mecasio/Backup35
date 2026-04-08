@@ -192,6 +192,30 @@ const StudentDashboard1 = () => {
     fetchYearLevels();
   }, []);
 
+  const getYearLevelSelectValue = () => {
+    const current = person?.yearLevel;
+    if (current === null || current === undefined || current === "") return "";
+
+    const currentText = String(current).trim();
+    const byId = yearLevelOptions.find(
+      (yl) => String(yl.year_level_id) === currentText,
+    );
+    if (byId) return String(byId.year_level_id);
+
+    const byDesc = yearLevelOptions.find(
+      (yl) =>
+        String(yl.year_level_description || "")
+          .trim()
+          .toLowerCase() === currentText.toLowerCase(),
+    );
+    if (byDesc) return String(byDesc.year_level_id);
+
+    return currentText;
+  };
+
+
+
+  
   const [studentNumber, setStudentNumber] = useState("");
 
   const queryParams = new URLSearchParams(location.search);
@@ -1235,7 +1259,7 @@ const StudentDashboard1 = () => {
             maxWidth="100%"
             sx={{
               backgroundColor: "#f1f1f1",
-             border: `1px solid ${borderColor}`,
+              border: `1px solid ${borderColor}`,
               padding: 4,
               borderRadius: 2,
               boxShadow: 3,
@@ -1566,11 +1590,13 @@ const StudentDashboard1 = () => {
                       error={!!errors.yearLevel}
                     >
                       <InputLabel id="year-level-label">Year Level</InputLabel>
+
+
                       <Select
                         labelId="year-level-label"
                         id="year-level-select"
                         name="yearLevel"
-                        value={person.yearLevel || ""}
+                        value={getYearLevelSelectValue()}
                         label="Year Level"
                         onChange={handleChange}
                         onBlur={() => handleUpdate(person)}
@@ -1582,13 +1608,12 @@ const StudentDashboard1 = () => {
                         {yearLevelOptions.map((yl) => (
                           <MenuItem
                             key={yl.year_level_id}
-                            value={yl.year_level_description}
+                            value={String(yl.year_level_id)}
                           >
                             {yl.year_level_description}
                           </MenuItem>
                         ))}
                       </Select>
-
                       {errors.yearLevel && (
                         <FormHelperText>This field is required.</FormHelperText>
                       )}
@@ -2053,7 +2078,7 @@ const StudentDashboard1 = () => {
                   helperText={
                     errors.birthOfDate ? "This field is required." : ""
                   }
-                 />
+                />
               </Box>
 
               {/* 👤 Age (auto-filled, read-only) */}

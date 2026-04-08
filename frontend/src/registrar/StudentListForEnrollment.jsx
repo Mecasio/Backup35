@@ -153,6 +153,7 @@ const StudentListForEnrollment = () => {
     const pageId = 137;
     const [employeeID, setEmployeeID] = useState("");
 
+
     useEffect(() => {
         const storedUser = localStorage.getItem("email");
         const storedRole = localStorage.getItem("role");
@@ -160,9 +161,8 @@ const StudentListForEnrollment = () => {
         const storedEmployeeID = localStorage.getItem("employee_id");
 
         if (storedUser && storedRole && storedID) {
-            setUser(storedUser);
-            setUserRole(storedRole);
             setUserID(storedID);
+            setUserRole(storedRole);
             setEmployeeID(storedEmployeeID);
 
             if (storedRole === "registrar") {
@@ -176,19 +176,19 @@ const StudentListForEnrollment = () => {
     }, []);
 
     const checkAccess = async (employeeID) => {
+        setLoading(true);
         try {
             const response = await axios.get(`${API_BASE_URL}/api/page_access/${employeeID}/${pageId}`);
-            if (response.data && response.data.page_privilege === 1) {
-                setHasAccess(true);
-            } else {
-                setHasAccess(false);
-            }
-        } catch (error) {
-            console.error('Error checking access:', error);
+            setHasAccess(response.data?.page_privilege === 1);
+        } catch (err) {
+            console.error("Error checking access:", err);
             setHasAccess(false);
+            setSnackbar({ open: true, message: "Failed to check access", severity: "error" });
+        } finally {
             setLoading(false);
         }
     };
+
 
     const [persons, setPersons] = useState([]);
     const [selectedPerson, setSelectedPerson] = useState(null);

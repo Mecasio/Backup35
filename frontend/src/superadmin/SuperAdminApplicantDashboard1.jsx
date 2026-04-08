@@ -151,6 +151,30 @@ const SuperAdminApplicantDashboard1 = () => {
         fetchYearLevels();
     }, []);
 
+    const getYearLevelSelectValue = () => {
+        const current = person?.yearLevel;
+        if (current === null || current === undefined || current === "") return "";
+
+        const currentText = String(current).trim();
+        const byId = yearLevelOptions.find(
+            (yl) => String(yl.year_level_id) === currentText,
+        );
+        if (byId) return String(byId.year_level_id);
+
+        const byDesc = yearLevelOptions.find(
+            (yl) =>
+                String(yl.year_level_description || "")
+                    .trim()
+                    .toLowerCase() === currentText.toLowerCase(),
+        );
+        if (byDesc) return String(byDesc.year_level_id);
+
+        return currentText;
+    };
+
+
+
+
     const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
     const handleCloseSnackbar = () => setSnackbar((prev) => ({ ...prev, open: false }));
 
@@ -978,7 +1002,7 @@ const SuperAdminApplicantDashboard1 = () => {
     // ✅ For Excel Import
     const [excelFile, setExcelFile] = useState(null);
 
-   
+
 
     const divToPrintRef = useRef();
     const [showPrintView, setShowPrintView] = useState(false);
@@ -1744,11 +1768,13 @@ const SuperAdminApplicantDashboard1 = () => {
 
                                         <FormControl fullWidth size="small" required error={!!errors.yearLevel}>
                                             <InputLabel id="year-level-label">Year Level</InputLabel>
+
+
                                             <Select
                                                 labelId="year-level-label"
                                                 id="year-level-select"
                                                 name="yearLevel"
-                                                value={person.yearLevel || ""}
+                                                value={getYearLevelSelectValue()}
                                                 label="Year Level"
                                                 onChange={handleChange}
                                                 onBlur={() => handleUpdate(person)}
@@ -1760,13 +1786,12 @@ const SuperAdminApplicantDashboard1 = () => {
                                                 {yearLevelOptions.map((yl) => (
                                                     <MenuItem
                                                         key={yl.year_level_id}
-                                                        value={yl.year_level_description}
+                                                        value={String(yl.year_level_id)}
                                                     >
                                                         {yl.year_level_description}
                                                     </MenuItem>
                                                 ))}
                                             </Select>
-
                                             {errors.yearLevel && (
                                                 <FormHelperText>This field is required.</FormHelperText>
                                             )}
@@ -3152,7 +3177,7 @@ const SuperAdminApplicantDashboard1 = () => {
                                                     width: "192px",
                                                     height: "192px",
                                                     objectFit: "cover",
-                                                   border: `1px solid ${borderColor}`,
+                                                    border: `1px solid ${borderColor}`,
                                                     borderRadius: 2,
                                                 }}
                                             />
