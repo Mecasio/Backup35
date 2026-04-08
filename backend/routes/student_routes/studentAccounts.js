@@ -2,17 +2,19 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const { db, db3 } = require("../database/database");
-
+require("dotenv").config();
 const router = express.Router();
 
 
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
 function generateRandomPassword(length = 10) {
@@ -266,6 +268,8 @@ router.post("/notify_applicant", async (req, res) => {
       );
     }
 
+    const frontendUrl = process.env.FRONTEND_URL;
+
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
@@ -309,12 +313,12 @@ router.post("/notify_applicant", async (req, res) => {
   Please change your password after your first login.
 </p>
 
-<p>
-  Login Link:<br/>
-  <a href="${process.env.FRONTEND_URL}/login">
-    ${process.env.FRONTEND_URL}/login
-  </a>
-</p>
+ <p>
+      Login Link:<br/>
+      <a href="${frontendUrl}/login">
+        ${frontendUrl}/login
+      </a>
+    </p>
   `
     });
 
@@ -329,7 +333,8 @@ router.post("/notify_applicant", async (req, res) => {
   } catch (error) {
     if (conn) await conn.rollback();
 
-    console.error(error);
+    console.error("EMAIL ERROR:", error.message);
+    console.error("FULL ERROR:", error);
 
     res.status(500).json({
       success: false,

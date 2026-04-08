@@ -1494,7 +1494,7 @@ const SuperAdminStudentDashboard4 = () => {
                             <Button
                                 variant="contained"
                                 onClick={(e) => {
-                                    handleUpdate();
+                            handleUpdate(person);
                                     navigate(`/super_admin_student_dashboard5?person_id=${userID}`);
 
                                 }}

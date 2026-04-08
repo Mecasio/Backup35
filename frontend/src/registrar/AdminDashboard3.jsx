@@ -739,7 +739,6 @@ const AdminDashboard3 = () => {
           </React.Fragment>
         ))}
       </Box>
-
       <div style={{ height: "40px" }}></div>
 
 
@@ -1015,7 +1014,7 @@ const AdminDashboard3 = () => {
                   <Box
                     sx={{
                       height: "2px",
-                      backgroundcolor: mainButtonColor,
+                      backgroundColor: mainButtonColor,
                       flex: 1,
                       alignSelf: "center",
                       mx: 2,
@@ -1026,6 +1025,7 @@ const AdminDashboard3 = () => {
             ))}
           </Box>
         )}
+
         <br />
 
         <form>

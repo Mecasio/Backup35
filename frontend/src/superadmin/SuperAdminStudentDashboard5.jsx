@@ -897,7 +897,7 @@ const SuperAdminStudentDashboard5 = () => {
                             <Button
                                 variant="contained"
                                 onClick={async () => {
-                                    handleUpdate(); // Save data
+                                    handleUpdate(person);
 
                                     try {
                                         await axios.post(`${API_BASE_URL}/api/notify-submission`, {

@@ -97,27 +97,27 @@ const AssignQualifyingInterviewExam = () => {
     }, [settings]);
 
 
-    const tabs = [
+    // const tabs = [
 
-        { label: "Qualifying / Interview Room Assignment", to: "/assign_qualifying_interview_exam", icon: <MeetingRoomIcon fontSize="large" /> },
-        { label: "Qualifying / Interview Schedule Management", to: "/assign_schedule_applicants_qualifying_interview", icon: <ScheduleIcon fontSize="large" /> },
-        { label: "Qualifying / Interviewer Applicant's List", to: "/enrollment_schedule_room_list", icon: <PeopleIcon fontSize="large" /> },
-
-
+    //     { label: "Qualifying / Interview Room Assignment", to: "/assign_qualifying_interview_exam", icon: <MeetingRoomIcon fontSize="large" /> },
+    //     // { label: "Qualifying / Interview Schedule Management", to: "/assign_schedule_applicants_qualifying_interview", icon: <ScheduleIcon fontSize="large" /> },
+    //     { label: "Qualifying / Interviewer Applicant's List", to: "/enrollment_schedule_room_list", icon: <PeopleIcon fontSize="large" /> },
 
 
-    ];
+
+
+    // ];
 
 
     const navigate = useNavigate();
-    const [activeStep, setActiveStep] = useState(0);
-    const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
+    // const [activeStep, setActiveStep] = useState(0);
+    // // const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
 
 
-    const handleStepClick = (index, to) => {
-        setActiveStep(index);
-        navigate(to); // this will actually change the page
-    };
+    // const handleStepClick = (index, to) => {
+    //     setActiveStep(index);
+    //     navigate(to); // this will actually change the page
+    // };
 
     const [day, setDay] = useState("");
     const [roomId, setRoomId] = useState("");            // store selected room_id
@@ -469,7 +469,7 @@ const AssignQualifyingInterviewExam = () => {
 
             <div style={{ height: "20px" }}></div>
 
-            <Box
+            {/* <Box
                 sx={{
                     display: "flex",
                     justifyContent: "space-between",
@@ -512,7 +512,7 @@ const AssignQualifyingInterviewExam = () => {
                         </Box>
                     </Card>
                 ))}
-            </Box>
+            </Box> */}
 
             <br />
             <br />

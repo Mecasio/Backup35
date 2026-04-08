@@ -570,7 +570,7 @@ const RequirementsForm = () => {
                         }
                       }}
                     >
-                      + Add Schedule
+                      + Add Requirements
                     </Button>
 
                   </Box>

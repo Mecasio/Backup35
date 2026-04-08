@@ -206,22 +206,22 @@ const InterviewerApplicantList = () => {
   const secondLine = words.slice(middle).join(" ");
 
 
-  const tabs = [
+  // const tabs = [
 
-    { label: "Qualifying / Interview Room Assignment", to: "/assign_qualifying_interview_exam", icon: <MeetingRoomIcon fontSize="large" /> },
-    { label: "Qualifying / Interview Schedule Management", to: "/assign_schedule_applicants_qualifying_interview", icon: <ScheduleIcon fontSize="large" /> },
-    { label: "Qualifying / Interviewer Applicant's List", to: "/enrollment_schedule_room_list", icon: <PeopleIcon fontSize="large" /> },
-
-
+  //   { label: "Qualifying / Interview Room Assignment", to: "/assign_qualifying_interview_exam", icon: <MeetingRoomIcon fontSize="large" /> },
+  //   { label: "Qualifying / Interview Schedule Management", to: "/assign_schedule_applicants_qualifying_interview", icon: <ScheduleIcon fontSize="large" /> },
+  //   { label: "Qualifying / Interviewer Applicant's List", to: "/enrollment_schedule_room_list", icon: <PeopleIcon fontSize="large" /> },
 
 
-  ];
+
+
+  // ];
 
 
 
   const navigate = useNavigate();
-  const [activeStep, setActiveStep] = useState(2);
-  const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
+  // const [activeStep, setActiveStep] = useState(2);
+  // const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [applicantToDelete, setApplicantToDelete] = useState(null);
 
@@ -537,7 +537,7 @@ const InterviewerApplicantList = () => {
 
       <br />
 
-      <Box
+      {/* <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
@@ -580,7 +580,7 @@ const InterviewerApplicantList = () => {
             </Box>
           </Card>
         ))}
-      </Box>
+      </Box> */}
 
 
       <br />

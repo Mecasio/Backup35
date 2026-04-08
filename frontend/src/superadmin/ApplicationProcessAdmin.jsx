@@ -1158,7 +1158,7 @@ const ApplicationProcessAdmin = () => {
                 mb={2}
             >
                 <Typography variant="h4" fontWeight="bold" sx={{ color: titleColor }}>
-                    ADMISSION PROCESS FOR REGISTRAR
+                    ADMISSION PROCESS FOR ADMIN
                 </Typography>
                 <Box sx={{ position: "absolute", top: 10, right: 24 }}>
                     <Button
@@ -1813,13 +1813,13 @@ const ApplicationProcessAdmin = () => {
                         </Box>
 
                         {/* RIGHT SIDE */}
-                        <Button
+                        {/* <Button
                             sx={{ width: "250px" }}
                             variant="contained"
                             onClick={() => setOpenAddApplicant(true)}
                         >
                             Add Applicant
-                        </Button>
+                        </Button> */}
                     </FormControl>
 
                 </Box>
@@ -2082,6 +2082,7 @@ const ApplicationProcessAdmin = () => {
                                     }}
                                 >
                                     <Checkbox
+                                    disabled
                                         checked={Number(person.submitted_documents) === 1}
                                         onChange={(e) => {
                                             const checked = e.target.checked;
@@ -2488,12 +2489,13 @@ const ApplicationProcessAdmin = () => {
                                                 key={doc.key}
                                                 control={
                                                     <Checkbox
+                                                    disabled
                                                         checked={
                                                             isCompleted
                                                                 ? true
                                                                 : selectedArray.includes(doc.key)
                                                         }
-                                                        disabled={isCompleted}
+                                                     
                                                         onChange={(e) => {
                                                             if (isCompleted) return;
                                                             const updated = e.target.checked

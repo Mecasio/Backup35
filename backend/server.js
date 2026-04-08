@@ -44,7 +44,7 @@ const allowedOrigins = [
   "http://192.168.50.55:5173",
   "http://192.168.50.211:5173",
   "http://136.239.248.62:5173",
-  "http://192.168.50.54:5173",
+  "http://192.168.50.69:5173",
   "http://192.168.1.9:5173",
 ];
 
@@ -9528,37 +9528,85 @@ app.get("/api/program_evaluation/:student_number", async (req, res) => {
 
 app.get("/registrar-users", async (req, res) => {
   try {
-    const [users] = await db3.query(
-      "SELECT * FROM user_accounts WHERE role = 'registrar'",
-    );
+    const requestedPageId = Number(req.query.pageId);
 
-    const filteredUsers = [];
+    const parsePageIds = (value) => {
+      if (!value) return [];
 
-    for (const user of users) {
-      const [accessRows] = await db3.query(
-        "SELECT page_id FROM page_access WHERE user_id = ? ORDER BY page_id ASC",
-        [user.employee_id],
-      );
-
-      const userPageIds = accessRows
-        .map((r) => r.page_id)
-        .sort((a, b) => a - b);
-
-      // 2¸ Strictly compare with registrar page access
-      const registrarPages = [...ROLE_PAGE_ACCESS.registrar].sort(
-        (a, b) => a - b,
-      );
-
-      const isExactMatch =
-        userPageIds.length === registrarPages.length &&
-        userPageIds.every((id, idx) => id === registrarPages[idx]);
-
-      if (isExactMatch) {
-        filteredUsers.push(user);
+      try {
+        const parsed = Array.isArray(value) ? value : JSON.parse(value);
+        return parsed
+          .map((pageId) => Number(pageId))
+          .filter((pageId) => Number.isInteger(pageId));
+      } catch (error) {
+        console.error("Error parsing page access:", error);
+        return [];
       }
-    }
+    };
 
-    res.json({ registrars: filteredUsers });
+    const [users] = await db3.query(`
+      SELECT
+        ua.id,
+        ua.person_id,
+        ua.employee_id,
+        ua.last_name,
+        ua.middle_name,
+        ua.first_name,
+        ua.role,
+        ua.email,
+        ua.status,
+        ua.access_level,
+        at.access_id,
+        at.access_description,
+        at.access_page,
+        GROUP_CONCAT(DISTINCT pa.page_id ORDER BY pa.page_id ASC) AS assigned_page_ids
+      FROM user_accounts ua
+      LEFT JOIN access_table at
+        ON ua.access_level = at.access_id
+      LEFT JOIN page_access pa
+        ON pa.user_id = ua.employee_id
+      WHERE ua.role = 'registrar'
+      GROUP BY
+        ua.id,
+        ua.person_id,
+        ua.employee_id,
+        ua.last_name,
+        ua.middle_name,
+        ua.first_name,
+        ua.role,
+        ua.email,
+        ua.status,
+        ua.access_level,
+        at.access_id,
+        at.access_description,
+        at.access_page
+      ORDER BY ua.first_name ASC, ua.last_name ASC
+    `);
+
+    const registrars = users
+      .map((user) => {
+        const accessTablePages = parsePageIds(user.access_page);
+        const assignedPageIds = (user.assigned_page_ids || "")
+          .split(",")
+          .map((pageId) => Number(pageId))
+          .filter((pageId) => Number.isInteger(pageId));
+
+        return {
+          ...user,
+          access_page: accessTablePages,
+          assigned_page_ids: assignedPageIds,
+        };
+      })
+      .filter((user) => {
+        if (!Number.isInteger(requestedPageId)) return true;
+
+        return (
+          user.access_page.includes(requestedPageId) ||
+          user.assigned_page_ids.includes(requestedPageId)
+        );
+      });
+
+    res.json({ registrars });
   } catch (error) {
     console.error("Error fetching registrar users:", error);
     res

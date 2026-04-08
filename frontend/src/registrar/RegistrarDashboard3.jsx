@@ -71,7 +71,7 @@ const RegistrarDashboard3 = () => {
     }, [settings]);
 
     const stepsData = [
-      {
+     {
           label: "Admission Process For College",
           to: "/applicant_list",
           icon: <SchoolIcon fontSize="large" />,
@@ -86,6 +86,11 @@ const RegistrarDashboard3 = () => {
           to: "/registrar_requirements",
           icon: <AssignmentTurnedInIcon fontSize="large" />,
         },
+        { 
+          label: "Qualifying / Interview Schedule Management", 
+          to: "/assign_schedule_applicants_qualifying_interview", 
+          icon: <ScheduleIcon fontSize="large" /> 
+        },
         {
           label: "Qualifying / Interview Exam Score",
           to: "/qualifying_interview_exam_scores",
@@ -96,7 +101,7 @@ const RegistrarDashboard3 = () => {
           to: "/student_numbering_per_college",
           icon: <DashboardIcon fontSize="large" />,
         },
-      
+    
       
     ];
     const [currentStep, setCurrentStep] = useState(1);

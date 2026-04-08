@@ -1249,7 +1249,7 @@ const SuperAdminStudentDashboard3 = () => {
                             <Button
                                 variant="contained"
                                 onClick={() => {
-                                    handleUpdate();
+                               handleUpdate(person);
                                     navigate(`/super_admin_student_dashboard4?person_id=${userID}`);
                                 }}
                                 endIcon={

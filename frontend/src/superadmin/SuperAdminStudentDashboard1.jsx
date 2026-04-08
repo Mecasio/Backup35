@@ -830,7 +830,7 @@ const SuperAdminStudentDashboard1 = () => {
         // Auto-close after 3 seconds
         setTimeout(() => {
             setSnack(prev => ({ ...prev, open: false }));
-        }, 3000);
+        }, 6000);
     };
 
     const handleImportExcel = async () => {
@@ -848,7 +848,10 @@ const SuperAdminStudentDashboard1 = () => {
             });
 
             if (res.data.success) {
-                showSnack(`✅ ${res.data.message}`, "success");
+                showSnack(
+                    `✅ Imported: ${res.data.totalRows} | Updated: ${res.data.updated} | Skipped: ${res.data.skipped} | Invalid: ${res.data.totalInvalid}`,
+                    "success"
+                );
                 // optional: re-fetch applicants if needed
                 // await fetchApplicants();
             } else {
@@ -2817,7 +2820,35 @@ const SuperAdminStudentDashboard1 = () => {
                             label="Same as Present Address"
                         />
 
+                        <Box display="flex" gap={2} mb={2}>
+                            <Box flex={1}>
+                                <Typography mb={1} fontWeight="medium">Permanent Street</Typography>
+                                <TextField
+                                    fullWidth
+                                    size="small"
+                                    name="permanentStreet"
+                                    placeholder="Enter your Permanent Street"
+                                    value={person.permanentStreet || ""}
+                                    onBlur={() => handleUpdate(person)} onChange={handleChange}
+                                    error={!!errors.permanentStreet}
+                                    helperText={errors.permanentStreet && "This field is required."}
+                                />
+                            </Box>
 
+                            <Box flex={1}>
+                                <Typography mb={1} fontWeight="medium">Permanent Zip Code</Typography>
+                                <TextField
+                                    fullWidth
+                                    size="small"
+                                    name="permanentZipCode"
+                                    placeholder="Enter your Permanent Zip Code"
+                                    value={person.permanentZipCode || ""}
+                                    onBlur={() => handleUpdate(person)} onChange={handleChange}
+                                    error={!!errors.permanentZipCode}
+                                    helperText={errors.permanentZipCode && "This field is required."}
+                                />
+                            </Box>
+                        </Box>
 
 
                         {/* Permanent Region & Province */}
@@ -2974,35 +3005,7 @@ const SuperAdminStudentDashboard1 = () => {
                         </Box>
 
 
-                        <Box display="flex" gap={2} mb={2}>
-                            <Box flex={1}>
-                                <Typography mb={1} fontWeight="medium">Permanent Street</Typography>
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    name="permanentStreet"
-                                    placeholder="Enter your Permanent Street"
-                                    value={person.permanentStreet || ""}
-                                    onBlur={() => handleUpdate(person)} onChange={handleChange}
-                                    error={!!errors.permanentStreet}
-                                    helperText={errors.permanentStreet && "This field is required."}
-                                />
-                            </Box>
 
-                            <Box flex={1}>
-                                <Typography mb={1} fontWeight="medium">Permanent Zip Code</Typography>
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    name="permanentZipCode"
-                                    placeholder="Enter your Permanent Zip Code"
-                                    value={person.permanentZipCode || ""}
-                                    onBlur={() => handleUpdate(person)} onChange={handleChange}
-                                    error={!!errors.permanentZipCode}
-                                    helperText={errors.permanentZipCode && "This field is required."}
-                                />
-                            </Box>
-                        </Box>
 
 
 
@@ -3309,7 +3312,7 @@ const SuperAdminStudentDashboard1 = () => {
                             <Button
                                 variant="contained"
                                 onClick={() => {
-                                    handleUpdate();
+                                   handleUpdate(person);
                                     navigate(`/super_admin_student_dashboard2?person_id=${userID}`);
                                 }}
                                 endIcon={

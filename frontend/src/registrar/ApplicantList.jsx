@@ -174,6 +174,11 @@ const ApplicantList = () => {
       to: "/registrar_requirements",
       icon: <AssignmentTurnedInIcon fontSize="large" />,
     },
+    { 
+      label: "Qualifying / Interview Schedule Management", 
+      to: "/assign_schedule_applicants_qualifying_interview", 
+      icon: <ScheduleIcon fontSize="large" /> 
+    },
     {
       label: "Qualifying / Interview Exam Score",
       to: "/qualifying_interview_exam_scores",

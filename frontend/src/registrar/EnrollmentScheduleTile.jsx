@@ -57,25 +57,25 @@ const InterviewScheduleHoverTile = () => {
     });
 
 
-    const tabs = [
+    // const tabs = [
 
-        { label: "Qualifying / Interview Room Assignment", to: "/assign_qualifying_interview_exam", icon: <MeetingRoomIcon fontSize="large" /> },
-        { label: "Qualifying / Interview Schedule Management", to: "/assign_schedule_applicants_qualifying_interview", icon: <ScheduleIcon fontSize="large" /> },
-        { label: "Qualifying / Interviewer Applicant's List", to: "/enrollment_schedule_room_list", icon: <PeopleIcon fontSize="large" /> },
-
-
+    //     { label: "Qualifying / Interview Room Assignment", to: "/assign_qualifying_interview_exam", icon: <MeetingRoomIcon fontSize="large" /> },
+    //     // { label: "Qualifying / Interview Schedule Management", to: "/assign_schedule_applicants_qualifying_interview", icon: <ScheduleIcon fontSize="large" /> },
+    //     { label: "Qualifying / Interviewer Applicant's List", to: "/enrollment_schedule_room_list", icon: <PeopleIcon fontSize="large" /> },
 
 
-    ];
-
-    const [activeStep, setActiveStep] = useState(2);
-    const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
 
 
-    const handleStepClick = (index, to) => {
-        setActiveStep(index);
-        navigate(to); // this will actually change the page
-    };
+    // ];
+
+    // const [activeStep, setActiveStep] = useState(2);
+    // const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
+
+
+    // const handleStepClick = (index, to) => {
+    //     setActiveStep(index);
+    //     navigate(to); // this will actually change the page
+    // };
 
     const branches = Array.isArray(settings?.branches)
         ? settings.branches
@@ -287,7 +287,7 @@ const InterviewScheduleHoverTile = () => {
             <br />
 
 
-            <Box
+            {/* <Box
                 sx={{
                     display: "flex",
                     justifyContent: "space-between",
@@ -330,7 +330,7 @@ const InterviewScheduleHoverTile = () => {
                         </Box>
                     </Card>
                 ))}
-            </Box>
+            </Box> */}
 
             <br />
             <br />

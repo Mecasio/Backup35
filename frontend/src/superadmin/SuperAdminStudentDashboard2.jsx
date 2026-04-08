@@ -1912,7 +1912,7 @@ const SuperAdminStudentDashboard2 = () => {
                             <Button
                                 variant="contained"
                                 onClick={() => {
-                                    handleUpdate();
+                                  handleUpdate(person);
                                     navigate(`/super_admin_student_dashboard3?person_id=${userID}`);
                                 }}
                                 endIcon={

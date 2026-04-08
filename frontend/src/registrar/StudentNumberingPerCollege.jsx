@@ -123,6 +123,11 @@ const StudentNumbering = () => {
             icon: <AssignmentTurnedInIcon fontSize="large" />,
         },
         {
+            label: "Qualifying / Interview Schedule Management",
+            to: "/assign_schedule_applicants_qualifying_interview",
+            icon: <ScheduleIcon fontSize="large" />
+        },
+        {
             label: "Qualifying / Interview Exam Score",
             to: "/qualifying_interview_exam_scores",
             icon: <ScoreIcon fontSize="large" />,
@@ -133,11 +138,12 @@ const StudentNumbering = () => {
             icon: <DashboardIcon fontSize="large" />,
         },
 
+
     ];
 
 
     const navigate = useNavigate();
-    const [activeStep, setActiveStep] = useState(4);
+    const [activeStep, setActiveStep] = useState(5);
     const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
 
 
@@ -582,7 +588,7 @@ const StudentNumbering = () => {
                 open={authOpen}
                 onClose={() => {
                     setAuthOpen(false);
-                    navigate("/registrar_dashboard"); // or wherever you want to go
+                    navigate("/enrollment_officer_dashboard"); // or wherever you want to go
                 }}
             >
                 <DialogTitle

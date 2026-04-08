@@ -1705,260 +1705,588 @@ router.post("/import_xslx_student", upload.single("file"), async (req, res) => {
   }
 });
 
-
 router.post("/api/person/import", upload.single("file"), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    if (!req.file)
+      return res.status(400).json({ error: "No file uploaded" });
 
     const XLSX = require("xlsx");
 
     // ---------------------------------------
     // HELPERS
     // ---------------------------------------
+
     function excelDateToJSDate(serial) {
       if (typeof serial !== "number") return serial;
+
       const days = Math.floor(serial - 25569);
       const date = new Date(days * 86400 * 1000);
+
       return date.toISOString().split("T")[0];
     }
 
     function normalizeGender(val) {
       if (!val) return null;
+
       const v = val.toString().trim().toLowerCase();
+
       if (["male", "m", "0"].includes(v)) return 0;
       if (["female", "f", "1"].includes(v)) return 1;
-      return null;
+
+      return null; // unknown values
     }
 
     function calculateAge(birthdate) {
       if (!birthdate) return null;
+
       const d = new Date(birthdate);
       const now = new Date();
+
       let age = now.getFullYear() - d.getFullYear();
       const m = now.getMonth() - d.getMonth();
-      if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+
+      if (m < 0 || (m === 0 && now.getDate() < d.getDate()))
+        age--;
+
       return age;
+
     }
+
+    function normalizeSchoolLevel(value) {
+      if (!value) return null;
+
+      const v = value.toString().trim().toUpperCase();
+
+      const mapping = {
+        "SENIOR HIGH SCHOOL": "Senior High School",
+        "UNDERGRADUATE": "Undergraduate",
+        "GRADUATE": "Graduate",
+        "ALS": "ALS"
+      };
+
+      return mapping[v] || value;
+    }
+
+
 
     // ---------------------------------------
     // READ EXCEL
     // ---------------------------------------
-    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const raw = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-    const rows = raw.slice(1);
 
+    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    const rows = XLSX.utils.sheet_to_json(sheet, {
+      header: 1,
+      defval: null
+    });
     // ---------------------------------------
-    // COUNTS (OLD STYLE)
+    // COUNTERS
     // ---------------------------------------
+
     let totalRows = 0;
     let totalValid = 0;
     let totalInvalid = 0;
-    let totalInserted = 0;
+    let totalUpdated = 0;
+    let totalSkipped = 0;
 
     // ---------------------------------------
-    // OLD IMPORTER STUDENT NUMBER RULE
+    // VALIDATION
     // ---------------------------------------
-    const STUD_NUM_REGEX =
-      /^\d{9,10}$|^\d{3}-\d{3,5}[A-Z]?$/;
+
+    const STUD_NUM_REGEX = /^\d{9,10}$|^\d{3}-\d{3,5}[A-Z]?$/;
 
     // ---------------------------------------
-    // BASE COLUMNS
+    // COLUMNS
     // ---------------------------------------
+
     const columns = [
-      "student_number", "profile_img", "campus", "academicProgram", "classifiedAs", "applyingAs",
-      "program", "program2", "program3", "yearLevel", "last_name", "first_name", "middle_name",
-      "extension", "nickname", "height", "weight", "lrnNumber", "nolrnNumber", "gender", "pwdMember",
-      "pwdType", "pwdId", "birthOfDate", "age", "birthPlace", "languageDialectSpoken", "citizenship",
-      "religion", "civilStatus", "tribeEthnicGroup", "cellphoneNumber", "emailAddress",
-      "presentStreet", "presentBarangay", "presentZipCode", "presentRegion", "presentProvince",
-      "presentMunicipality", "presentDswdHouseholdNumber", "sameAsPresentAddress",
-      "permanentStreet", "permanentBarangay", "permanentZipCode", "permanentRegion",
-      "permanentProvince", "permanentMunicipality", "permanentDswdHouseholdNumber", "solo_parent",
-      "father_deceased", "father_family_name", "father_given_name", "father_middle_name",
-      "father_ext", "father_nickname", "father_education", "father_education_level",
-      "father_last_school", "father_course", "father_year_graduated", "father_school_address",
-      "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
-      "mother_deceased", "mother_family_name", "mother_given_name", "mother_middle_name",
-      "mother_ext", "mother_nickname", "mother_education", "mother_education_level",
-      "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
-      "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
-      "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
-      "guardian_ext", "guardian_nickname", "guardian_address", "guardian_contact",
-      "guardian_email", "annual_income", "schoolLevel", "schoolLastAttended",
-      "schoolAddress", "courseProgram", "honor", "generalAverage", "yearGraduated",
-      "schoolLevel1", "schoolLastAttended1", "schoolAddress1", "courseProgram1",
-      "honor1", "generalAverage1", "yearGraduated1", "strand", "cough", "colds", "fever", "asthma",
-      "faintingSpells", "heartDisease", "tuberculosis", "frequentHeadaches", "hernia",
-      "chronicCough", "headNeckInjury", "hiv", "highBloodPressure", "diabetesMellitus",
-      "allergies", "cancer", "smokingCigarette", "alcoholDrinking", "hospitalized",
-      "hospitalizationDetails", "medications", "hadCovid", "covidDate", "vaccine1Brand",
-      "vaccine1Date", "vaccine2Brand", "vaccine2Date", "booster1Brand", "booster1Date",
-      "booster2Brand", "booster2Date", "chestXray", "cbc", "urinalysis", "otherworkups",
-      "symptomsToday", "remarks", "termsOfAgreement", "created_at",
+      "student_number",
+      "profile_img",
+      "campus",
+      "academicProgram",
+      "classifiedAs",
+      "applyingAs",
+      "program",
+      "program2",
+      "program3",
+      "yearLevel",
+      "last_name",
+      "first_name",
+      "middle_name",
+      "extension",
+      "nickname",
+      "height",
+      "weight",
+      "lrnNumber",
+      "nolrnNumber",
+      "gender",
+      "pwdMember",
+      "pwdType",
+      "pwdId",
+      "birthOfDate",
+      "age",
+      "birthPlace",
+      "languageDialectSpoken",
+      "citizenship",
+      "religion",
+      "civilStatus",
+      "tribeEthnicGroup",
+      "cellphoneNumber",
+      "emailAddress",
+      "presentStreet",
+      "presentBarangay",
+      "presentZipCode",
+      "presentRegion",
+      "presentProvince",
+      "presentMunicipality",
+      "presentDswdHouseholdNumber",
+      "sameAsPresentAddress",
+      "permanentStreet",
+      "permanentBarangay",
+      "permanentZipCode",
+      "permanentRegion",
+      "permanentProvince",
+      "permanentMunicipality",
+      "permanentDswdHouseholdNumber",
+      "solo_parent",
+      "father_deceased",
+      "father_family_name",
+      "father_given_name",
+      "father_middle_name",
+      "father_ext",
+      "father_nickname",
+      "father_education",
+      "father_education_level",
+      "father_last_school",
+      "father_course",
+      "father_year_graduated",
+      "father_school_address",
+      "father_contact",
+      "father_occupation",
+      "father_employer",
+      "father_income",
+      "father_email",
+      "mother_deceased",
+      "mother_family_name",
+      "mother_given_name",
+      "mother_middle_name",
+      "mother_ext",
+      "mother_nickname",
+      "mother_education",
+      "mother_education_level",
+      "mother_last_school",
+      "mother_course",
+      "mother_year_graduated",
+      "mother_school_address",
+      "mother_contact",
+      "mother_occupation",
+      "mother_employer",
+      "mother_income",
+      "mother_email",
+      "guardian",
+      "guardian_family_name",
+      "guardian_given_name",
+      "guardian_middle_name",
+      "guardian_ext",
+      "guardian_nickname",
+      "guardian_address",
+      "guardian_contact",
+      "guardian_email",
+      "annual_income",
+      "schoolLevel",
+      "schoolLastAttended",
+      "schoolAddress",
+      "courseProgram",
+      "honor",
+      "generalAverage",
+      "yearGraduated",
+      "schoolLevel1",
+      "schoolLastAttended1",
+      "schoolAddress1",
+      "courseProgram1",
+      "honor1",
+      "generalAverage1",
+      "yearGraduated1",
+      "strand",
+      "cough",
+      "colds",
+      "fever",
+      "asthma",
+      "faintingSpells",
+      "heartDisease",
+      "tuberculosis",
+      "frequentHeadaches",
+      "hernia",
+      "chronicCough",
+      "headNeckInjury",
+      "hiv",
+      "highBloodPressure",
+      "diabetesMellitus",
+      "allergies",
+      "cancer",
+      "smokingCigarette",
+      "alcoholDrinking",
+      "hospitalized",
+      "hospitalizationDetails",
+      "medications",
+      "hadCovid",
+      "covidDate",
+      "vaccine1Brand",
+      "vaccine1Date",
+      "vaccine2Brand",
+      "vaccine2Date",
+      "booster1Brand",
+      "booster1Date",
+      "booster2Brand",
+      "booster2Date",
+      "chestXray",
+      "cbc",
+      "urinalysis",
+      "otherworkups",
+      "symptomsToday",
+      "remarks",
+      "termsOfAgreement",
+      "created_at"
     ];
-
     // ---------------------------------------
     // PROCESS ROWS
     // ---------------------------------------
-    for (let i = 0; i < rows.length; i++) {
+
+    for (let i = 1; i < rows.length; i++) {
+
       const row = rows[i];
-      if (!row.some(v => v)) continue;
+      if (!Object.values(row).some(v => v)) continue;
 
       totalRows++;
 
       const studentNumber = row[0]?.toString().trim();
+      const notUpdatedStudents = [];
+
       if (!STUD_NUM_REGEX.test(studentNumber)) {
+        console.log(`⚠️ Invalid student number format: ${studentNumber}`);
+        notUpdatedStudents.push({
+          studentNumber,
+          reason: "Invalid student number format"
+        });
         totalInvalid++;
         continue;
       }
 
       totalValid++;
 
+      // ---------------------------------------
+      // STEP 1: FIND IN student_numbering_table
+      // ---------------------------------------
+
+      const [studentRows] = await db3.query(
+        `
+        SELECT person_id
+        FROM student_numbering_table
+        WHERE student_number = ?
+        LIMIT 1
+        `,
+        [studentNumber]
+      );
+
+      if (studentRows.length === 0) {
+        console.log(`❌ Student not found in numbering table: ${studentNumber}`);
+        notUpdatedStudents.push({
+          studentNumber,
+          reason: "Not found in student_numbering_table"
+        });
+        totalSkipped++;
+        continue;
+      }
+
+      const person_id = studentRows[0].person_id;
+
+      // ---------------------------------------
+      // STEP 2: VERIFY person_id EXISTS IN person_table
+      // ---------------------------------------
+
+      const [personCheck] = await db3.query(
+        `
+        SELECT person_id
+        FROM person_table
+        WHERE person_id = ?
+        LIMIT 1
+        `,
+        [person_id]
+      );
+
+      if (personCheck.length === 0) {
+        console.log(`❌ person_id ${person_id} missing in person_table for ${studentNumber}`);
+        notUpdatedStudents.push({
+          studentNumber,
+          reason: "person_id missing in person_table"
+        });
+        totalSkipped++;
+        continue;
+      }
+
+      // ✅ STRICT VALIDATION PASSED HERE
+
+      // ---------------------------------------
+      // BUILD VALUES
+      // ---------------------------------------
+
+      function splitFullName(fullName) {
+        if (!fullName || typeof fullName !== "string") {
+          return { family: null, given: null, middle: null };
+        }
+
+        const clean = fullName.trim();
+
+        // CASE 1: "LAST, FIRST MIDDLE"
+        if (clean.includes(",")) {
+          const [last, rest] = clean.split(",");
+          const parts = rest.trim().split(/\s+/);
+
+          return {
+            family: last.trim(),
+            given: parts[0] || null,
+            middle: parts.slice(1).join(" ") || null
+          };
+        }
+
+        // CASE 2: "FIRST MIDDLE LAST"
+        const parts = clean.split(/\s+/);
+
+        return {
+          family: parts.length > 1 ? parts[parts.length - 1] : null,
+          given: parts[0] || null,
+          middle: parts.slice(1, -1).join(" ") || null
+        };
+      }
+
+      function cleanValue(v) {
+        if (!v) return null;
+
+        const val = v.toString().trim().toLowerCase();
+
+        if (["-", "n/a", "na", "~", ""].includes(val)) return null;
+
+        return v;
+      }
+
       let birthTmp = null;
 
-      // CLEAN + SAFE INT HANDLING (FIXED)
-      const optionalIntFields = [
-        "father_education",
-        "mother_education",
-        "pwdMember",
-        "pwdType"
-      ];
+      const excelToDbMap = {
+        0: "student_number",
+        1: "last_name",
+        2: "first_name",
+        3: "middle_name",
+        4: "extension",
+        5: "lrnNumber",
 
-      // values that count as empty
-      const EMPTY_VALUES = ["", "-", "—", "None", "none", "N/A", "n/a", "No", "no"];
+        10: "birthOfDate",
+        11: "birthPlace",
+        12: "gender",
+        13: "civilStatus",
 
-      const personValues = columns.map((col, idx) => {
-        let v = row[idx] ?? null;
+        15: "citizenship",
+        16: "religion",
 
-        // Student number
+        // ✅ ADDRESS FIX
+        17: "presentStreet",
+        20: "presentZipCode",
+        20: "permanentZipCode",
+        21: "permanentStreet",
+
+        22: "cellphoneNumber",
+        23: "emailAddress", //done
+
+        25: "pwdType",
+        26: "pwdId",
+
+        27: "tribeEthnicGroup",
+
+        28: "schoolLevel1",
+        29: "schoolLastAttended1",
+        30: "schoolAddress1",
+
+        32: "yearGraduated",
+        34: "generalAverage1",
+
+        // ✅ FATHER (CORRECT)
+        38: "father_fullname", //done
+        40: "father_contact",
+        41: "father_occupation",
+        42: "father_income",
+
+        47: "mother_fullname",
+        49: "mother_contact",
+        50: "mother_occupation",
+        51: "mother_income",
+
+        // ✅ GUARDIAN (FIXED SHIFT)
+        61: "annual_income",     // Family Annual Income
+        62: "guardian_fullname",
+        64: "guardian_contact",
+
+        // physical
+        68: "height",
+        69: "weight",
+      };
+
+      const fatherParsed = splitFullName(row[38]);
+      const motherParsed = splitFullName(row[47]);
+      const guardianParsed = splitFullName(row[62]); // FIXED
+
+      const personValues = columns.map((col) => {
+
+
+        // ---------------------------------------
+        // HANDLE CUSTOM NAME FIELDS FIRST
+        // ---------------------------------------
+
+        if (col === "father_family_name") return fatherParsed.family;
+        if (col === "father_given_name") return fatherParsed.given;
+        if (col === "father_middle_name") return fatherParsed.middle;
+
+        if (col === "mother_family_name") return motherParsed.family;
+        if (col === "mother_given_name") return motherParsed.given;
+        if (col === "mother_middle_name") return motherParsed.middle;
+
+        if (col === "guardian_family_name") return guardianParsed.family;
+        if (col === "guardian_given_name") return guardianParsed.given;
+        if (col === "guardian_middle_name") return guardianParsed.middle;
+
+
+
+        // ---------------------------------------
+        // NORMAL MAPPING
+        // ---------------------------------------
+        const dbToExcelMap = {};
+        for (const [key, value] of Object.entries(excelToDbMap)) {
+          dbToExcelMap[value] = Number(key);
+        }
+
+        const excelIndex = dbToExcelMap[col];
+
+
+
+        if (excelIndex === undefined) return null;
+
+        let v = cleanValue(row[excelIndex]);
+
+        if (col === "schoolLevel" || col === "schoolLevel1") {
+          v = normalizeSchoolLevel(v);
+        }
+
         if (col === "student_number") v = studentNumber;
-
-        // Gender
         if (col === "gender") v = normalizeGender(v);
 
-        // Birthdate → convert
+
         if (col === "birthOfDate") {
           v = excelDateToJSDate(v);
           birthTmp = v;
         }
 
-        // Age → auto calc
-        if (col === "age") v = calculateAge(birthTmp);
+        if (col === "age") {
+          const ageVal = calculateAge(birthTmp);
+          v = isNaN(ageVal) ? null : ageVal;
+        }
 
-        // created_at
         if (col === "created_at") v = new Date();
 
-        // FIX: int fields MUST NEVER BE NULL
-        if (optionalIntFields.includes(col)) {
-          if (v === null || EMPTY_VALUES.includes(String(v).trim())) {
-            v = 0;
-          } else {
-            // Convert non-numeric to 0
-            if (isNaN(Number(v))) v = 0;
-            else v = Number(v);
-          }
-        }
+        if (typeof v === "number" && isNaN(v)) v = null;
 
         return v;
       });
 
+      const birthIndex = columns.indexOf("birthOfDate");
+      const ageIndex = columns.indexOf("age");
+
+      const birthDateValue = personValues[birthIndex];
+
+      personValues[ageIndex] = birthDateValue
+        ? calculateAge(birthDateValue)
+        : null;
+
       // ---------------------------------------
-      // RESTORE CURRICULUM → PROGRAM RESOLUTION
+      // PROGRAM RESOLUTION
       // ---------------------------------------
-      // Program columns mapping
+
       const programCols = ["program", "program2", "program3"];
 
       for (let p = 0; p < programCols.length; p++) {
-        const columnName = programCols[p];
-        const colIdx = columns.indexOf(columnName);
 
-        if (colIdx === -1) {
-          console.log("Column not found in columns array:", columnName);
-          continue;
-        }
+        const colIdx = columns.indexOf(programCols[p]);
 
-        const rawProg = row[6 + p] ? row[6 + p].toString().trim() : null;
+        const rawProg = row[6 + p]
+          ? row[6 + p].toString().trim()
+          : null;
+
         if (!rawProg) {
           personValues[colIdx] = null;
           continue;
         }
 
-        console.log("Raw Excel value:", rawProg);
-
-        // Extract program_code from parentheses: (BSBA-HRDM)
         const match = rawProg.match(/\((.*?)\)/);
         const programCode = match ? match[1].trim() : null;
 
         if (!programCode) {
-          console.log("No program_code found in:", rawProg);
           personValues[colIdx] = null;
           continue;
         }
 
-        console.log("Extracted program_code:", programCode);
-
-        // Find program_id using program_code
         const [progResult] = await db3.query(
-          `SELECT program_id 
-         FROM program_table 
-         WHERE program_code = ? 
-         LIMIT 1`,
+          `
+          SELECT program_id
+          FROM program_table
+          WHERE program_code = ?
+          LIMIT 1
+          `,
           [programCode]
         );
 
-        if (!progResult || progResult.length === 0) {
-          console.log("Program not found for code:", programCode);
-          personValues[colIdx] = null;
-          continue;
-        }
-
-        const program_id = progResult[0].program_id;
-        console.log("Matched program_id:", program_id);
-
-        // Save ONLY program_id in person table
-        personValues[colIdx] = program_id;
-
-        console.log(`Saved program_id ${program_id} into personValues for ${columnName}`);
+        personValues[colIdx] =
+          progResult.length > 0
+            ? progResult[0].program_id
+            : null;
       }
 
-
       // ---------------------------------------
-      // INSERT PERSON
+      // UPDATE QUERY
       // ---------------------------------------
-      const updateClause = columns
-        .filter(col => col !== "created_at")
-        .map(col => `${col} = VALUES(${col})`)
-        .join(", ");
 
-      const [result] = await db3.query(
-        `INSERT INTO person_table (${columns.join(",")})
-   VALUES (?)
-   ON DUPLICATE KEY UPDATE ${updateClause}`,
-        [personValues]
+      const updateFields = columns
+        .map(col => `${col} = ?`)
+        .join(",");
+
+      await db3.query(
+        `
+        UPDATE person_table
+        SET ${updateFields}
+        WHERE person_id = ?
+        `,
+        [...personValues, person_id]
       );
 
-      
-      totalInserted++;
-
-
+      totalUpdated++;
     }
 
     // ---------------------------------------
-    // RESPONSE (OLD STYLE)
-    // ---------------------------------------
+
     return res.json({
       success: true,
-      imported: totalInserted,
+      message: `Imported: ${totalRows}, Updated: ${totalUpdated}, Skipped: ${totalSkipped}, Invalid: ${totalInvalid}`,
+      updated: totalUpdated,
+      skipped: totalSkipped,
       totalValid,
       totalInvalid,
-      totalRows,
-      message: `Imported ${totalInserted} of ${totalRows} rows (Invalid: ${totalInvalid})`
+      totalRows
     });
 
   } catch (err) {
     console.error("IMPORT ERROR:", err);
-    res.status(500).json({ error: err.message });
+
+    res.status(500).json({
+      error: err.message
+    });
   }
 });
 

@@ -26,6 +26,8 @@ import {
   TableRow,
   Typography,
   IconButton,
+  Autocomplete,
+  TextField
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
@@ -398,29 +400,29 @@ export default function DepartmentCurriculumPanel() {
           </Grid>
 
           <Grid item>
-            <FormControl size="small" sx={{ minWidth: 420 }}>
-              <InputLabel>Curriculum (Year - Program)</InputLabel>
-              <Select
-                label="Curriculum"
-                value={selectedCurr}
-                onChange={(e) => setSelectedCurr(e.target.value)}
-              >
-                <MenuItem value="">
-                  <em>Choose curriculum</em>
-                </MenuItem>
-                {curriculums.map((c) => {
-                  const programLabel = c.program_description || c.program_code || `program ${c.program_id}`;
-
-                  return (
-                    <MenuItem key={c.curriculum_id} value={c.curriculum_id}>
-                      {formatSchoolYear(c.year_description)}:{" "}
-                      {`(${c.program_code}): ${c.program_description}${c.major ? ` (${c.major})` : ""
-                        } (${getBranchLabel(c.components)})`}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              sx={{ minWidth: 500 }}
+              options={curriculums}
+              getOptionLabel={(c) =>
+                `${formatSchoolYear(c.year_description)} - (${c.program_code}) ${c.program_description}${c.major ? ` (${c.major})` : ""
+                } (${getBranchLabel(c.components)})`
+              }
+              value={
+                curriculums.find(
+                  (c) => c.curriculum_id === selectedCurr
+                ) || null
+              }
+              onChange={(event, newValue) => {
+                setSelectedCurr(newValue ? newValue.curriculum_id : "");
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Search Curriculum"
+                  size="small"
+                />
+              )}
+            />
           </Grid>
 
           <Grid item>
@@ -554,9 +556,9 @@ export default function DepartmentCurriculumPanel() {
           Are you sure you want to remove this department ↔ curriculum mapping?
         </DialogContent>
         <DialogActions>
-          <Button 
-          color="error"
-            variant="outlined" 
+          <Button
+            color="error"
+            variant="outlined"
             onClick={closeDeleteDialog}>Cancel</Button>
           <Button color="error" onClick={handleDelete}>Delete</Button>
         </DialogActions>

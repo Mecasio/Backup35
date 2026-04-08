@@ -26,6 +26,11 @@ import API_BASE_URL from "../apiConfig";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 import SearchIcon from "@mui/icons-material/Search";
+import {
+    Snackbar,
+    Alert
+} from "@mui/material";
+
 
 const rowsPerPage = 100;
 
@@ -85,6 +90,26 @@ export default function StudentAccounts() {
         }
     }, [settings]);
 
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: "",
+        severity: "success"
+    });
+
+    const getCampusName = (campusId) => {
+        const campus = branches.find(
+            (branch) => branch.id === Number(campusId)
+        );
+
+        return campus ? campus.branch : "Unknown Campus";
+    };
+
+    const branchMap = React.useMemo(() => {
+        return branches.reduce((acc, branch) => {
+            acc[branch.id] = branch.branch;
+            return acc;
+        }, {});
+    }, [branches]);
 
 
     const [userID, setUserID] = useState("");
@@ -396,7 +421,7 @@ export default function StudentAccounts() {
         printWindow.document.close();
     };
 
-    
+
     const handleNotify = async () => {
         try {
             setLoading(true);
@@ -412,16 +437,26 @@ export default function StudentAccounts() {
             if (res.data.success) {
                 setGeneratedPassword(res.data.generatedPassword);
 
+                setSnackbar({
+                    open: true,
+                    message: "Email sent successfully!",
+                    severity: "success"
+                });
+
                 printAccountSlip(
                     selectedPerson,
                     res.data.generatedPassword,
                     email
                 );
             }
-
         } catch (error) {
             console.error(error);
-            alert("Failed to Send Email to Students");
+
+            setSnackbar({
+                open: true,
+                message: "Failed to send email",
+                severity: "error"
+            });
         } finally {
             setLoading(false);
         }
@@ -438,6 +473,7 @@ export default function StudentAccounts() {
             student.student_number?.toLowerCase().includes(query) ||
             student.last_name?.toLowerCase().includes(query) ||
             student.first_name?.toLowerCase().includes(query) ||
+            student.middle_name?.toLowerCase().includes(query) ||
             student.program_code?.toLowerCase().includes(query) ||
             student.dprtmnt_name?.toLowerCase().includes(query)
 
@@ -754,7 +790,22 @@ export default function StudentAccounts() {
                     <TableHead>
 
                         <TableRow>
-
+                            <TableCell
+                                sx={{
+                                    border: `1px solid ${borderColor}`,
+                                    backgroundColor: "#f5f5f5"
+                                }}
+                            >
+                                #
+                            </TableCell>
+                            <TableCell
+                                sx={{
+                                    border: `1px solid ${borderColor}`,
+                                    backgroundColor: "#f5f5f5"
+                                }}
+                            >
+                                Campus
+                            </TableCell>
                             <TableCell
                                 sx={{
                                     border: `1px solid ${borderColor}`,
@@ -779,8 +830,9 @@ export default function StudentAccounts() {
                                     backgroundColor: "#f5f5f5"
                                 }}
                             >
-                                Program
+                                Department
                             </TableCell>
+
 
                             <TableCell
                                 sx={{
@@ -788,8 +840,9 @@ export default function StudentAccounts() {
                                     backgroundColor: "#f5f5f5"
                                 }}
                             >
-                                Department
+                                Program
                             </TableCell>
+
 
                         </TableRow>
 
@@ -799,11 +852,29 @@ export default function StudentAccounts() {
                     <TableBody>
 
                         {currentData.map(
-                            (row) => (
+                            (row, index) => (
 
                                 <TableRow
                                     key={row.person_id}
                                 >
+                                    <TableCell
+                                        sx={{
+                                            border: `1px solid ${borderColor}`
+                                        }}
+                                    >
+                                        {index + 1}
+                                    </TableCell>
+
+                                    <TableCell
+                                        sx={{
+                                            border: `1px solid ${borderColor}`
+                                        }}
+                                    >
+                                        {branchMap[row.campus] || ""}
+                                    </TableCell>
+
+
+
 
                                     <TableCell
                                         sx={{
@@ -835,17 +906,8 @@ export default function StudentAccounts() {
                                     >
                                         {row.last_name},
                                         {row.first_name}
+                                        {row.middle_name}
                                     </TableCell>
-
-
-                                    <TableCell
-                                        sx={{
-                                            border: `1px solid ${borderColor}`
-                                        }}
-                                    >
-                                        {row.program_code}
-                                    </TableCell>
-
 
                                     <TableCell
                                         sx={{
@@ -854,6 +916,17 @@ export default function StudentAccounts() {
                                     >
                                         {row.dprtmnt_name}
                                     </TableCell>
+
+
+                                    <TableCell
+                                        sx={{
+                                            border: `1px solid ${borderColor}`
+                                        }}
+                                    >
+                                        {row.program_code} - {row.program_description} ({row.major})
+                                    </TableCell>
+
+
 
                                 </TableRow>
 
@@ -1203,6 +1276,25 @@ export default function StudentAccounts() {
                     </Box>
                 </DialogActions>
             </Dialog>
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={3000}
+                onClose={() =>
+                    setSnackbar({ ...snackbar, open: false })
+                }
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            >
+                <Alert
+                    severity={snackbar.severity}
+                    variant="filled"
+                    onClose={() =>
+                        setSnackbar({ ...snackbar, open: false })
+                    }
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
 
         </Box>
     );
