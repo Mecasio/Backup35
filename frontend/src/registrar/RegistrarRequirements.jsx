@@ -44,37 +44,37 @@ import SearchIcon from "@mui/icons-material/Search";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 
 const tabs = [
-   {
-        label: "Admission Process For College",
-        to: "/applicant_list",
-        icon: <SchoolIcon fontSize="large" />,
-      },
-      {
-        label: "Applicant Form",
-        to: "/registrar_dashboard1",
-        icon: <AssignmentIcon fontSize="large" />,
-      },
-      {
-        label: "Student Requirements",
-        to: "/registrar_requirements",
-        icon: <AssignmentTurnedInIcon fontSize="large" />,
-      },
-      { 
-        label: "Qualifying / Interview Schedule Management", 
-        to: "/assign_schedule_applicants_qualifying_interview", 
-        icon: <ScheduleIcon fontSize="large" /> 
-      },
-      {
-        label: "Qualifying / Interview Exam Score",
-        to: "/qualifying_interview_exam_scores",
-        icon: <ScoreIcon fontSize="large" />,
-      },
-      {
-        label: "Student Numbering",
-        to: "/student_numbering_per_college",
-        icon: <DashboardIcon fontSize="large" />,
-      },
-  
+  {
+    label: "Admission Process For College",
+    to: "/applicant_list",
+    icon: <SchoolIcon fontSize="large" />,
+  },
+  {
+    label: "Applicant Form",
+    to: "/registrar_dashboard1",
+    icon: <AssignmentIcon fontSize="large" />,
+  },
+  {
+    label: "Student Requirements",
+    to: "/registrar_requirements",
+    icon: <AssignmentTurnedInIcon fontSize="large" />,
+  },
+  {
+    label: "Qualifying / Interview Schedule Management",
+    to: "/assign_schedule_applicants_qualifying_interview",
+    icon: <ScheduleIcon fontSize="large" />
+  },
+  {
+    label: "Qualifying / Interview Exam Score",
+    to: "/qualifying_interview_exam_scores",
+    icon: <ScoreIcon fontSize="large" />,
+  },
+  {
+    label: "Student Numbering",
+    to: "/student_numbering_per_college",
+    icon: <DashboardIcon fontSize="large" />,
+  },
+
 ];
 
 const RegistrarRequirements = () => {
@@ -1763,14 +1763,15 @@ const RegistrarRequirements = () => {
           </DialogContent>
           <DialogActions>
             <Button
+              variant="contained"
               color="error"
-              variant="outlined"
+
+
               onClick={() => setConfirmOpen(false)}>
               Cancel
             </Button>
             <Button
               onClick={handleConfirmAction}
-              color="success"
               variant="contained"
             >
               Yes, Confirm

@@ -409,7 +409,7 @@ const PageCRUD = () => {
                                                 <EditIcon fontSize="small" /> Edit
                                             </Button>
 
-                                            <Button
+                                            {/* <Button
                                                 variant="contained"
                                                 size="small"
                                                 sx={{
@@ -427,7 +427,7 @@ const PageCRUD = () => {
                                                 onClick={() => handleDelete(page.id)}
                                             >
                                                 <DeleteIcon fontSize="small" /> Delete
-                                            </Button>
+                                            </Button> */}
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -516,8 +516,10 @@ const PageCRUD = () => {
 
                 <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
                     <Button onClick={handleClose}
+                        variant="contained"
                         color="error"
-                        variant="outlined">
+
+                    >
                         Cancel
                     </Button>
                     <Button

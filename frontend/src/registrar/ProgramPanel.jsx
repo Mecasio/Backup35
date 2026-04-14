@@ -1081,8 +1081,10 @@ const ProgramPanel = () => {
               setEditMode(false);
               setEditId(null);
             }}
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
           >
             Cancel
           </Button>
@@ -1116,8 +1118,10 @@ const ProgramPanel = () => {
 
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={() => setOpenDeleteDialog(false)}>
             Cancel
           </Button>

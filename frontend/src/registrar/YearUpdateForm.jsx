@@ -603,8 +603,10 @@ const YearUpdateForm = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={closeConfirm}
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
           >Cancel</Button>
           <Button onClick={handleConfirm} variant="contained">
             Confirm

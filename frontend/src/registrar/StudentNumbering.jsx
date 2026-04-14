@@ -31,12 +31,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 import SearchIcon from "@mui/icons-material/Search";
-import ListAltIcon from "@mui/icons-material/ListAlt";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import ClassIcon from "@mui/icons-material/Class";
-import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
-import GradeIcon from "@mui/icons-material/Grade";
-import SchoolIcon from "@mui/icons-material/School";
+
 import API_BASE_URL from "../apiConfig";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -1402,15 +1397,17 @@ const StudentNumbering = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenModal(false)}
+                        variant="contained"
                         color="error"
-                        variant="outlined"
+
+
                     >
                         Cancel
                     </Button>
                     <Button
                         onClick={confirmAssignNumber}
                         variant="contained"
-                        sx={{ backgroundColor: settings?.header_color || "#1976d2" }}
+                  
                     >
                         Confirm Assign & Send Email
                     </Button>

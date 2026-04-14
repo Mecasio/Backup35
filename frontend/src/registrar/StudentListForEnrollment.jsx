@@ -1152,8 +1152,10 @@ const StudentListForEnrollment = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button
+                        variant="contained"
                         color="error"
-                        variant="outlined"
+
+
                         onClick={handleCloseDialog}>Cancel</Button>
                     <Button onClick={handleViewDocuments} variant="contained">View</Button>
                 </DialogActions>

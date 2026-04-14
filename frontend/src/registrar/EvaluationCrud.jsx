@@ -760,8 +760,10 @@ const EvaluationCRUD = () => {
 
                 <DialogActions>
                     <Button
+                        variant="contained"
                         color="error"
-                        variant="outlined"
+
+
                         onClick={handleCloseDialog}>Cancel</Button>
                     <Button
                         variant="contained"
@@ -801,8 +803,10 @@ const EvaluationCRUD = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button
+                        variant="contained"
                         color="error"
-                        variant="outlined"
+
+
                         onClick={handleCategoryDialogClose}>Cancel</Button>
                     <Button
                         variant="contained"

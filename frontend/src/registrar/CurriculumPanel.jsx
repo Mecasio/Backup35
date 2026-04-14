@@ -903,8 +903,10 @@ const CurriculumPanel = () => {
 
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={() => {
               setOpenDeleteDialog(false);
               setCurriculumToDelete(null);
@@ -915,7 +917,6 @@ const CurriculumPanel = () => {
 
           <Button
             variant="contained"
-            color="error"
             onClick={handleDeleteConfirmed}
           >
             Yes, Delete

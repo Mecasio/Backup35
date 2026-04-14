@@ -655,8 +655,10 @@ const YearPanel = () => {
         >
           <Button
             onClick={() => setOpenYearDialog(false)}
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
           >
             Cancel
           </Button>

@@ -1427,14 +1427,16 @@ const StudentNumbering = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenModal(false)}
+                        variant="contained"
                         color="error"
-                        variant="outlined">
+
+                    >
                         Cancel
                     </Button>
                     <Button
                         onClick={confirmAssignNumber}
                         variant="contained"
-                        sx={{ backgroundColor: settings?.header_color || "#1976d2" }}
+                       
                     >
                         Confirm Assign & Send Email
                     </Button>

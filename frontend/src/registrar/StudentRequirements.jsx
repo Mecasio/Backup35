@@ -1620,11 +1620,13 @@ const StudentRequirements = () => {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setConfirmOpen(false)}
+              variant="contained"
               color="error"
-              variant="outlined">
+
+            >
               Cancel
             </Button>
-            <Button onClick={handleConfirmAction} color="success" variant="contained">
+            <Button onClick={handleConfirmAction} variant="contained">
               Yes, Confirm
             </Button>
           </DialogActions>

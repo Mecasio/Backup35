@@ -1896,14 +1896,15 @@ const CourseTaggingForSummerCollege = () => {
         </DialogContent>
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
 
             onClick={handleConfirmDialogClose}>Cancel</Button>
           <Button
             onClick={handleConfirmDialogProceed}
             variant="contained"
-            color="primary"
           >
             Continue
           </Button>

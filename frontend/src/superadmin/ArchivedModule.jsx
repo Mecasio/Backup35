@@ -662,10 +662,10 @@ const ArchivedModule = () => {
                         variant="contained"
                         color="error"
                         startIcon={<DeleteIcon />}
-                   
-                         sx={{
+
+                        sx={{
                           backgroundColor: "#9E0000",
-                       
+
                         }}
                         disabled={!canDelete}
                         onClick={() => openDialog("delete", account)}
@@ -861,8 +861,10 @@ const ArchivedModule = () => {
         </DialogContent>
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={closeDialog} disabled={actionLoading}>
             Cancel
           </Button>
@@ -903,8 +905,10 @@ const ArchivedModule = () => {
         </DialogContent>
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={closeDialog} disabled={actionLoading}>
             Cancel
           </Button>

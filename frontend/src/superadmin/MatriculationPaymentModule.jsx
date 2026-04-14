@@ -592,12 +592,7 @@ const MatriculationPaymentModule = () => {
         (item) => toAmount(receiptData?.[item.key]) > 0
     );
 
-    const getDeductionStatusLabel = (status) => {
-        if (status === "paid") return "Paid";
-        if (status === "partial") return "Partial";
-        if (status === "unpaid") return "Unpaid";
-        return "No Fee";
-    };
+
 
     const confirmPaymentChartData = [
         {
@@ -901,7 +896,7 @@ const MatriculationPaymentModule = () => {
                                     <TableCell>
                                         <Button
                                             variant="contained"
-                                            sx={{ background: "maroon" }}
+                                        
                                             onClick={() => openConfirm(row)}
                                         >
                                             Transact to Matriculation
@@ -1001,12 +996,14 @@ const MatriculationPaymentModule = () => {
                             />
                             <Box sx={{ mt: 2, width: "406px", display: "flex", alignItems: "center", justifyContent: "end" }}>
                                 <Button onClick={closeConfirm}
+                                    variant="contained"
                                     color="error"
-                                    variant="outlined"
+
+
                                 >
                                     Cancel
                                 </Button>
-                                <Button onClick={handleConfirmTransfer} variant="contained" sx={{ background: "maroon" }} disabled={isOverPayment}>
+                                <Button onClick={handleConfirmTransfer} variant="contained"  disabled={isOverPayment}>
                                     Confirm
                                 </Button>
                             </Box>
@@ -1293,8 +1290,10 @@ const MatriculationPaymentModule = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCancelCloseWithoutPrint}
+                        variant="contained"
                         color="error"
-                        variant="outlined">
+
+                    >
                         No
                     </Button>
                     <Button variant="contained" color="error" onClick={handleConfirmCloseWithoutPrint}>

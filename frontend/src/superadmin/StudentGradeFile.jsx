@@ -871,8 +871,10 @@ const StudentGradeFile = () => {
 
                 <DialogActions>
                     <Button
+                        variant="contained"
                         color="error"
-                        variant="outlined"
+
+
                         onClick={() => setOpenAddSubjectDialog(false)}>
                         Cancel
                     </Button>
@@ -894,7 +896,10 @@ const StudentGradeFile = () => {
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+                    <Button variant="contained"
+                        color="error"
+
+                        onClick={() => setOpenDialog(false)}>Cancel</Button>
                     <Button color="error" onClick={handleDelete}>
                         Delete
                     </Button>

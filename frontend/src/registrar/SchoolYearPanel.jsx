@@ -691,8 +691,10 @@ const SchoolYearPanel = () => {
 
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={() => {
               setOpenDeleteDialog(false);
               setSchoolYearToDelete(null);
@@ -703,7 +705,6 @@ const SchoolYearPanel = () => {
 
           <Button
             variant="contained"
-            color="error"
             onClick={handleConfirmDelete}
           >
             Yes, Delete
@@ -853,7 +854,7 @@ const SchoolYearPanel = () => {
             sx={{
               px: 4,
               fontWeight: 600,
-              textTransform: "none", 
+              textTransform: "none",
             }}
           >
             {editID ? "Update" : "Save"}

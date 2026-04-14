@@ -466,8 +466,10 @@ const DepartmentRegistration = () => {
             Save
           </Button>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={() => setOpenModal(false)}
           >
             Cancel

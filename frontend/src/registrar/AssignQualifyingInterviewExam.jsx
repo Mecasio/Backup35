@@ -222,7 +222,59 @@ const AssignQualifyingInterviewExam = () => {
         }
     };
 
+    const handleSaveSchedule = async () => {
+        try {
+            const selectedRoom = rooms.find(r => r.room_id === roomId);
 
+            const payload = {
+                schedule_id: editingSchedule?.schedule_id,
+                branch: selectedBranch,
+                day_description: day,
+                building_description: buildingName,
+                room_description: selectedRoom?.room_description || "",
+                start_time: startTime,
+                end_time: endTime,
+                interviewer,
+                room_quota: roomQuota,
+            };
+
+            if (editingSchedule) {
+                await axios.put(
+                    `${API_BASE_URL}/update_interview_schedule/${editingSchedule.schedule_id}`,
+                    payload
+                );
+
+                setSnackbarMessage("Schedule updated successfully ✅");
+            } else {
+                await axios.post(
+                    `${API_BASE_URL}/insert_interview_schedule`,
+                    payload
+                );
+
+                setSnackbarMessage("Schedule created successfully ✅");
+            }
+
+            setSnackbarSeverity("success");
+            setOpenSnackbar(true);
+
+            const res = await axios.get(
+                `${API_BASE_URL}/interview_schedules_with_count`
+            );
+
+            setSchedules(res.data);
+            setOpenFormDialog(false);
+
+        } catch (err) {
+            console.error("Save error:", err);
+
+            setSnackbarMessage(
+                err.response?.data?.error || "Failed to save schedule ❌"
+            );
+
+            setSnackbarSeverity("error");
+            setOpenSnackbar(true);
+        }
+    };
 
     const [editingSchedule, setEditingSchedule] = useState(null);
 
@@ -1090,6 +1142,7 @@ const AssignQualifyingInterviewExam = () => {
 
                 <DialogActions>
                     <Button
+                        sx={{}}
                         onClick={() => {
                             setOpenDeleteDialog(false);
                             setScheduleToDelete(null);
@@ -1167,7 +1220,7 @@ const AssignQualifyingInterviewExam = () => {
                                 fontWeight={700}
                                 sx={{ mb: 1, }}
                             >
-                               Qualifying 
+                                Qualifying
                             </Typography>
                             <DateField
                                 fullWidth
@@ -1322,10 +1375,7 @@ const AssignQualifyingInterviewExam = () => {
                     <Button
                         variant="contained"
                         sx={{ px: 4, fontWeight: 600 }}
-                        onClick={(e) => {
-                            handleSaveSchedule(e);
-                            setOpenFormDialog(false);
-                        }}
+                        onClick={handleSaveSchedule}
                     >
                         {editingSchedule ? "Update Schedule" : "Save Schedule"}
                     </Button>

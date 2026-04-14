@@ -1077,8 +1077,10 @@ const CertificateOfRegistrationForCollege = forwardRef(
           </DialogContent>
           <DialogActions>
             <Button
+              variant="contained"
               color="error"
-              variant="outlined"
+
+
               onClick={closeConfirm}>
               Cancel
             </Button>

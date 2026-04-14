@@ -1098,9 +1098,9 @@ const CollegeScheduleChecker = () => {
               border: `1px solid ${borderColor}`,
               backgroundColor: "white",
               padding: "2rem",
-              
+
               boxShadow: "0px 0px 10px rgba(0,0,0,0.1)",
-          
+
             }}
           >
             {/* Day */}
@@ -2498,7 +2498,10 @@ const CollegeScheduleChecker = () => {
               setOpenDialogue(false);
               setSelectedScheduleId(null);
             }}
-            color="primary"
+            variant="contained"
+            color="error"
+
+
           >
             Cancel
           </Button>
@@ -2523,7 +2526,11 @@ const CollegeScheduleChecker = () => {
           Are you sure you want to assign this schedule as Honorarium Load?
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenConfirmDialog(false)} color="secondary">
+          <Button onClick={() => setOpenConfirmDialog(false)}
+            variant="contained"
+            color="error"
+
+          >
             Cancel
           </Button>
           <Button
@@ -2531,7 +2538,7 @@ const CollegeScheduleChecker = () => {
               setIsHonorarium(true);
               setOpenConfirmDialog(false);
             }}
-            color="primary"
+          variant="contained"
           >
             Yes
           </Button>

@@ -184,7 +184,7 @@ const ChangeGradingPeriod = lazy(() => import("./registrar/ChangeYearGradPer"));
 const ScheduleChecker = lazy(() => import("./registrar/ScheduleChecker"));
 const RoomRegistration = lazy(() => import("./registrar/RoomRegistration"));
 const RegistrarExamPermit = lazy(
-  () => import("./registrar/RegistrarExamPermit"),
+  () => import("./components/ApplicantExamPermit"),
 );
 const ReportOfGrade = lazy(() => import("./registrar/ReportOfGrade"));
 const TranscriptOfRecords = lazy(

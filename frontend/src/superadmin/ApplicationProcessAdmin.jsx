@@ -26,7 +26,6 @@ import {
     DialogActions,
     Modal
 } from "@mui/material";
-import { Search } from "@mui/icons-material";
 import { io } from "socket.io-client";
 import { Snackbar, Alert } from "@mui/material";
 import API_BASE_URL from "../apiConfig";
@@ -34,14 +33,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { FcPrint } from "react-icons/fc";
 import EaristLogo from "../assets/EaristLogo.png";
-import { Link } from "react-router-dom";
-import ListAltIcon from "@mui/icons-material/ListAlt";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import ClassIcon from "@mui/icons-material/Class";
+
 import SearchIcon from "@mui/icons-material/Search";
-import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
-import GradeIcon from "@mui/icons-material/Grade";
-import SchoolIcon from "@mui/icons-material/School";
+
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 import DateField from "../components/DateField";
@@ -2016,8 +2010,10 @@ const ApplicationProcessAdmin = () => {
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={() => setConfirmOpen(false)}
+                                variant="contained"
                                 color="error"
-                                variant="outlined">
+
+                            >
                                 Cancel
                             </Button>
                             <Button
@@ -2026,7 +2022,7 @@ const ApplicationProcessAdmin = () => {
                                     setConfirmOpen(false);
                                     fetchApplicants();
                                 }}
-                                color="success"
+                            
                                 variant="contained"
                             >
                                 Yes, Confirm
@@ -2082,7 +2078,7 @@ const ApplicationProcessAdmin = () => {
                                     }}
                                 >
                                     <Checkbox
-                                    disabled
+                                        disabled
                                         checked={Number(person.submitted_documents) === 1}
                                         onChange={(e) => {
                                             const checked = e.target.checked;
@@ -2489,13 +2485,13 @@ const ApplicationProcessAdmin = () => {
                                                 key={doc.key}
                                                 control={
                                                     <Checkbox
-                                                    disabled
+                                                        disabled
                                                         checked={
                                                             isCompleted
                                                                 ? true
                                                                 : selectedArray.includes(doc.key)
                                                         }
-                                                     
+
                                                         onChange={(e) => {
                                                             if (isCompleted) return;
                                                             const updated = e.target.checked
@@ -2527,8 +2523,10 @@ const ApplicationProcessAdmin = () => {
 
                         <DialogActions>
                             <Button
+                                variant="contained"
                                 color="error"
-                                variant="outlined"
+
+
                                 onClick={handleCloseDialog}>Cancel</Button>
                             {!(
                                 Array.isArray(activePerson?.missing_documents) &&
@@ -2789,8 +2787,10 @@ const ApplicationProcessAdmin = () => {
 
                 <DialogActions>
                     <Button
+                        variant="contained"
                         color="error"
-                        variant="outlined"
+
+
                         onClick={() => {
                             setOpenDeleteDialog(false);
                             setAccountToDelete(null);

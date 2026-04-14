@@ -916,8 +916,10 @@ const DepartmentSection = () => {
         >
 
           <Button
-            variant="outlined"
+            variant="contained"
             color="error"
+
+
             sx={{
               textTransform: "none",
               fontWeight: 600

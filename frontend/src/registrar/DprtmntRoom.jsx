@@ -406,8 +406,10 @@ const DepartmentRoom = () => {
 
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={() => setOpenUnassignDialog(false)}>
             Cancel
           </Button>

@@ -382,11 +382,6 @@ const MedicalRequirements = () => {
     setConfirmOpen(true);
   };
 
-  const handleConfirmDelete = (doc) => {
-    setTargetDoc(doc);
-    setConfirmAction("delete");
-    setConfirmOpen(true);
-  };
 
   const handleConfirmAction = async () => {
     if (confirmAction === "upload") {
@@ -1575,13 +1570,14 @@ const MedicalRequirements = () => {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setConfirmOpen(false)}
+              variant="contained"
               color="error"
-              variant="outlined">
+
+            >
               Cancel
             </Button>
             <Button
               onClick={handleConfirmAction}
-              color="success"
               variant="contained"
             >
               Yes, Confirm

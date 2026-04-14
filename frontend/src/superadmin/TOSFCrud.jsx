@@ -691,8 +691,10 @@ const TOSF = () => {
                   });
 
                 }}
+                variant="contained"
                 color="error"
-                variant="outlined"
+
+
                 sx={{ ml: 2 }}
               >
                 Cancel
@@ -925,8 +927,10 @@ const TOSF = () => {
               {editingScholarshipId && (
                 <Button
                   onClick={resetScholarshipForm}
+                  variant="contained"
                   color="error"
-                  variant="outlined"
+
+
                   sx={{ ml: 2 }}
                 >
                   Cancel
@@ -1437,8 +1441,10 @@ const TOSF = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDeleteCancel}
+            variant="contained"
             color="error"
-            variant="outlined">
+
+          >
             Cancel
           </Button>
           <Button onClick={handleDeleteConfirm} color="error">
@@ -1459,8 +1465,10 @@ const TOSF = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setTosfUpdateDialogOpen(false)}
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
           >
             Cancel
           </Button>
@@ -1489,8 +1497,10 @@ const TOSF = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setScholarshipUpdateDialogOpen(false)}
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
           >
             Cancel
           </Button>
@@ -1526,8 +1536,10 @@ const TOSF = () => {
               setScholarshipDeleteDialogOpen(false);
               setSelectedScholarshipId(null);
             }}
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
           >
             Cancel
           </Button>

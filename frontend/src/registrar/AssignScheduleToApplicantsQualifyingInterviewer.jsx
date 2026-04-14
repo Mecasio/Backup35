@@ -2258,8 +2258,10 @@ Thank you and good luck!`
                 <DialogActions sx={{ p: 2, justifyContent: "space-between" }}>
                     <Button
                         onClick={() => setConfirmOpen(false)}
+                        variant="contained"
                         color="error"
-                        variant="outlined"
+
+
                     >
                         Cancel
                     </Button>

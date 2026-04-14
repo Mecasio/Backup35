@@ -559,8 +559,10 @@ export default function DepartmentCurriculumPanel() {
         </DialogContent>
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={closeDeleteDialog}>Cancel</Button>
           <Button color="error" onClick={handleDelete}>Delete</Button>
         </DialogActions>

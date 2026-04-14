@@ -17,23 +17,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-function generateRandomPassword(length = 10) {
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let password = "";
-
-  for (let i = 0; i < length; i++) {
-    password += chars.charAt(
-      Math.floor(Math.random() * chars.length)
-    );
-  }
 
 
-  return password;
-}
-
-
-router.get("/applicant_list", async (req, res) => {
+router.get("/student_list", async (req, res) => {
   try {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 100;
@@ -66,7 +52,7 @@ router.get("/applicant_list", async (req, res) => {
       ];
     }
 
-  const sql = `
+    const sql = `
   SELECT 
     snt.student_number,
     pt.campus,
@@ -138,7 +124,7 @@ router.get("/applicant_list", async (req, res) => {
 
 
 
-router.get("/applicant_list/:student_number", async (req, res) => {
+router.get("/student_list/:student_number", async (req, res) => {
 
   const { student_number } =
     req.params;
@@ -204,7 +190,8 @@ LIMIT 1
     res.json(rows);
 
   } catch (error) {
-    console.error(error);
+    console.error("FULL ERROR:", error);
+    console.error("RESPONSE:", error.response?.data);
 
     res.status(500).json({
       success: false
@@ -214,8 +201,8 @@ LIMIT 1
 
 
 
-router.post("/notify_applicant", async (req, res) => {
-  const { person_id, email } = req.body;
+router.post("/notify_student", async (req, res) => {
+  const { person_id, email, password } = req.body;
 
   let conn;
 
@@ -263,12 +250,16 @@ router.post("/notify_applicant", async (req, res) => {
 
     const dprtmnt_id = student[0].dprtmnt_id;
 
+    if (!person_id || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields"
+      });
+    }
 
-    const randomPassword =
-      generateRandomPassword();
+    // ✅ hash frontend password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const hashedPassword =
-      await bcrypt.hash(randomPassword, 10);
 
     await conn.beginTransaction();
 
@@ -372,7 +363,7 @@ router.post("/notify_applicant", async (req, res) => {
 
     <p>
       <b>Username:</b> ${email} / ${student[0].student_number || "N/A"}<br/>
-      <b>Password:</b> ${randomPassword}
+   <b>Password:</b> ${password}
     </p>
 
     <p style="color:red;">
@@ -393,8 +384,7 @@ router.post("/notify_applicant", async (req, res) => {
 
     res.json({
       success: true,
-      message: "Applicant notified successfully",
-      generatedPassword: randomPassword
+      message: "Student notified successfully"
     });
   } catch (error) {
     if (conn) await conn.rollback();

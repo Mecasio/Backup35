@@ -719,8 +719,10 @@ const ProctorApplicantList = () => {
 
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={() => {
               setOpenDeleteDialog(false);
               setApplicantToDelete(null);

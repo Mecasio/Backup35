@@ -1712,8 +1712,10 @@ const ProgramTagging = () => {
           }}
         >
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={() => setOpenFormDialog(false)}
           >
             Cancel
@@ -1747,7 +1749,12 @@ const ProgramTagging = () => {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)}>
+          <Button
+            variant="contained"
+            color="error"
+
+
+            onClick={() => setOpenDeleteDialog(false)}>
             Cancel
           </Button>
 
@@ -1782,7 +1789,12 @@ const ProgramTagging = () => {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={() => setOpenDeleteAllDialog(false)}>
+          <Button
+            variant="contained"
+            color="error"
+
+
+            onClick={() => setOpenDeleteAllDialog(false)}>
             Cancel
           </Button>
 

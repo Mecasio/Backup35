@@ -1911,7 +1911,7 @@ Admission Office`);
           </TableBody>
         </Table>
       </TableContainer>
-<TableContainer component={Paper} sx={{ width: '100%', }}>
+      <TableContainer component={Paper} sx={{ width: '100%', }}>
         <Table size="small">
           <TableHead sx={{
             backgroundColor: settings?.header_color || "#1976d2",
@@ -2155,8 +2155,10 @@ Admission Office`);
 
           <Button
             onClick={() => setConfirmOpen(false)}
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
           >
             Cancel
           </Button>

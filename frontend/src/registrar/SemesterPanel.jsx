@@ -220,48 +220,48 @@ const SemesterPanel = () => {
 
       {/* Display Section */}
       <Grid item xs={12} md={7}>
-    
 
-          <Box sx={{ maxHeight: 400, overflowY: "auto" }}>
-            <TableContainer sx={{ maxHeight: 400 }}>
-              <Table size="small" stickyHeader>
-                <TableHead>
-                  <TableRow>
-                    <TableCell
-                      sx={{
-                        fontWeight: "bold",
-                        border: `1px solid ${borderColor}`,
-                        color: "black",
-                        backgroundColor: "#f5f5f5",
-                      }}
-                    >
-                      Semester ID
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        fontWeight: "bold",
-                        border: `1px solid ${borderColor}`,
-                        color: "black",
-                        backgroundColor: "#f5f5f5",
-                      }}
-                    >
-                      Description
-                    </TableCell>
+
+        <Box sx={{ maxHeight: 400, overflowY: "auto" }}>
+          <TableContainer sx={{ maxHeight: 400 }}>
+            <Table size="small" stickyHeader>
+              <TableHead>
+                <TableRow>
+                  <TableCell
+                    sx={{
+                      fontWeight: "bold",
+                      border: `1px solid ${borderColor}`,
+                      color: "black",
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    Semester ID
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: "bold",
+                      border: `1px solid ${borderColor}`,
+                      color: "black",
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    Description
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {semesters.map((semester, index) => (
+                  <TableRow key={index}>
+                    <TableCell sx={{ border: `1px solid ${borderColor}`, textAlign: "center" }}>{semester.semester_id}</TableCell>
+                    <TableCell sx={{ border: `1px solid ${borderColor}`, textAlign: "center" }}>{semester.semester_description}</TableCell>
                   </TableRow>
-                </TableHead>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
 
-                <TableBody>
-                  {semesters.map((semester, index) => (
-                    <TableRow key={index}>
-                      <TableCell sx={{ border: `1px solid ${borderColor}`, textAlign: "center" }}>{semester.semester_id}</TableCell>
-                      <TableCell sx={{ border: `1px solid ${borderColor}`, textAlign: "center" }}>{semester.semester_description}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
-        
       </Grid>
 
 
@@ -316,8 +316,10 @@ const SemesterPanel = () => {
         >
           <Button
             onClick={() => setOpenDialog(false)}
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             sx={{
               textTransform: "none",
               fontWeight: 600
@@ -328,12 +330,12 @@ const SemesterPanel = () => {
 
           <Button
             variant="contained"
-            
+
             sx={{
               px: 4,
               fontWeight: 600,
               textTransform: "none",
-            
+
             }}
             onClick={async () => {
               await handleSubmit({

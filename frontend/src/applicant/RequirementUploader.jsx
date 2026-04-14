@@ -542,8 +542,10 @@ const RequirementUploader = () => {
 
           {/* Cancel */}
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={() => setOpenConfirmModal(false)}
 
           >

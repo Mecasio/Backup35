@@ -30,7 +30,10 @@ import {
     Snackbar,
     Alert
 } from "@mui/material";
-
+import CancelIcon from "@mui/icons-material/Cancel";
+import PrintIcon from "@mui/icons-material/Print";
+import VpnKeyIcon from "@mui/icons-material/VpnKey";
+import SendIcon from "@mui/icons-material/Send";
 
 const rowsPerPage = 100;
 
@@ -96,13 +99,6 @@ export default function StudentAccounts() {
         severity: "success"
     });
 
-    const getCampusName = (campusId) => {
-        const campus = branches.find(
-            (branch) => branch.id === Number(campusId)
-        );
-
-        return campus ? campus.branch : "Unknown Campus";
-    };
 
     const branchMap = React.useMemo(() => {
         return branches.reduce((acc, branch) => {
@@ -111,7 +107,16 @@ export default function StudentAccounts() {
         }, {});
     }, [branches]);
 
+    const generatePassword = (length = 10) => {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let password = "";
 
+        for (let i = 0; i < length; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        return password;
+    };
     const [userID, setUserID] = useState("");
     const [user, setUser] = useState("");
     const [userRole, setUserRole] = useState("");
@@ -181,7 +186,7 @@ export default function StudentAccounts() {
     const fetchPersons = async () => {
         try {
             const res = await axios.get(
-                `${API_BASE_URL}/api/applicant_list`,
+                `${API_BASE_URL}/api/student_list`,
                 {
                     params: {
                         page: currentPage,
@@ -208,7 +213,7 @@ export default function StudentAccounts() {
             setLoading(true);
 
             const res = await axios.get(
-                `${API_BASE_URL}/api/applicant_list/${person.student_number}`
+                `${API_BASE_URL}/api/student_list/${person.student_number}`
             );
 
             let selectedData;
@@ -440,19 +445,27 @@ export default function StudentAccounts() {
 
     const handleNotify = async () => {
         try {
+            if (!generatedPassword) {
+                setSnackbar({
+                    open: true,
+                    message: "Please generate password first",
+                    severity: "warning"
+                });
+                return;
+            }
+
             setLoading(true);
 
             const res = await axios.post(
-                `${API_BASE_URL}/api/notify_applicant`,
+                `${API_BASE_URL}/api/notify_student`,
                 {
                     person_id: selectedPerson.person_id,
-                    email
+                    email,
+                    password: generatedPassword // ✅ use existing
                 }
             );
 
             if (res.data.success) {
-                setGeneratedPassword(res.data.generatedPassword);
-
                 setSnackbar({
                     open: true,
                     message: "Email sent successfully!",
@@ -461,7 +474,7 @@ export default function StudentAccounts() {
 
                 printAccountSlip(
                     selectedPerson,
-                    res.data.generatedPassword,
+                    generatedPassword,
                     email
                 );
             }
@@ -477,7 +490,6 @@ export default function StudentAccounts() {
             setLoading(false);
         }
     };
-
 
 
     const [searchQuery, setSearchQuery] = useState("");
@@ -1252,27 +1264,61 @@ export default function StudentAccounts() {
                 </DialogContent>
 
                 {/* ACTIONS */}
+                {/* ACTIONS */}
                 <DialogActions
                     sx={{
                         px: 3,
                         py: 2,
                         borderTop: "1px solid #e0e0e0",
                         display: "flex",
-                        justifyContent: "space-between"
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        backgroundColor: "#fafafa"
                     }}
                 >
+                    {/* CANCEL */}
                     <Button
                         onClick={() => setOpen(false)}
+                        variant="contained"
                         color="error"
-                        variant="outlined"
+
+
+                        startIcon={<CancelIcon />}
+                        sx={{
+                            fontWeight: 600,
+                            borderRadius: 2,
+                            minWidth: 110
+                        }}
                     >
                         Cancel
                     </Button>
 
-                    <Box display="flex" gap={1}>
+                    {/* RIGHT SIDE - SINGLE LINE */}
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                            flexWrap: "nowrap" // 🚫 NO WRAP (IMPORTANT)
+                        }}
+                    >
                         <Button
                             variant="outlined"
-                            color="secondary"
+                            size="small"
+                            startIcon={<VpnKeyIcon />}
+                            onClick={() => {
+                                const pwd = generatePassword(10);
+                                setGeneratedPassword(pwd);
+                            }}
+                            sx={{ fontWeight: 600 }}
+                        >
+                            Generate
+                        </Button>
+
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<PrintIcon />}
                             disabled={!generatedPassword}
                             onClick={() =>
                                 printAccountSlip(
@@ -1281,17 +1327,23 @@ export default function StudentAccounts() {
                                     email
                                 )
                             }
-                            sx={{ px: 4, fontWeight: 600 }}
+                            sx={{ fontWeight: 600 }}
                         >
                             Print
                         </Button>
 
                         <Button
                             variant="contained"
+                            size="small"
+                            startIcon={<SendIcon />}
+                            disabled={!generatedPassword || !email}
                             onClick={handleNotify}
-                            sx={{ px: 4, fontWeight: 600 }}
+                            sx={{
+                                fontWeight: 700,
+                                px: 2.5
+                            }}
                         >
-                            Send Email
+                            Send
                         </Button>
                     </Box>
                 </DialogActions>

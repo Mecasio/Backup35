@@ -755,8 +755,10 @@ const ReceiptCounterAssignment = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button
+                        variant="contained"
                         color="error"
-                        variant="outlined"
+
+
                         onClick={resetModalState}>Cancel</Button>
                     <Button
                         variant="contained"
@@ -786,8 +788,10 @@ const ReceiptCounterAssignment = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button
+                        variant="contained"
                         color="error"
-                        variant="outlined"
+
+
                         onClick={() => setOpenConfirmDialog(false)}>Cancel</Button>
                     <Button variant="contained" onClick={handleConfirmSubmit}>
                         Confirm

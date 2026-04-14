@@ -467,7 +467,8 @@ export default function EmailTemplateManager() {
                         px: 2,
 
                       }}
-                      onClick={() => {``
+                      onClick={() => {
+                        ``
                         setEditing(null);
                         setForm({
                           sender_name: "",
@@ -782,8 +783,10 @@ export default function EmailTemplateManager() {
 
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={() => setOpenDeleteDialog(false)}>
             Cancel
           </Button>

@@ -25,7 +25,7 @@ import {
   FormControlLabel,
   DialogActions,
 } from "@mui/material";
-import { Search } from "@mui/icons-material";
+
 import { io } from "socket.io-client";
 import { Snackbar, Alert } from "@mui/material";
 import API_BASE_URL from "../apiConfig";
@@ -33,14 +33,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { FcPrint } from "react-icons/fc";
 import EaristLogo from "../assets/EaristLogo.png";
-import { Link } from "react-router-dom";
-import ListAltIcon from "@mui/icons-material/ListAlt";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import ClassIcon from "@mui/icons-material/Class";
+
 import SearchIcon from "@mui/icons-material/Search";
-import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
-import GradeIcon from "@mui/icons-material/Grade";
-import SchoolIcon from "@mui/icons-material/School";
+
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 import DateField from "../components/DateField";
@@ -1863,8 +1858,10 @@ const SuperAdminApplicantList = () => {
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setConfirmOpen(false)}
+                variant="contained"
                 color="error"
-                variant="outlined">
+
+              >
                 Cancel
               </Button>
               <Button
@@ -2338,8 +2335,10 @@ const SuperAdminApplicantList = () => {
 
             <DialogActions>
               <Button
+                variant="contained"
                 color="error"
-                variant="outlined"
+
+
                 onClick={handleCloseDialog}>Cancel</Button>
               {!(
                 Array.isArray(activePerson?.missing_documents) &&

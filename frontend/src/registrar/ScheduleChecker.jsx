@@ -2468,8 +2468,10 @@ const ScheduleChecker = () => {
               setOpenDialogue(false);
               setSelectedScheduleId(null);
             }}
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
           >
             Cancel
           </Button>
@@ -2495,8 +2497,10 @@ const ScheduleChecker = () => {
         </DialogContent>
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={() => setOpenConfirmDialog(false)}>
             Cancel
           </Button>
@@ -2505,7 +2509,7 @@ const ScheduleChecker = () => {
               setIsHonorarium(true);
               setOpenConfirmDialog(false);
             }}
-            color="primary"
+            variant="contained"
           >
             Yes
           </Button>

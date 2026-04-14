@@ -1027,8 +1027,10 @@ const CoursePanel = () => {
 
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={() => setOpenDeleteDialog(false)}>
             Cancel
           </Button>
@@ -1193,8 +1195,10 @@ const CoursePanel = () => {
         >
           <Button
             onClick={() => setOpenCourseDialog(false)}
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
           >
             Cancel
           </Button>

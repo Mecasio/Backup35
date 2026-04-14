@@ -116,8 +116,10 @@ export default function QRScanner({ open, onClose, onScan }) {
         </Box>
         <Box sx={{ mt: 2, display: "flex", justifyContent: "center", gap: 1 }}>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={() => {
               onClose && onClose(); // cleanup useEffect will stop it
             }}

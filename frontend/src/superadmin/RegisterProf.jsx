@@ -21,6 +21,7 @@ import {
   InputLabel,
   Stack,
   Select,
+  Grid,
   MenuItem,
 } from "@mui/material";
 import { Add, Search, SortByAlpha, FileDownload } from "@mui/icons-material";
@@ -31,8 +32,10 @@ import SearchIcon from "@mui/icons-material/Search";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import API_BASE_URL from "../apiConfig";
-
-
+import * as XLSX from "xlsx";
+import LockResetIcon from "@mui/icons-material/LockReset";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
+import ImageIcon from "@mui/icons-material/Image";
 
 
 const RegisterProf = () => {
@@ -42,13 +45,14 @@ const RegisterProf = () => {
   const [subtitleColor, setSubtitleColor] = useState("#555555");
   const [borderColor, setBorderColor] = useState("#000000");
   const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
-  const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
-  const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+  const [subButtonColor, setSubButtonColor] = useState("#ffffff"); // ✅ NEW
+  const [stepperColor, setStepperColor] = useState("#000000"); // ✅ NEW
 
   const [fetchedLogo, setFetchedLogo] = useState(null);
   const [companyName, setCompanyName] = useState("");
   const [shortTerm, setShortTerm] = useState("");
   const [campusAddress, setCampusAddress] = useState("");
+  const [branches, setBranches] = useState([]);
 
   useEffect(() => {
     if (!settings) return;
@@ -57,9 +61,10 @@ const RegisterProf = () => {
     if (settings.title_color) setTitleColor(settings.title_color);
     if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
     if (settings.border_color) setBorderColor(settings.border_color);
-    if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
-    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
-    if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+    if (settings.main_button_color)
+      setMainButtonColor(settings.main_button_color);
+    if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);
+    if (settings.stepper_color) setStepperColor(settings.stepper_color);
 
     // 🏫 Logo
     if (settings.logo_url) {
@@ -68,11 +73,24 @@ const RegisterProf = () => {
       setFetchedLogo(EaristLogo);
     }
 
-    // 🏷️ School Information
+    // 🏷️ School Info
     if (settings.company_name) setCompanyName(settings.company_name);
     if (settings.short_term) setShortTerm(settings.short_term);
-    if (settings.campus_address) setCampusAddress(settings.campus_address);
 
+    // ✅ Branches (JSON stored in DB)
+    if (settings?.branches) {
+      try {
+        const parsed =
+          typeof settings.branches === "string"
+            ? JSON.parse(settings.branches)
+            : settings.branches;
+
+        setBranches(parsed);
+      } catch (err) {
+        console.error("Failed to parse branches:", err);
+        setBranches([]);
+      }
+    }
   }, [settings]);
 
   // Also put it at the very top
@@ -142,7 +160,7 @@ const RegisterProf = () => {
 
 
   const [form, setForm] = useState({
-    person_id: "",
+    employee_id: "",
     fname: "",
     mname: "",
     lname: "",
@@ -158,14 +176,158 @@ const RegisterProf = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // success | error | info | warning
 
-  const handleSnackbarClose = (event, reason) => {
-    if (reason === "clickaway") return;
-    setSnackbarOpen(false);
+  const printFacultySlip = (prof, password, email) => {
+    const resolvedCampusAddress =
+      campusAddress || "No address set in Settings";
+
+    const logoSrc = fetchedLogo || EaristLogo;
+    const name = companyName?.trim() || "";
+
+    const words = name.split(" ");
+    const middleIndex = Math.ceil(words.length / 2);
+    const firstLine = words.slice(0, middleIndex).join(" ");
+    const secondLine = words.slice(middleIndex).join(" ");
+
+    const printWindow = window.open("", "_blank");
+
+    printWindow.document.write(`
+    <html>
+      <head>
+        <title>Faculty Account Slip</title>
+        <style>
+          @page { size: A5 portrait; margin: 8mm; }
+
+          body { font-family: Arial; margin: 0; }
+
+          .print-container { padding: 10px; }
+
+          .header-top {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+          }
+
+          .header-top img {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+          }
+
+          .school-name {
+            font-size: 15px;
+            font-weight: bold;
+          }
+
+          .title {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            border: 1.5px solid black;
+          }
+
+          th, td {
+            border: 1.5px solid black;
+            padding: 8px;
+            font-size: 13px;
+          }
+
+          th {
+            background: lightgray;
+            width: 35%;
+          }
+
+          .password-box {
+            margin-top: 20px;
+            border: 2px dashed black;
+            padding: 15px;
+            text-align: center;
+          }
+
+          .password {
+            font-size: 22px;
+            font-weight: bold;
+            color: red;
+            letter-spacing: 2px;
+          }
+
+          .footer-note {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 12px;
+          }
+        </style>
+      </head>
+
+      <body onload="window.print(); setTimeout(() => window.close(), 100);">
+        <div class="print-container">
+
+          <div class="header-top">
+            <img src="${logoSrc}" />
+            <div>
+              <div style="font-size:11px;">Republic of the Philippines</div>
+              <div class="school-name">${firstLine}</div>
+              ${secondLine ? `<div class="school-name">${secondLine}</div>` : ""}
+              <div style="font-size:11px;">${resolvedCampusAddress}</div>
+            </div>
+          </div>
+
+          <div class="title">Faculty Portal Account Slip</div>
+
+          <table>
+            <tr>
+              <th>Employee ID</th>
+              <td>${prof.employee_id || ""}</td>
+            </tr>
+            <tr>
+              <th>Last Name</th>
+              <td>${prof.lname || ""}</td>
+            </tr>
+            <tr>
+              <th>First Name</th>
+              <td>${prof.fname || ""}</td>
+            </tr>
+            <tr>
+              <th>Middle Name</th>
+              <td>${prof.mname || ""}</td>
+            </tr>
+            <tr>
+              <th>Email</th>
+              <td>${email}</td>
+            </tr>
+            <tr>
+              <th>Username</th>
+              <td>${email} / ${prof.employee_id}</td>
+            </tr>
+          </table>
+
+          <div class="password-box">
+            <div>Generated Password</div>
+            <div class="password">${password}</div>
+          </div>
+
+          <div class="footer-note">
+            Please change password after first login.
+          </div>
+
+        </div>
+      </body>
+    </html>
+  `);
+
+    printWindow.document.close();
   };
 
   const fetchProfessors = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/professors`);
+      const res = await axios.get(`${API_BASE_URL}/faculty/professors`);
 
       console.log("Fetched Professors:", res.data); // 👈 check what backend returns
 
@@ -255,7 +417,7 @@ const RegisterProf = () => {
   const handleExportCSV = () => {
     const headers = ["Person ID", "Full Name", "Email", "Role", "Status"];
     const rows = currentProfessors.map((p) => [
-      p.person_id,
+      p.employee_id,
       `${p.fname} ${p.mname || ""} ${p.lname}`,
       p.email,
       p.role,
@@ -289,7 +451,7 @@ const RegisterProf = () => {
 
     // Only required when creating a new professor
     if (!editData) {
-      requiredFields.push("password", "profileImage", "person_id");
+      requiredFields.push("password", "profileImage", "employee_id");
     }
 
     const missing = requiredFields.filter((key) => !form[key]);
@@ -310,13 +472,13 @@ const RegisterProf = () => {
     try {
       if (editData) {
         await axios.put(
-          `${API_BASE_URL}/api/update_prof/${editData.prof_id}`,
+          `${API_BASE_URL}/faculty/update_prof/${editData.prof_id}`,
           formData
         );
         setSnackbarMessage("Professor updated successfully!");
         setSnackbarSeverity("success");
       } else {
-        await axios.post(`${API_BASE_URL}/api/register_prof`, formData);
+        await axios.post(`${API_BASE_URL}/faculty/register_prof`, formData);
         setSnackbarMessage("Professor registered successfully!");
         setSnackbarSeverity("success");
       }
@@ -336,10 +498,37 @@ const RegisterProf = () => {
     }
   };
 
+
+  const handleNotifyFaculty = async () => {
+    if (!form.employee_id || !form.email) {
+      setSnackbarMessage("Employee ID and Email are required");
+      setSnackbarSeverity("warning");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    try {
+      await axios.post(`${API_BASE_URL}/faculty/notify_faculty`, {
+        employee_id: form.employee_id,
+        email: form.email,
+        password: form.password // optional
+      });
+
+      setSnackbarMessage("Faculty notified successfully!");
+      setSnackbarSeverity("success");
+      setOpenSnackbar(true);
+    } catch (err) {
+      console.error("Notify error:", err);
+      setSnackbarMessage("Failed to send email");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+    }
+  };
+
   const handleEdit = (prof) => {
     setEditData(prof);
     setForm({
-      person_id: prof.person_id || "",
+      employee_id: prof.employee_id || "",
       fname: prof.fname,
       mname: prof.mname || "",
       lname: prof.lname,
@@ -356,7 +545,7 @@ const RegisterProf = () => {
     setOpenDialog(false);
     setEditData(null);
     setForm({
-      person_id: "",
+      employee_id: "",
       fname: "",
       mname: "",
       lname: "",
@@ -371,7 +560,7 @@ const RegisterProf = () => {
   const handleToggleStatus = async (prof_id, currentStatus) => {
     try {
       const newStatus = currentStatus === 1 ? 0 : 1;
-      await axios.put(`${API_BASE_URL}/api/update_prof_status/${prof_id}`, {
+      await axios.put(`${API_BASE_URL}/faculty/update_prof_status/${prof_id}`, {
         status: newStatus,
       });
       fetchProfessors();
@@ -380,13 +569,77 @@ const RegisterProf = () => {
     }
   };
 
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const handleFileSelect = (e) => {
+    setSelectedFile(e.target.files[0]);
+  };
+
+  const handleImportClick = async () => {
+    if (!selectedFile) {
+      alert("Please select a file first");
+      return;
+    }
+
+    const data = await selectedFile.arrayBuffer();
+
+    const workbook = XLSX.read(data);
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+    const professors = rows
+      .slice(1)
+      .map((row) => ({
+        employeeNumber: row[0]?.toString().trim(),
+        firstName: row[1]?.trim(),
+        middleName: row[2]?.trim() || "",
+        lastName: row[3]?.trim(),
+        email: row[5]?.trim(),
+      }))
+      .filter((prof) => {
+        if (!prof.employeeNumber && !prof.firstName && !prof.lastName && !prof.email) return false;
+        if (!prof.email) return false;
+        return true;
+      });
+
+    console.log("FINAL DATA:", professors);
+
+    const res = await axios.post(`${API_BASE_URL}/faculty/import_professors`, {
+      professors,
+    });
+
+    console.log(res.data);
+
+    fetchProfessors();
+  };
 
 
 
 
+  const handleGeneratePassword = () => {
+    const newPassword = generatePassword(10);
 
+    setForm((prev) => ({
+      ...prev,
+      password: newPassword,
+    }));
 
+    setSnackbarMessage("Password generated!");
+    setSnackbarSeverity("info");
+    setOpenSnackbar(true);
+  };
 
+  const generatePassword = (length = 10) => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let password = "";
+
+    for (let i = 0; i < length; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    return password;
+  };
 
   // Put this at the very bottom before the return 
   if (loading || hasAccess === null) {
@@ -655,7 +908,7 @@ const RegisterProf = () => {
                         setEditData(null);
                         setForm((prev) => ({
                           ...prev,
-                          person_id: "",
+                          employee_id: "",
                           fname: "",
                           mname: "",
                           lname: "",
@@ -728,6 +981,40 @@ const RegisterProf = () => {
                         }}
                       >
                         Export CSV
+                      </Button>
+
+
+                    </Box>
+
+                    <Box display="flex" gap={2}>
+                      {/* SELECT FILE */}
+                      <Button
+                        variant="outlined"
+                        component="label"
+                      >
+                        Select File
+                        <input
+                          hidden
+                          type="file"
+                          accept=".csv,.xls,.xlsx"
+                          onChange={handleFileSelect}
+                        />
+                      </Button>
+
+                      {selectedFile && (
+                        <Typography variant="body2" mt={1}>
+                          Selected: {selectedFile.name}
+                        </Typography>
+                      )}
+
+                      {/* IMPORT BUTTON */}
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleImportClick}
+                        disabled={!selectedFile}
+                      >
+                        Import
                       </Button>
                     </Box>
                   </Box>
@@ -837,7 +1124,7 @@ const RegisterProf = () => {
 
             {currentProfessors.map((prof) => (
               <TableRow key={prof.prof_id}>
-                <TableCell sx={{ border: `1px solid ${borderColor}`, border: `1px solid ${borderColor}`, }}>{prof.person_id ?? "N/A"}</TableCell>
+                <TableCell sx={{ border: `1px solid ${borderColor}`, border: `1px solid ${borderColor}`, }}>{prof.employee_id || ""}</TableCell>
                 <TableCell sx={{ border: `1px solid ${borderColor}` }}>
                   <Avatar
                     src={
@@ -890,77 +1177,111 @@ const RegisterProf = () => {
         </Table>
       </TableContainer>
 
-      <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-        <DialogTitle>{editData ? "Edit Professor" : "Add Professor"}</DialogTitle>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: 3, overflow: "hidden", boxShadow: 6 }
+        }}
+      >
+        {/* HEADER */}
+        <DialogTitle
+          sx={{
+            background: settings?.header_color || "#1976d2",
+            color: "#fff",
+            fontWeight: 700,
+            fontSize: "1.1rem",
+            py: 2
+          }}
+        >
+          {editData ? "Edit Faculty" : "Faculty Registration"}
+        </DialogTitle>
 
-        <DialogContent dividers>
+        <DialogContent sx={{ p: 3 }}>
 
-          {/* PERSON ID */}
-          <TextField
-            label="Person ID"
-            name="person_id"
-            fullWidth
-            margin="dense"
-            value={form.person_id}
-            onChange={handleChange}
-            disabled={!!editData}   // disable when editing
-          />
+          <Typography fontWeight={700} mt={2} mb={2}>
+            Faculty Information
+          </Typography>
 
-          {/* FIRST NAME */}
-          <TextField
-            label="First Name"
-            name="fname"
-            fullWidth
-            margin="dense"
-            value={form.fname}
-            onChange={handleChange}
-          />
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                label="Employee ID"
+                fullWidth
+                value={form.employee_id}
+                InputProps={{ readOnly: true }}
+              />
+            </Grid>
 
-          {/* MIDDLE NAME */}
-          <TextField
-            label="Middle Name"
-            name="mname"
-            fullWidth
-            margin="dense"
-            value={form.mname}
-            onChange={handleChange}
-          />
+            <Grid item xs={6}>
+              <TextField
+                label="First Name"
+                fullWidth
+                name="fname"
+                value={form.fname}
+                onChange={handleChange}
+              />
+            </Grid>
 
-          {/* LAST NAME */}
-          <TextField
-            label="Last Name"
-            name="lname"
-            fullWidth
-            margin="dense"
-            value={form.lname}
-            onChange={handleChange}
-          />
+            <Grid item xs={6}>
+              <TextField
+                label="Last Name"
+                fullWidth
+                name="lname"
+                value={form.lname}
+                onChange={handleChange}
+              />
+            </Grid>
 
-          {/* EMAIL */}
+            <Grid item xs={12}>
+              <TextField
+                label="Middle Name"
+                fullWidth
+                name="mname"
+                value={form.mname}
+                onChange={handleChange}
+              />
+            </Grid>
+          </Grid>
+
+          <Typography fontWeight={700} mt={3} mb={2}>
+            Account Details
+          </Typography>
+
           <TextField
             label="Email"
-            name="email"
             fullWidth
-            margin="dense"
             value={form.email}
+            name="email"
             onChange={handleChange}
           />
 
-          {/* PASSWORD – only when adding */}
-          {!editData && (
-            <TextField
-              label="Password"
-              name="password"
-              type="password"
-              fullWidth
-              margin="dense"
-              value={form.password}
-              onChange={handleChange}
-            />
+          {/* PASSWORD BOX */}
+          {form.password && (
+            <Box
+              mt={3}
+              p={3}
+              sx={{
+                border: "2px dashed #1976d2",
+                borderRadius: 2,
+                textAlign: "center",
+                backgroundColor: "#f9f9f9"
+              }}
+            >
+              <Typography variant="h6">Generated Password</Typography>
+
+              <Typography
+                variant="h4"
+                sx={{ color: "#d32f2f", fontWeight: "bold" }}
+              >
+                {form.password}
+              </Typography>
+            </Box>
           )}
 
-          {/* DEPARTMENT */}
-          <FormControl fullWidth margin="dense">
+          <FormControl fullWidth margin="dense" sx={{ mt: 3 }}>
             <InputLabel>Department</InputLabel>
             <Select
               name="dprtmnt_id"
@@ -976,43 +1297,104 @@ const RegisterProf = () => {
             </Select>
           </FormControl>
 
-          <TextField
-            margin="dense"
-            label="Password"
-            name="password"
-            type="password"
-            fullWidth
-            value={form.password || ""}
-            onChange={handleChange}
-            placeholder={editData ? "Leave blank to keep current password" : ""}
-          />
+          {/* BUTTONS */}
+          <Box mt={3}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="center">
 
+              {/* GENERATE PASSWORD */}
+              <Button
+                variant="contained"
+                startIcon={<LockResetIcon />}
+                onClick={handleGeneratePassword}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  px: 3
+                }}
+              >
+                Generate Password
+              </Button>
 
+              {/* UPLOAD IMAGE */}
+              <Button
+                variant="outlined"
+                component="label"
+                startIcon={<UploadFileIcon />}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  px: 3
+                }}
+              >
+                Upload Image
+                <input hidden type="file" onChange={handleChange} />
+              </Button>
 
-          {/* IMAGE UPLOAD */}
-          <Button variant="outlined" component="label" sx={{ mt: 2 }}>
-            Upload Image
-            <input hidden type="file" name="profileImage" accept="image/*" onChange={handleChange} />
-          </Button>
+            </Stack>
 
-          {form.preview && (
-            <img
-              src={form.preview}
-              alt="Preview"
-              style={{ width: 100, marginTop: 10, borderRadius: 8 }}
-            />
-          )}
+            {/* IMAGE PREVIEW */}
+            {form.preview && (
+              <Box mt={3} display="flex" alignItems="center" gap={2}>
+                <Avatar
+                  src={form.preview}
+                  variant="rounded"
+                  sx={{ width: 90, height: 90, boxShadow: 2 }}
+                />
+
+                <Box>
+                  <ImageIcon color="action" />
+                  <span style={{ marginLeft: 6, fontSize: 14, color: "#666" }}>
+                    Image Preview
+                  </span>
+                </Box>
+              </Box>
+            )}
+          </Box>
+
 
         </DialogContent>
 
-        <DialogActions>
+        {/* ACTIONS */}
+        <DialogActions
+          sx={{
+            px: 3,
+            py: 2,
+            borderTop: "1px solid #e0e0e0",
+            display: "flex",
+            justifyContent: "space-between"
+          }}
+        >
           <Button
+            onClick={handleCloseDialog}
+            variant="contained"
             color="error"
-            variant="outlined"
-            onClick={handleCloseDialog}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmit}>
-            {editData ? "Update" : "Register"}
+
+
+          >
+            Cancel
           </Button>
+
+          <Box display="flex" gap={1}>
+            <Button
+              variant="outlined"
+              color="secondary"
+
+              disabled={!form.password}
+              onClick={() =>
+                printFacultySlip(form, form.password, form.email)
+              }
+            >
+              Print
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={handleNotifyFaculty}
+
+            >
+              Send Email
+            </Button>
+          </Box>
         </DialogActions>
       </Dialog>
 

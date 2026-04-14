@@ -768,15 +768,16 @@ router.post("/login", async (req, res) => {
           'prof' AS source,
           NULL AS dprtmnt_id,
           NULL AS dprtmnt_name
-        FROM prof_table AS ua
-        WHERE ua.email = ?
+       FROM prof_table AS ua
+WHERE (ua.email = ? OR ua.employee_id = ?)
       );
     `;
 
     const [results] = await db3.query(query, [
-      loginCredentials,
-      loginCredentials,
-      loginCredentials,
+      loginCredentials, // user_accounts email
+      loginCredentials, // student_number
+      loginCredentials, // faculty email
+      loginCredentials, // faculty employee_id
     ]);
 
     if (results.length === 0) {
@@ -804,20 +805,18 @@ router.post("/login", async (req, res) => {
         resourceType: "unknown",
         resource: loginCredentials,
         outcome: "FAILED",
-        reason: `Invalid email or student number (Attempt ${record.count} out of 3)`,
+        reason: `Invalid Email, Employee ID, or Student number (Attempt ${record.count} out of 3)`,
       });
       return res.json({
         success: false,
-        message: "Invalid email or student number",
+        message: "Invalid Email, Employee ID, or Student number",
       });
     }
 
     const user = results[0];
-    const actorId =
-      user.employee_id || user.student_number || user.person_id || user.email;
+    const actorId =  user.employee_id || user.student_number || user.person_id || user.email;
     const resourceType = user.employee_id ? "employee" : "student";
-    const resource =
-      user.employee_id || user.student_number || user.person_id || user.email;
+    const resource = user.employee_id || user.student_number || user.person_id || user.email;
 
     // ======================================
     // 🔥 FIX: normalize require_otp properly

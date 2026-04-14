@@ -347,8 +347,9 @@ const StudentTable = ({ data, paymentType, onRemove }) => {
         </DialogContent>
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
 
             onClick={closeConfirm} >
             Cancel

@@ -260,7 +260,7 @@ const YearLevelPanel = () => {
       </TableContainer>
 
 
-      <Box sx={{ overflowY: "auto",}}>
+      <Box sx={{ overflowY: "auto", }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ backgroundColor: "#F5F5F5", color: "#000", border: `1px solid ${borderColor}` }}>
@@ -277,53 +277,53 @@ const YearLevelPanel = () => {
                 <td style={styles.tableCell}>{level.year_level_description}</td>
                 <td style={styles.tableCell}>{level.level_type}</td>
                 <td style={styles.tableCell}>
-                  <Box   sx={{
-                
-                        textAlign: "center",
-                    
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        gap: "10px", // space between buttons
-                      }}
-                      >
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => handleEdit(level)}
-                    sx={{
-                      backgroundColor: "green",
-                      color: "white",
-                      borderRadius: "5px",
-                      padding: "8px 14px",
-                      width: "100px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "5px",
-                    }}
-                  >
-                    <EditIcon fontSize="small" /> Edit
-                  </Button>
+                  <Box sx={{
 
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => handleDelete(level.year_level_id)}
-                    sx={{
-                      backgroundColor: "#9E0000",
-                      color: "white",
-                      borderRadius: "5px",
-                      padding: "8px 14px",
-                      width: "100px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "5px",
-                    }}
+                    textAlign: "center",
+
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "10px", // space between buttons
+                  }}
                   >
-                    <DeleteIcon fontSize="small" /> Delete
-                  </Button>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => handleEdit(level)}
+                      sx={{
+                        backgroundColor: "green",
+                        color: "white",
+                        borderRadius: "5px",
+                        padding: "8px 14px",
+                        width: "100px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "5px",
+                      }}
+                    >
+                      <EditIcon fontSize="small" /> Edit
+                    </Button>
+
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => handleDelete(level.year_level_id)}
+                      sx={{
+                        backgroundColor: "#9E0000",
+                        color: "white",
+                        borderRadius: "5px",
+                        padding: "8px 14px",
+                        width: "100px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "5px",
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" /> Delete
+                    </Button>
                   </Box>
                 </td>
               </tr>
@@ -403,8 +403,10 @@ const YearLevelPanel = () => {
         >
           <Button
             onClick={() => setOpenYearLevelDialog(false)}
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             sx={{ textTransform: "none" }}
           >
             Cancel

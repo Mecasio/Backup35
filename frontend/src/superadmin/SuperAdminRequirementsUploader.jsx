@@ -841,7 +841,7 @@ const SuperAdminRequirementsUploader = () => {
                   sx={{
                     backgroundColor: "maroon",
                     color: "white",
-                    "&:hover": { backgroundColor: "#600000" },
+                   
                   }}
                 >
                   Delete
@@ -1595,13 +1595,15 @@ const SuperAdminRequirementsUploader = () => {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setConfirmOpen(false)}
+              variant="contained"
               color="error"
-              variant="outlined">
+
+            >
               Cancel
             </Button>
             <Button
               onClick={handleConfirmAction}
-              color="success"
+         
               variant="contained"
             >
               Yes, Confirm

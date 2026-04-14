@@ -720,8 +720,10 @@ const SectionPanel = () => {
               setEditId(null);
               setDescription("");
             }}
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             sx={{
               textTransform: "none",
               fontWeight: 600

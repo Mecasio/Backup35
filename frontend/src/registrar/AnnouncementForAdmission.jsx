@@ -899,8 +899,10 @@ const AnnouncementPanel = () => {
 
                 <DialogActions>
                     <Button
+                        variant="contained"
                         color="error"
-                        variant="outlined"
+
+
                         onClick={() => setOpenDeleteDialog(false)}>
                         Cancel
                     </Button>
@@ -940,8 +942,10 @@ const AnnouncementPanel = () => {
 
                 <DialogActions>
                     <Button
+                        variant="contained"
                         color="error"
-                        variant="outlined"
+
+
                         onClick={() => setOpenCrop(false)}>Cancel</Button>
                     <Button variant="contained" onClick={handleCropSave}>
                         Crop & Use Image
@@ -1134,8 +1138,10 @@ const AnnouncementPanel = () => {
                     }}
                 >
                     <Button
+                        variant="contained"
                         color="error"
-                        variant="outlined"
+
+
                         onClick={() => setOpenFormDialog(false)}
                     >
                         Cancel

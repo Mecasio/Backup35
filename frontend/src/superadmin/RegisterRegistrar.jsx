@@ -955,8 +955,10 @@ const RegisterRegistrar = () => {
 
                 <DialogActions>
                     <Button
+                        variant="contained"
                         color="error"
-                        variant="outlined"
+
+
                         onClick={handleCloseDialog}>Cancel</Button>
                     <Button
                         variant="contained"

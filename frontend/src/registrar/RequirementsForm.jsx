@@ -1132,8 +1132,11 @@ const RequirementsForm = () => {
         <DialogActions>
 
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
+
             onClick={() =>
               setOpenDialog(false)
             }
@@ -1176,8 +1179,10 @@ const RequirementsForm = () => {
 
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={() => setOpenDeleteDialog(false)}>
             Cancel
           </Button>

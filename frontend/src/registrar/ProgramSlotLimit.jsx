@@ -86,7 +86,7 @@ const ProgramSlotLimit = () => {
     : typeof settings?.branches === "string"
       ? JSON.parse(settings.branches)
       : [];
-  
+
   const getDefaultBranch = (branchesInput) => {
     try {
       const branches = Array.isArray(branchesInput)
@@ -338,11 +338,11 @@ const ProgramSlotLimit = () => {
   const filteredSlots = slots.filter(
     (row) =>
       (!selectedDepartmentFilter ||
-      row.dprtmnt_id === Number(selectedDepartmentFilter)) &&
-      (!selectedBranch || 
-      row.components === Number(selectedBranch))
+        row.dprtmnt_id === Number(selectedDepartmentFilter)) &&
+      (!selectedBranch ||
+        row.components === Number(selectedBranch))
   );
-  
+
   const filteredDepartments = department.filter((dep) => {
     return slots.some(
       (row) =>
@@ -396,7 +396,7 @@ const ProgramSlotLimit = () => {
     setSelectedBranch(branchId);
 
     setSelectedProgram("");
-    setSelectedDepartmentFilter(""); 
+    setSelectedDepartmentFilter("");
   };
 
   return (
@@ -643,8 +643,11 @@ const ProgramSlotLimit = () => {
         </DialogContent>
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
+
             onClick={() => setConfirmOpen(false)}
           >
             Cancel
@@ -678,8 +681,10 @@ const ProgramSlotLimit = () => {
         </DialogContent>
         <DialogActions>
           <Button
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
             onClick={() => setConfirmAllOpen(false)}
           >
             Cancel
@@ -713,8 +718,11 @@ const ProgramSlotLimit = () => {
         <DialogActions>
           <Button
             onClick={() => setConfirmAllProgramsOpen(false)}
+            variant="contained"
             color="error"
-            variant="outlined"
+
+
+
           >
             Cancel
           </Button>
