@@ -2277,10 +2277,10 @@ router.post("/api/person/import", upload.single("file"), async (req, res) => {
 
         // ❌ ONLY missing students go here
         missingStudents.push({
-          studentNumber,
-          last_name: "",
-          first_name: "",
-          middle_name: "",
+          studentNumber: rawStudentNumber, // ✅ KEEP ORIGINAL (19-*****)
+          last_name: cleanValue(row[1]) || "",
+          first_name: cleanValue(row[2]) || "",
+          middle_name: cleanValue(row[3]) || "",
         });
 
         continue;

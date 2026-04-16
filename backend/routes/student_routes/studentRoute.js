@@ -8,7 +8,7 @@ const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.get("/student-info", async (req, res) => {
-  const { searchQuery, campus } = req.query;
+  const { searchQuery } = req.query;
 
   try {
     const keyword = `%${searchQuery}%`;
@@ -28,6 +28,8 @@ router.get("/student-info", async (req, res) => {
       [searchQuery, keyword, keyword, keyword, searchQuery]
     );
 
+    console.log("LOG #1: ",searchStudentNumber);
+
     if (searchStudentNumber.length === 0) {
       return res.status(400).json({ error: "student is not found" });
     }
@@ -36,38 +38,53 @@ router.get("/student-info", async (req, res) => {
 
     const [rows] = await db3.query(
       `
-        SELECT DISTINCT
-          pst.first_name,
-          pst.middle_name,
-          pst.last_name, 
-          pst.presentStreet,
-          pst.emailAddress,
-          pst.cellphoneNumber,
-          pst.campus,
-          pst.presentBarangay,
-          pst.presentZipCode,
-          pst.presentMunicipality,
-          pgt.program_description, 
-          yrt_cur.year_description, 
-          yrt_sy.year_description AS current_year, 
-          smt.semester_description,
-          snt.student_number,
-          ylt.year_level_description
-        FROM enrolled_subject es
-          INNER JOIN student_numbering_table snt ON es.student_number = snt.student_number
-          INNER JOIN person_table pst ON snt.person_id = pst.person_id
-          INNER JOIN student_status_table sst ON snt.student_number = sst.student_number 
-          	AND es.active_school_year_id = sst.active_school_year_id
-          INNER JOIN curriculum_table cct ON es.curriculum_id = cct.curriculum_id
-          INNER JOIN program_table pgt ON cct.program_id = pgt.program_id
-          INNER JOIN active_school_year_table sy ON es.active_school_year_id = sy.id
-          INNER JOIN year_table yrt_cur ON cct.year_id = yrt_cur.year_id
-          INNER JOIN year_table yrt_sy ON sy.year_id = yrt_sy.year_id
-          INNER JOIN year_level_table ylt ON sst.year_level_id = ylt.year_level_id
-          INNER JOIN semester_table smt ON sy.semester_id = smt.semester_id
-          WHERE es.student_number = ? AND sy.astatus = 1 AND pst.campus = ?;
-      `, [student_number, campus]
-    )
+        SELECT
+  pst.first_name,
+  pst.middle_name,
+  pst.last_name, 
+  pst.presentStreet,
+  pst.emailAddress,
+  pst.cellphoneNumber,
+  pst.campus,
+  pst.presentBarangay,
+  pst.presentZipCode,
+  pst.presentMunicipality,
+  pgt.program_description, 
+  yrt_cur.year_description, 
+  yrt_sy.year_description AS current_year, 
+  smt.semester_description,
+  snt.student_number,
+  sst.year_level_id,
+  ylt.year_level_description
+FROM student_numbering_table snt
+INNER JOIN enrolled_subject es 
+    ON es.student_number = snt.student_number
+INNER JOIN person_table pst 
+    ON pst.person_id = snt.person_id
+INNER JOIN student_status_table sst 
+    ON sst.student_number = snt.student_number 
+    AND sst.active_school_year_id = es.active_school_year_id
+INNER JOIN curriculum_table cct 
+    ON cct.curriculum_id = es.curriculum_id
+INNER JOIN program_table pgt 
+    ON pgt.program_id = cct.program_id
+INNER JOIN active_school_year_table sy 
+    ON sy.id = es.active_school_year_id
+INNER JOIN year_table yrt_cur 
+    ON yrt_cur.year_id = cct.year_id
+INNER JOIN year_table yrt_sy 
+    ON yrt_sy.year_id = sy.year_id
+INNER JOIN year_level_table ylt 
+    ON ylt.year_level_id = sst.year_level_id
+INNER JOIN semester_table smt 
+    ON smt.semester_id = sy.semester_id
+WHERE snt.student_number = ?
+ORDER BY 
+  sy.year_id DESC,
+  sst.year_level_id DESC
+LIMIT 1;
+      `, [student_number]
+    ) 
 
     if (rows.length === 0) {
       return res.status(400).json({ error: "student record is not found" });
@@ -102,7 +119,8 @@ router.get("/student-info/:student_number", async (req, res) => {
 		      cst.course_code,
           cst.course_description,
           cst.course_unit,
-          es.remarks
+          es.remarks,
+          sst.id AS student_status_id
         FROM enrolled_subject es
           INNER JOIN student_numbering_table snt ON es.student_number = snt.student_number
           INNER JOIN student_status_table sst ON snt.student_number = sst.student_number
@@ -115,7 +133,7 @@ router.get("/student-info/:student_number", async (req, res) => {
           INNER JOIN year_level_table ylt ON sst.year_level_id = ylt.year_level_id 
           INNER JOIN semester_table smt ON sy.semester_id = smt.semester_id
           INNER JOIN course_table cst ON es.course_id = cst.course_id
-          WHERE es.student_number = ? ORDER BY ylt.year_level_id AND es.id;
+          WHERE es.student_number = ? ORDER BY ylt.year_level_id, es.id;
       `, [student_number]
     )
 
@@ -131,6 +149,28 @@ router.get("/student-info/:student_number", async (req, res) => {
     res.status(500).send("Failed to get student record.");
   }
 })
+
+router.put("/update_student_year_level", async (req, res) => {
+  const { new_year_level_id, id } = req.body;
+
+  try {
+    if (!new_year_level_id || !id) {
+      return res.status(400).json({ message: "Missing required variables." });
+    }
+
+    await db3.query(
+      `UPDATE student_status_table SET year_level_id = ? WHERE id = ?`,
+      [new_year_level_id, id]
+    );
+
+    res
+      .status(200)
+      .json({ message: "Student Year Level was successfully changed." });
+  } catch (err) {
+    console.log("Internal Server Error: " + err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 router.post("/update_student", upload.single("profile_picture"), async (req, res) => {
   const { person_id } = req.body;
@@ -1044,5 +1084,87 @@ ORDER BY dt.dprtmnt_code, pgt.program_code, pt.last_name;
     res.status(500).json({ error: "Failed fetching students" });
   }
 });
+
+
+
+router.get("/student_enrollment", async (req, res) => {
+  try {
+    const [rows] = await db3.query(
+      `
+        SELECT DISTINCT
+          snt.student_number,
+          pt.first_name,
+          pt.middle_name,
+          pt.last_name
+        FROM student_numbering_table snt
+        LEFT JOIN person_table pt ON snt.person_id = pt.person_id
+        ORDER BY snt.student_number ASC
+      `,
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed fetching students" });
+  }
+});
+
+router.get("/student_enrollment/:student_number", async (req, res) => {
+  const { student_number } = req.params;
+
+  try {
+    const [rows] = await db3.query(
+      `
+        SELECT DISTINCT
+          snt.student_number,
+          pt.first_name,
+          pt.middle_name,
+          pt.last_name,
+          pt.presentStreet,
+          pt.presentBarangay,
+          pt.presentZipCode,
+          pt.presentRegion,
+          pt.presentProvince,
+          pt.presentMunicipality,
+          pt.presentDswdHouseholdNumber,
+          pt.emailAddress,
+          pt.cellphoneNumber,
+          pt.campus,
+          dt.dprtmnt_code,
+          dt.dprtmnt_name,
+          pgt.program_code,
+          pgt.program_description,
+          ylt.year_level_description,
+          smt.semester_description,
+          st.description AS section_description,
+          CONCAT(yt.year_description, '-', yt.year_description + 1) AS current_academic_year
+        FROM student_numbering_table snt  
+        LEFT JOIN enrolled_subject es ON snt.student_number = es.student_number
+        LEFT JOIN person_table pt ON snt.person_id = pt.person_id
+        LEFT JOIN student_status_table sst ON snt.student_number = sst.student_number
+        LEFT JOIN dprtmnt_curriculum_table dct ON pt.program = dct.curriculum_id
+        LEFT JOIN curriculum_table cct ON dct.curriculum_id = cct.curriculum_id
+        LEFT JOIN dprtmnt_table dt ON dct.dprtmnt_id = dt.dprtmnt_id
+        LEFT JOIN program_table pgt ON cct.program_id = pgt.program_id
+        LEFT JOIN dprtmnt_section_table dst ON es.department_section_id = dst.id
+        LEFT JOIN section_table st ON dst.section_id = st.id
+        LEFT JOIN year_level_table ylt ON sst.year_level_id = ylt.year_level_id
+        LEFT JOIN active_school_year_table sy ON es.active_school_year_id = sy.id
+        LEFT JOIN semester_table smt ON sy.semester_id = smt.semester_id
+        LEFT JOIN year_table yt ON sy.year_id = yt.year_id
+        WHERE snt.student_number = ? GROUP BY ylt.year_level_description, smt.semester_description, current_academic_year
+      `,
+      [student_number]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed fetching students" });
+  }
+});
+
+
+
 
 module.exports = router;

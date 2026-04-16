@@ -974,7 +974,7 @@ const SuperAdminStudentDashboard1 = () => {
         // ✅ CLEAN TERMINAL OUTPUT (FINAL ONLY)
         if (res.data.missingStudents?.length) {
           console.group("❌ Missing Students (FINAL LIST)");
-          console.table(res.data.missingStudents.map((sn) => ({ studentNumber: sn })));
+          console.table(res.data.missingStudents);
           console.groupEnd();
         }
 

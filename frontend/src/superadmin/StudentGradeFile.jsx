@@ -1,48 +1,122 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import { SettingsContext } from "../App";
-import axios from 'axios';
-import { Box, Button, Typography, TextField, Paper, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Snackbar, Alert, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
-import { Search as SearchIcon } from '@mui/icons-material';
-import API_BASE_URL from '../apiConfig';
+import axios from "axios";
+import {
+    Box,
+    Button,
+    Typography,
+    TextField,
+    Paper,
+    TableContainer,
+    Table,
+    TableHead,
+    TableBody,
+    TableRow,
+    TableCell,
+    Snackbar,
+    Alert,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Menu,
+    Autocomplete,
+} from "@mui/material";
+import { Search as SearchIcon } from "@mui/icons-material";
+import API_BASE_URL from "../apiConfig";
 import Unauthorized from "../components/Unauthorized";
 import LoadingOverlay from "../components/LoadingOverlay";
 
+// 🎨 Global Body Style based on your requirements
+const bodyStyle = {
+    fontSize: "15px",
+    letterSpacing: "-0.9px",
+    wordSpacing: "3px",
+    color: "#333", // Ensuring high contrast for accessibility
+};
+
 const StudentGradeFile = () => {
     const settings = useContext(SettingsContext);
+
+    // Colors State
     const [titleColor, setTitleColor] = useState("#000000");
     const [subtitleColor, setSubtitleColor] = useState("#555555");
     const [borderColor, setBorderColor] = useState("#000000");
     const [mainButtonColor, setMainButtonColor] = useState("#1976d2");
-    const [subButtonColor, setSubButtonColor] = useState("#ffffff");   // ✅ NEW
-    const [stepperColor, setStepperColor] = useState("#000000");       // ✅ NEW
+    const [subButtonColor, setSubButtonColor] = useState("#ffffff");
+    const [stepperColor, setStepperColor] = useState("#000000");
 
+    // School Info State
     const [fetchedLogo, setFetchedLogo] = useState(null);
     const [companyName, setCompanyName] = useState("");
     const [shortTerm, setShortTerm] = useState("");
     const [campusAddress, setCampusAddress] = useState("");
     const [branches, setBranches] = useState([]);
 
-    const [selectedYearLevel, setSelectedYearLevel] = useState("");
+    // Filters
     const [selectedSemester, setSelectedSemester] = useState("");
-
     const [filteredPrograms, setFilteredPrograms] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [campusFilter, setCampusFilter] = useState("");
+
+    // Data State
+    const [studentInfo, setStudentInfo] = useState(null);
+    const [studentGradeList, setStudentGradeList] = useState([]);
+    const [yearLevel, setYearLevel] = useState([]);
+
+    // Selected State
+    const [selectedYearLevel, setSelectedYearLevel] = useState(null);
+
+    // 👤 Auth & Loading
+    const [userID, setUserID] = useState("");
+    const [user, setUser] = useState("");
+    const [userRole, setUserRole] = useState("");
+    const [hasAccess, setHasAccess] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [employeeID, setEmployeeID] = useState("");
+    const pageId = 126;
+
+    // ➕ Modals & Dialogs
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: "",
+        severity: "success",
+    });
+    const [openDialog, setOpenDialog] = useState(false);
+    const [selectedSubjectId, setSelectedSubjectId] = useState(null);
+    const [selectedTermContext, setSelectedTermContext] = useState(null);
+    const [openAddSubjectDialog, setOpenAddSubjectDialog] = useState(false);
+    const [courseList, setCourseList] = useState([]);
+    const [loadingCourses, setLoadingCourses] = useState(false);
+    const [selectedCourse, setSelectedCourse] = useState("");
+
+    // Menu State
+    const [yearLevelAnchorEl, setYearLevelAnchorEl] = useState(null);
+    const [viewMenuAnchorEl, setViewMenuAnchorEl] = useState(null);
+
+    // ==========================================
+    // EFFECTS & LOGIC
+    // ==========================================
 
     useEffect(() => {
         if (!settings) return;
 
-        // 🎨 Colors
+        // 🎨 Apply Colors
         if (settings.title_color) setTitleColor(settings.title_color);
         if (settings.subtitle_color) setSubtitleColor(settings.subtitle_color);
         if (settings.border_color) setBorderColor(settings.border_color);
         if (settings.main_button_color) setMainButtonColor(settings.main_button_color);
-        if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);   // ✅ NEW
-        if (settings.stepper_color) setStepperColor(settings.stepper_color);           // ✅ NEW
+        if (settings.sub_button_color) setSubButtonColor(settings.sub_button_color);
+        if (settings.stepper_color) setStepperColor(settings.stepper_color);
 
         // 🏫 Logo
         if (settings.logo_url) {
             setFetchedLogo(`${API_BASE_URL}${settings.logo_url}`);
-        } else {
-            setFetchedLogo(EaristLogo);
         }
 
         // 🏷️ School Information
@@ -65,26 +139,9 @@ const StudentGradeFile = () => {
                 setBranches([]);
             }
         }
-
     }, [settings]);
 
-    const [userID, setUserID] = useState("");
-    const [user, setUser] = useState("");
-    const [userRole, setUserRole] = useState("");
-    const [hasAccess, setHasAccess] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [snackbar, setSnackbar] = useState({
-        open: false,
-        message: "",
-        severity: "success",
-    });
-
-    const pageId = 126;
-
-    const [employeeID, setEmployeeID] = useState("");
-
     useEffect(() => {
-
         const storedUser = localStorage.getItem("email");
         const storedRole = localStorage.getItem("role");
         const storedID = localStorage.getItem("person_id");
@@ -108,62 +165,283 @@ const StudentGradeFile = () => {
 
     const checkAccess = async (employeeID) => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/api/page_access/${employeeID}/${pageId}`);
+            const response = await axios.get(
+                `${API_BASE_URL}/api/page_access/${employeeID}/${pageId}`
+            );
             if (response.data && response.data.page_privilege === 1) {
                 setHasAccess(true);
             } else {
                 setHasAccess(false);
             }
         } catch (error) {
-            console.error('Error checking access:', error);
+            console.error("Error checking access:", error);
             setHasAccess(false);
-            if (error.response && error.response.data.message) {
-                console.log(error.response.data.message);
-            } else {
-                console.log("An unexpected error occurred.");
-            }
             setLoading(false);
         }
     };
 
-    const handleCloseSnackbar = (event, reason) => {
-        if (reason === "clickaway") return;
-        setSnackbar(prev => ({ ...prev, open: false }));
-    };
-
-
-    const [openDialog, setOpenDialog] = useState(false);
-    const [selectedSubjectId, setSelectedSubjectId] = useState(null);
-    const [selectedTermContext, setSelectedTermContext] = useState(null);
+    useEffect(() => {
+        if (!searchQuery || !campusFilter) {
+            setStudentInfo(null);
+            return;
+        }
+        const delay = setTimeout(fetchStudent, 1200);
+        return () => clearTimeout(delay);
+    }, [searchQuery, campusFilter]);
 
     useEffect(() => {
-        if (!settings) return;
-        settings.title_color && setTitleColor(settings.title_color);
-        settings.subtitle_color && setSubtitleColor(settings.subtitle_color);
-        settings.border_color && setBorderColor(settings.border_color);
-        settings.main_button_color && setMainButtonColor(settings.main_button_color);
-    }, [settings]);
+        if (studentInfo?.length) {
+            fetchStudentGrade(studentInfo[0].student_number);
+        } else {
+            setStudentGradeList([]);
+        }
+    }, [studentInfo]);
 
-    // 🔍 SEARCH
-    const [searchQuery, setSearchQuery] = useState("");
-    const [campusFilter, setCampusFilter] = useState("");
+    useEffect(() => {
+        fetchYearLevels();
+    }, []);
 
-    // 📘 DATA
-    const [studentInfo, setStudentInfo] = useState(null);
-    const [studentGradeList, setStudentGradeList] = useState([]); // ✅ FIXED
+    // ==========================================
+    // DATA HELPERS (Moved inside component)
+    // ==========================================
 
-    // ➕ ADD SUBJECT
-    const [openAddSubjectDialog, setOpenAddSubjectDialog] = useState(false);
-    const [courseList, setCourseList] = useState([]);
-    const [loadingCourses, setLoadingCourses] = useState(false);
-    const [selectedCourse, setSelectedCourse] = useState("");
+    // Using useMemo so this only recalculates when studentGradeList changes
+    const groupedGrades = useMemo(() => {
+        return studentGradeList.reduce((acc, curr) => {
+            const year = curr.year_level_description;
+            const sem = curr.semester_description;
+            const sy = curr.active_school_year_id;
 
-    // 👁 VIEW
-    const [openViewDialog, setOpenViewDialog] = useState(false);
+            acc[year] ??= {};
+            acc[year][sem] ??= {};
+            acc[year][sem][sy] ??= [];
 
+            acc[year][sem][sy].push(curr);
 
+            return acc;
+        }, {});
+    }, [studentGradeList]);
 
+    const yearLevelOrder = [
+        "First Year",
+        "Second Year",
+        "Third Year",
+        "Fourth Year",
+        "Fifth Year",
+    ];
+    const semesterOrder = ["First Semester", "Second Semester", "Summer"];
 
+    const getYearLevelRank = (level) => {
+        const index = yearLevelOrder.indexOf(level);
+        return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+    };
+
+    const getSemesterRank = (semester) => {
+        const index = semesterOrder.indexOf(semester);
+        return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+    };
+
+    const sortedTermGroups = useMemo(() => {
+        return Object.entries(groupedGrades)
+            .flatMap(([yearLevel, semesters]) =>
+                Object.entries(semesters).flatMap(([semester, schoolYears]) =>
+                    Object.entries(schoolYears).map(([schoolYearId, termData]) => ({
+                        yearLevel,
+                        semester,
+                        schoolYearId,
+                        termData,
+                        currentYear: Number(termData?.[0]?.current_year) || 0,
+                    }))
+                )
+            )
+            .sort((a, b) => {
+                if (a.currentYear !== b.currentYear) {
+                    return a.currentYear - b.currentYear;
+                }
+
+                const yearLevelDiff =
+                    getYearLevelRank(a.yearLevel) - getYearLevelRank(b.yearLevel);
+                if (yearLevelDiff !== 0) {
+                    return yearLevelDiff;
+                }
+
+                const semesterDiff =
+                    getSemesterRank(a.semester) - getSemesterRank(b.semester);
+                if (semesterDiff !== 0) {
+                    return semesterDiff;
+                }
+
+                return Number(a.schoolYearId) - Number(b.schoolYearId);
+            });
+    }, [groupedGrades]);
+
+    const viewOptions = [
+        "HISTORY LOGS",
+        "EVALUATION",
+        "TRANSCRIPT OF RECORDS",
+        "PERMANENT RECORD",
+        "HONORABLE DISMISSAL",
+        "COPY OF GRADES",
+        "REPORT OF GRADES",
+        "GOOD MORAL",
+        "CERTIFICATE OF HONORS",
+        "CERTIFICATE OF GWA",
+        "CERTIFICATE OF HONORS AND GWA",
+        "APPLICATION FOR EVALUATION",
+        "APPLICATION FOR GRADUATION",
+        "RESULT OF EVALUATION",
+        "CERTIFICATE OF COMPLETE ACADEMIC REPORTS",
+    ];
+
+    const gradeOptions = [
+        ...Array.from({ length: 41 }, (_, i) => (100 - i).toString()),
+        "INC",
+        "DRP",
+    ];
+
+    const validateGradeInput = (rawValue) => {
+        if (rawValue === null || rawValue === undefined) return "";
+
+        let value = String(rawValue).trim().toUpperCase();
+
+        if (/^INC/.test(value)) return "INC";
+        if (/^DRP|^DROP/.test(value)) return "DRP";
+
+        if (/^[A-Z]+$/.test(value)) return "60";
+        if (!/^\d{1,3}$/.test(value)) return "60";
+
+        let num = Number(value);
+        if (Number.isNaN(num)) return "60";
+
+        if (num > 100) num = 100;
+        if (num < 60) num = 60;
+
+        return String(num);
+    };
+
+    const convertRawToRating = (value) => {
+        if (value === null || value === undefined || value === "") return "";
+
+        const normalizedValue = String(value).trim().toUpperCase();
+
+        if (normalizedValue === "INC") return "Incomplete";
+        if (normalizedValue === "DROP" || normalizedValue === "DRP") return "Dropped";
+
+        const numericValue = Number(normalizedValue);
+        if (Number.isNaN(numericValue) || numericValue === 0) return "";
+
+        if (numericValue >= 97 && numericValue <= 100) return "1.00";
+        if (numericValue >= 94 && numericValue <= 96) return "1.25";
+        if (numericValue >= 91 && numericValue <= 93) return "1.50";
+        if (numericValue >= 88 && numericValue <= 90) return "1.75";
+        if (numericValue >= 85 && numericValue <= 87) return "2.00";
+        if (numericValue >= 82 && numericValue <= 84) return "2.25";
+        if (numericValue >= 79 && numericValue <= 81) return "2.50";
+        if (numericValue >= 76 && numericValue <= 78) return "2.75";
+        if (numericValue === 75) return "3.00";
+        if (numericValue < 75) return "5.00";
+
+        return "";
+    };
+
+    const setRemarksFromRating = (rating) => {
+        switch (rating) {
+            case "1.00":
+            case "1.25":
+            case "1.50":
+            case "1.75":
+            case "2.00":
+            case "2.25":
+            case "2.50":
+            case "2.75":
+            case "3.00":
+                return 1;
+            case "5.00":
+                return 2;
+            default:
+                return 3;
+        }
+    };
+
+    const remarkConversion = (enRemarks) => {
+        if (enRemarks === 0) return "ONGOING";
+        if (enRemarks === 1) return "PASSED";
+        if (enRemarks === 2) return "FAILED";
+        if (enRemarks === 3) return "INCOMPLETE";
+        if (enRemarks === 4) return "DROPPED";
+        return "-";
+    };
+
+    const GradeSelect = ({ value, onChange, placeholder = "" }) => {
+        const [inputValue, setInputValue] = useState(value ?? "");
+
+        useEffect(() => {
+            setInputValue(value ?? "");
+        }, [value]);
+
+        return (
+            <Autocomplete
+                freeSolo
+                disableClearable
+                options={gradeOptions}
+                inputValue={inputValue}
+                value={inputValue}
+                onInputChange={(event, newInputValue, reason) => {
+                    if (reason === "input") {
+                        setInputValue(newInputValue.toUpperCase());
+                    }
+                }}
+                onChange={(event, newValue) => {
+                    if (newValue !== null) {
+                        const validated = validateGradeInput(newValue);
+                        setInputValue(validated);
+                        onChange(validated);
+                    }
+                }}
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        placeholder={placeholder}
+                        size="small"
+                        variant="outlined"
+                        onBlur={() => {
+                            const validated = validateGradeInput(inputValue);
+                            setInputValue(validated);
+                            onChange(validated);
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                const validated = validateGradeInput(inputValue);
+                                setInputValue(validated);
+                                onChange(validated);
+                            }
+                        }}
+                        sx={{
+                            "& .MuiOutlinedInput-root": {
+                                px: 0.5,
+                            },
+                            "& input": {
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                py: 0.5,
+                            },
+                        }}
+                    />
+                )}
+                sx={{
+                    minWidth: 90,
+                    "& .MuiAutocomplete-inputRoot": {
+                        py: 0,
+                    },
+                }}
+            />
+        );
+    };
+
+    // ==========================================
+    // API CALLS
+    // ==========================================
 
     const fetchStudent = async () => {
         if (!campusFilter) {
@@ -174,24 +452,29 @@ const StudentGradeFile = () => {
             });
             return;
         }
-
         try {
-            const res = await axios.get(
-                `${API_BASE_URL}/student-info`,
-                { params: { searchQuery, campus: campusFilter } }
-            );
-            setStudentInfo(res.data);
-
-            setSnackbar({
-                open: true,
-                message: "Student is found",
-                severity: "success",
+            const res = await axios.get(`${API_BASE_URL}/student-info`, {
+                params: { searchQuery, campus_id: campusFilter }, // Added campus filter
             });
+            setStudentInfo(res.data);
+            if (res.data.length > 0) {
+                setSnackbar({
+                    open: true,
+                    message: "Student found",
+                    severity: "success",
+                });
+            } else {
+                setSnackbar({
+                    open: true,
+                    message: "Student not found",
+                    severity: "info",
+                });
+            }
         } catch {
             setStudentInfo(null);
             setSnackbar({
                 open: true,
-                message: "Student is not found or existed in the record",
+                message: "Student not found or does not exist",
                 severity: "error",
             });
         }
@@ -202,16 +485,7 @@ const StudentGradeFile = () => {
             const res = await axios.get(
                 `${API_BASE_URL}/student-info/${student_number}`
             );
-            const convertedGrades = (res.data || []).map((course) => ({
-                ...course,
-                final_grade: course.final_grade !== null
-                    ? convertNumericToGrade(course.final_grade).toFixed(2).toString()
-                    : "",
-            }));
-
-            console.log("Data: ", convertedGrades);
-
-            setStudentGradeList(convertedGrades);
+            setStudentGradeList(res.data);
         } catch {
             setStudentGradeList([]);
         }
@@ -219,7 +493,6 @@ const StudentGradeFile = () => {
 
     const fetchCourses = async () => {
         if (!studentGradeList?.length) return;
-
         const currId = studentGradeList[0].curriculum_id;
         try {
             setLoadingCourses(true);
@@ -236,58 +509,49 @@ const StudentGradeFile = () => {
         }
     };
 
-    useEffect(() => {
-        if (!searchQuery || !campusFilter) {
-            setStudentInfo(null);
-            return;
+    const fetchYearLevels = async () => {
+        try {
+            const res = await axios.get(`${API_BASE_URL}/api/year-levels`);
+            setYearLevel(res.data);
+        } catch (err) {
+            console.error("Failed to fetch year levels:", err);
         }
+    };
 
-        const delay = setTimeout(fetchStudent, 1200);
-        return () => clearTimeout(delay);
-    }, [searchQuery, campusFilter]);
+    // ==========================================
+    // HANDLERS
+    // ==========================================
 
-    useEffect(() => {
-        if (studentInfo?.length) {
-            fetchStudentGrade(studentInfo[0].student_number);
-        } else {
-            setStudentGradeList([]);
-        }
-    }, [studentInfo]);
-
-    const groupedGrades = studentGradeList.reduce((acc, curr) => {
-        const year = curr.year_level_description;
-        const sem = curr.semester_description;
-
-        acc[year] ??= {};
-        acc[year][sem] ??= [];
-        acc[year][sem].push(curr);
-
-        return acc;
-    }, {});
-
-    const yearLevelOrder = ["First Year", "Second Year", "Third Year", "Fourth Year"];
-
-    const sortSemesters = (list) =>
-        ["First Semester", "Second Semester", "Summer"].filter((s) =>
-            list.includes(s)
-        );
+    const handleCloseSnackbar = (event, reason) => {
+        if (reason === "clickaway") return;
+        setSnackbar((prev) => ({ ...prev, open: false }));
+    };
 
     const confirmDelete = (id) => {
         setSelectedSubjectId(id);
         setOpenDialog(true);
     };
 
-    const handleOpenView = () => {
-        setOpenViewDialog(true);
+    const handleCloseYearLevelMenu = () => {
+        setYearLevelAnchorEl(null);
     };
 
-    const handleCloseView = () => {
-        setOpenViewDialog(false);
+    const handleOpenViewMenu = (event) => {
+        setViewMenuAnchorEl(event.currentTarget);
+    };
+
+    const handleCloseViewMenu = () => {
+        setViewMenuAnchorEl(null);
+    };
+
+    const handleSelectViewOption = (option) => {
+        console.log("Selected view option:", option);
+        // Add logic to handle specific document generation here
+        handleCloseViewMenu();
     };
 
     const handleAddSubject = async () => {
-        if (!selectedTermContext) return;
-
+        if (!selectedTermContext || !selectedCourse) return;
         try {
             await axios.post(`${API_BASE_URL}/insert_subject`, {
                 course_id: selectedCourse,
@@ -295,18 +559,14 @@ const StudentGradeFile = () => {
                 currId: studentGradeList[0].curriculum_id,
                 active_school_year_id: selectedTermContext.active_school_year_id,
             });
-
             setSnackbar({
                 open: true,
                 message: "Subject added successfully",
                 severity: "success",
             });
-
             setOpenAddSubjectDialog(false);
             setSelectedCourse("");
             setSelectedTermContext(null);
-
-            // refresh grades
             fetchStudentGrade(studentGradeList[0].student_number);
         } catch (err) {
             setSnackbar({
@@ -319,14 +579,10 @@ const StudentGradeFile = () => {
 
     const handleDelete = async () => {
         try {
-            await axios.delete(
-                `${API_BASE_URL}/delete_subject/${selectedSubjectId}`
-            );
-
+            await axios.delete(`${API_BASE_URL}/delete_subject/${selectedSubjectId}`);
             setStudentGradeList((prev) =>
                 prev.filter((s) => s.id !== selectedSubjectId)
             );
-
             setSnackbar({
                 open: true,
                 message: "Subject deleted successfully",
@@ -344,9 +600,18 @@ const StudentGradeFile = () => {
         }
     };
 
-    const handleEditSubject = async (yearLevel, semester) => {
+    const handleEditSubject = async (yearLevel, semester, schoolYearId) => {
+        // Safety check
+        if (
+            !groupedGrades[yearLevel] ||
+            !groupedGrades[yearLevel][semester] ||
+            !groupedGrades[yearLevel][semester][schoolYearId]
+        ) {
+            return;
+        }
+
         try {
-            const subjectsToUpdate = groupedGrades[yearLevel][semester].filter(
+            const subjectsToUpdate = groupedGrades[yearLevel][semester][schoolYearId].filter(
                 (s) => s.__edited && s.final_grade !== null
             );
 
@@ -359,6 +624,7 @@ const StudentGradeFile = () => {
                 return;
             }
 
+            setLoading(true); // Add loading state for better UX
             await Promise.all(
                 subjectsToUpdate.map((subject) =>
                     axios.put(`${API_BASE_URL}/update_subject`, {
@@ -366,19 +632,21 @@ const StudentGradeFile = () => {
                         student_number: subject.student_number,
                         currId: subject.curriculum_id,
                         active_school_year_id: subject.active_school_year_id,
-                        final_grade: parseFloat(subject.final_grade),
+                        midterm: subject.midterm ?? "",
+                        finals: subject.finals ?? "",
+                        final_grade: subject.final_grade ?? "",
+                        en_remarks: subject.en_remarks,
                     })
                 )
             );
-
             setSnackbar({
                 open: true,
                 message: "Grades updated successfully",
                 severity: "success",
             });
-
-            // Refresh from DB to clear __edited flags
-            fetchStudentGrade(studentInfo[0].student_number);
+            if (studentInfo?.[0]?.student_number) {
+                fetchStudentGrade(studentInfo[0].student_number);
+            }
         } catch (err) {
             console.error(err);
             setSnackbar({
@@ -386,73 +654,143 @@ const StudentGradeFile = () => {
                 message: "Failed to update grades",
                 severity: "error",
             });
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleFinalGradeChange = (id, value) => {
+    const handleGradeChange = (id, field, value) => {
         setStudentGradeList((prev) =>
-            prev.map((item) =>
-                item.id === id
-                    ? {
-                        ...item,
-                        final_grade: value,
-                        __edited: true, // 👈 mark as edited
+            prev.map((item) => {
+                if (item.id !== id) return item;
+
+                const updatedItem = {
+                    ...item,
+                    [field]: value?.toUpperCase?.() ?? value,
+                    __edited: true,
+                };
+
+                if (updatedItem[field] === "DRP") {
+                    if (field === "midterm") {
+                        updatedItem.finals = "DRP";
+                    } else if (field === "finals") {
+                        updatedItem.midterm = "DRP";
                     }
-                    : item
-            )
+                }
+
+                const midterm = updatedItem.midterm;
+                const finals = updatedItem.finals;
+
+                updatedItem.final_grade = finals;
+
+                if (midterm === "DRP" || finals === "DRP") {
+                    updatedItem.en_remarks = 4;
+                } else if (midterm === "INC" || finals === "INC") {
+                    updatedItem.en_remarks = 3;
+                } else if (finals === "0.00" || finals === 0 || finals === "0") {
+                    updatedItem.en_remarks = 0;
+                } else {
+                    const rating = convertRawToRating(finals);
+                    updatedItem.en_remarks = setRemarksFromRating(rating);
+                }
+
+                return updatedItem;
+            })
         );
     };
 
-    const convertNumericToGrade = (numeric) => {
-        const numericMap = {
-            100: 1.00,
-            96: 1.25,
-            93: 1.50,
-            90: 1.75,
-            87: 2.00,
-            84: 2.25,
-            81: 2.50,
-            78: 2.75,
-            75: 3.00,
-            0: 5.00,
-        };
+    const handleOpenYearLevelMenu = (
+        event,
+        currentYearLevel,
+        currentSemester,
+        schoolYearId
+    ) => {
+        const subjects =
+            groupedGrades[currentYearLevel]?.[currentSemester]?.[schoolYearId];
 
-        let grade = numericMap[numeric];
+        if (!subjects || subjects.length === 0) return;
 
-        if (grade === undefined) {
-            const entries = Object.entries(numericMap);
-            grade = entries[0][1];
-            let minDiff = Math.abs(numeric - Number(entries[0][0]));
+        setYearLevelAnchorEl(event.currentTarget);
 
-            for (const [numStr, g] of entries) {
-                const diff = Math.abs(numeric - Number(numStr));
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    grade = g;
-                }
-            }
-        }
-
-        return Number(grade.toFixed(2));
+        setSelectedTermContext({
+            yearLevel: currentYearLevel,
+            semester: currentSemester,
+            schoolYearId,
+            student_status_id: subjects[0].student_status_id,
+            active_school_year_id: subjects[0].active_school_year_id,
+        });
     };
 
+    const handleChangeYearLevel = async (newYearLevelId) => {
+        if (!selectedTermContext) {
+            setSnackbar({
+                open: true,
+                message: "No term selected",
+                severity: "error",
+            });
+            return;
+        }
 
-    if (loading || hasAccess === null) {
+        try {
+            await axios.put(`${API_BASE_URL}/update_student_year_level`, {
+                id: selectedTermContext.student_status_id,
+                new_year_level_id: newYearLevelId,
+            });
+
+            setSnackbar({
+                open: true,
+                message: `Year level updated for ${selectedTermContext.yearLevel} - ${selectedTermContext.semester}`,
+                severity: "success",
+            });
+
+            handleCloseYearLevelMenu();
+
+            // Refresh grades to see the change
+            if (studentInfo?.[0]?.student_number) {
+                fetchStudentGrade(studentInfo[0].student_number);
+            }
+        } catch (err) {
+            console.error("Error updating year level:", err);
+            setSnackbar({
+                open: true,
+                message: "Failed to update year level",
+                severity: "error",
+            });
+        }
+    };
+
+    const handleSelectYearLevel = async (yearLevelId) => {
+        await handleChangeYearLevel(yearLevelId);
+    };
+
+    if (loading || hasAccess === null)
         return <LoadingOverlay open={loading} message="Loading..." />;
-    }
-
-    if (!hasAccess) {
-        return <Unauthorized />;
-    }
-
-
+    if (!hasAccess) return <Unauthorized />;
 
     return (
-        <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent", mt: 1, padding: 2 }}>
-            <div style={{ height: "10px" }}></div>
-
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} >
-                <Typography variant="h4" fontWeight="bold" style={{ color: titleColor, }}>
+        <Box
+            sx={{
+                height: "calc(100vh - 150px)",
+                overflowY: "auto",
+                paddingRight: 1,
+                backgroundColor: "transparent",
+                mt: 1,
+                padding: 2,
+                ...bodyStyle,
+            }}
+        >
+            {/* HEADER & SEARCH */}
+            <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mb={2}
+            >
+                <Typography
+                    variant="h4"
+                    fontWeight="bold"
+                    style={{ color: titleColor }}
+                >
                     STUDENT GRADE FILE
                 </Typography>
 
@@ -461,9 +799,7 @@ const StudentGradeFile = () => {
                     placeholder="Search by name, student number, or email"
                     size="small"
                     value={searchQuery}
-                    onChange={(e) => {
-                        setSearchQuery(e.target.value.toLowerCase());
-                    }}
+                    onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {
                             e.preventDefault();
@@ -474,9 +810,7 @@ const StudentGradeFile = () => {
                         width: 450,
                         backgroundColor: "#fff",
                         borderRadius: 1,
-                        "& .MuiOutlinedInput-root": {
-                            borderRadius: "10px",
-                        },
+                        "& .MuiOutlinedInput-root": { borderRadius: "10px" },
                     }}
                     InputProps={{
                         startAdornment: <SearchIcon sx={{ mr: 1, color: "gray" }} />,
@@ -487,359 +821,694 @@ const StudentGradeFile = () => {
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <br />
 
-            <Box sx={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: 2.5 }}>
-                <Typography>
-                    Campus:
-                </Typography>
-                <FormControl size="small" sx={{ width: 220 }}>
-                    <InputLabel id="campus-branch-label">Campus</InputLabel>
-                    <Select
-                        labelId="campus-branch-label"
-                        label="Campus"
-                        value={campusFilter}
-                        onChange={(e) => setCampusFilter(e.target.value)}
-                    >
-                        <MenuItem value="">
-                            <em>All Campuses</em>
-                        </MenuItem>
-                        {branches.length > 0 ? (
-                            branches.map((branch) => (
-                                <MenuItem key={branch.id} value={String(branch.id)}>
-                                    {branch.branch}
-                                </MenuItem>
-                            ))
-                        ) : (
-                            [
-                                <MenuItem key="manila" value="1">Manila</MenuItem>,
-                                <MenuItem key="cavite" value="0">Cavite</MenuItem>,
-                            ]
-                        )}
-                    </Select>
-                </FormControl>
-            </Box>
-
-            <TableContainer component={Paper} sx={{ width: '100%', border: `1px solid ${borderColor}`, }}>
+            <TableContainer
+                component={Paper}
+                sx={{ width: "100%", border: `1px solid ${borderColor}` }}
+            >
                 <Table>
                     <TableHead sx={{ backgroundColor: mainButtonColor }}>
                         <TableRow>
-                            <TableCell sx={{ color: 'white', textAlign: "Center" }}>Student Personal Information</TableCell>
+                            <TableCell sx={{ color: "white", textAlign: "Center" }}>
+                                Student Personal Information
+                            </TableCell>
                         </TableRow>
                     </TableHead>
                 </Table>
             </TableContainer>
 
-            <TableContainer component={Paper} sx={{ width: '100%', border: `1px solid ${borderColor}`, padding: "20px 0px" }}>
-                <Table sx={{ '& td, & th': { paddingTop: 0, paddingBottom: 0, border: 'none', fontSize: "15px", letterSpacing: "-0.9px", wordSpacing: "3px" } }}>
+            <TableContainer
+                component={Paper}
+                sx={{
+                    width: "100%",
+                    border: `1px solid ${borderColor}`,
+                    padding: "20px 0px",
+                }}
+            >
+                <Table
+                    sx={{
+                        "& td, & th": {
+                            paddingTop: 0,
+                            paddingBottom: 0,
+                            border: "none",
+                            fontSize: "15px",
+                            letterSpacing: "-0.9px",
+                            wordSpacing: "3px",
+                        },
+                    }}
+                >
                     <TableHead>
                         <TableRow>
-                            <TableCell>
-                                Student Name:
-                            </TableCell>
+                            <TableCell>Student Name:</TableCell>
                             <TableCell sx={{ fontWeight: "700" }}>
-                                {studentInfo && studentInfo.length > 0 && (
+                                {studentInfo?.[0] ? (
                                     <>
                                         {studentInfo[0].last_name?.toUpperCase() || ""}{" "}
                                         {studentInfo[0].first_name?.toUpperCase() || ""}{" "}
                                         {studentInfo[0].middle_name?.toUpperCase() || ""}
                                     </>
+                                ) : (
+                                    "-"
                                 )}
                             </TableCell>
+                            <TableCell>Applicant No./Student No.:</TableCell>
                             <TableCell>
-                                Applicant No./Student No.:
-                            </TableCell>
-                            <TableCell>
-                                {studentInfo && studentInfo.length > 0 && (
-                                    <>
-                                        {studentInfo[0].student_number?.toUpperCase() || ""}
-                                    </>
-                                )}
+                                {studentInfo?.[0]?.student_number?.toUpperCase() || "-"}
                             </TableCell>
                         </TableRow>
                         <TableRow>
+                            <TableCell>Program:</TableCell>
                             <TableCell>
-                                Program:
-                            </TableCell>
-                            <TableCell>
-                                {studentInfo && studentInfo.length > 0 && (
+                                {studentInfo?.[0] ? (
                                     <>
-                                        {studentInfo[0].program_description} ({studentInfo[0].campus === 1 ? "MANILA CAMPUS" : "CAVITE CAMPUS"})
+                                        {studentInfo[0].program_description} (
+                                        {studentInfo[0].campus === 1
+                                            ? "MANILA CAMPUS"
+                                            : "CAVITE CAMPUS"}
+                                        )
                                     </>
+                                ) : (
+                                    "-"
                                 )}
                             </TableCell>
+                            <TableCell>Year Level:</TableCell>
                             <TableCell>
-                                Year Level:
-                            </TableCell>
-                            <TableCell>
-                                {studentInfo && studentInfo.length > 0 && (
-                                    <>
-                                        {studentInfo[0].year_level_description}
-                                    </>
-                                )}
+                                {studentInfo?.[0]?.year_level_description || "-"}
                             </TableCell>
                         </TableRow>
                         <TableRow>
+                            <TableCell>Address:</TableCell>
                             <TableCell>
-                                Address:
-                            </TableCell>
-                            <TableCell>
-                                {studentInfo && studentInfo.length > 0 && (
+                                {studentInfo?.[0] ? (
                                     <>
                                         {studentInfo[0].presentStreet},{" "}
                                         {studentInfo[0].presentBarangay},{" "}
                                         {studentInfo[0].presentMunicipality},{" "}
                                         {studentInfo[0].presentZipCode}
                                     </>
+                                ) : (
+                                    "-"
                                 )}
                             </TableCell>
+                            <TableCell>Contact No.:</TableCell>
                             <TableCell>
-                                Contact No.:
-                            </TableCell>
-                            <TableCell>
-                                {studentInfo && studentInfo.length > 0 && (
-                                    <>
-                                        {studentInfo[0].cellphoneNumber}
-                                    </>
-                                )}
+                                {studentInfo?.[0]?.cellphoneNumber || "-"}
                             </TableCell>
                         </TableRow>
                         <TableRow>
+                            <TableCell>Status:</TableCell>
                             <TableCell>
-                                Status:
+                                {studentInfo?.[0]?.student_status || "-"}
                             </TableCell>
+                            <TableCell>Section:</TableCell>
                             <TableCell>
-                                {studentInfo && studentInfo.length > 0 && (
-                                    <>
-
-                                    </>
-                                )}
-                            </TableCell>
-                            <TableCell>
-                                Section:
-                            </TableCell>
-                            <TableCell>
-                                {studentInfo && studentInfo.length > 0 && (
-                                    <>
-
-                                    </>
-                                )}
+                                {studentInfo?.[0]?.section || "-"}
                             </TableCell>
                         </TableRow>
                         <TableRow>
+                            <TableCell>Curriculum:</TableCell>
                             <TableCell>
-                                Curriculum:
-                            </TableCell>
-                            <TableCell>
-                                {studentInfo && studentInfo.length > 0 && (
+                                {studentInfo?.[0] ? (
                                     <>
-                                        {studentInfo[0].year_description}-{studentInfo[0].year_description + 1} (Regular)
+                                        {studentInfo[0].year_description}-
+                                        {studentInfo[0].year_description + 1}
                                     </>
+                                ) : (
+                                    "-"
                                 )}
                             </TableCell>
+                            <TableCell>Email Address:</TableCell>
                             <TableCell>
-                                Email Address:
-                            </TableCell>
-                            <TableCell>
-                                {studentInfo && studentInfo.length > 0 && (
-                                    <>
-                                        {studentInfo[0].emailAddress}
-                                    </>
-                                )}
+                                {studentInfo?.[0]?.emailAddress || "-"}
                             </TableCell>
                         </TableRow>
                         <TableRow>
+                            <TableCell>School Year</TableCell>
                             <TableCell>
-                                School Year
-                            </TableCell>
-                            <TableCell>
-                                {studentInfo && studentInfo.length > 0 && (
+                                {studentInfo?.[0] ? (
                                     <>
-                                        {studentInfo[0].current_year}-{studentInfo[0].current_year + 1}
+                                        {studentInfo[0].current_year}-
+                                        {studentInfo[0].current_year + 1}
                                     </>
+                                ) : (
+                                    "-"
                                 )}
                             </TableCell>
+                            <TableCell>Semester:</TableCell>
                             <TableCell>
-                                Semester:
-                            </TableCell>
-                            <TableCell>
-                                {studentInfo && studentInfo.length > 0 && (
-                                    <>
-                                        {studentInfo[0].semester_description}
-                                    </>
-                                )}
+                                {studentInfo?.[0]?.semester_description || "-"}
                             </TableCell>
                         </TableRow>
                     </TableHead>
                 </Table>
-                <Box sx={{ display: "flex", alignItems: "center", gap: "1rem", width: "100%", justifyContent: "end", padding: "0rem 1.5rem", marginTop: "1rem" }}>
-                    <Button variant='contained'>ADD TRANSFEREE SUBJECTS</Button>
-                    <Button variant='contained'>EXPORT GRADES</Button>
-                    <Button variant='contained' sx={{ background: mainButtonColor }} onClick={handleOpenView}>VIEW</Button>
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "1rem",
+                        width: "100%",
+                        justifyContent: "end",
+                        padding: "0rem 1.5rem",
+                        marginTop: "1rem",
+                    }}
+                >
+                    <Button variant="contained">ADD TRANSFEREE SUBJECTS</Button>
+                    <Button variant="contained">EXPORT GRADES</Button>
+                    <Button
+                        variant="contained"
+                        sx={{ background: mainButtonColor }}
+                        onClick={handleOpenViewMenu}
+                    >
+                        VIEW
+                    </Button>
                 </Box>
             </TableContainer>
 
-            {Object.keys(groupedGrades).sort((a, b) => yearLevelOrder.indexOf(a) - yearLevelOrder.indexOf(b)).map((yearLevel) => (
-                <Box key={yearLevel} style={{ marginBottom: 20 }}>
-                    {sortSemesters(Object.keys(groupedGrades[yearLevel])).map((semester) => (
-                        <TableContainer
-                            key={semester}
-                            component={Paper}
-                            sx={{ width: '100%', border: `1px solid ${borderColor}`, mb: 2, mt: 2 }}
+            {/* GRADE LISTS - COMPACT TABLES */}
+            {sortedTermGroups.map(
+                ({ yearLevel, semester, schoolYearId, termData }) => (
+                    <Paper
+                        key={`${yearLevel}-${semester}-${schoolYearId}`}
+                        sx={{
+                            width: "100%",
+                            border: `1px solid ${borderColor}`,
+                            mb: 2,
+                            overflow: "hidden",
+                        }}
+                    >
+                        {/* Term Header Info */}
+                        <Box
+                            sx={{
+                                backgroundColor: mainButtonColor,
+                                borderBottom: `1px solid ${borderColor}`,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                            }}
                         >
                             <Typography
                                 sx={{
-                                    backgroundColor: mainButtonColor,
-                                    color: 'white',
+                                    color: "white",
                                     padding: 1,
-                                    fontSize: "14px",
-                                    textAlign: 'center',
+                                    fontSize: "17px",
+                                    textAlign: "center",
+                                    fontWeight: "bold",
                                 }}
                             >
-                                Term Description
+                                ( {yearLevel} ){" "}
+                                {termData[0].current_year}-
+                                {termData[0].current_year + 1} - {semester}
                             </Typography>
-                            <TableContainer sx={{ width: '100%', padding: "10px 0px" }}>
-                                <Table sx={{ '& td, & th': { paddingTop: 0, paddingBottom: 0, border: 'none', fontSize: "15px", letterSpacing: "-0.9px", wordSpacing: "3px" } }}>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>
-                                                Academic School Year:
-                                            </TableCell>
-                                            <TableCell>
-                                                {groupedGrades[yearLevel][semester][0].current_year}-
-                                                {groupedGrades[yearLevel][semester][0].current_year + 1}
-                                            </TableCell>
-                                            <TableCell>
-                                                Year Level:
-                                            </TableCell>
-                                            <TableCell>
-                                                {yearLevel}
-                                            </TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell>
-                                                Semester:
-                                            </TableCell>
-                                            <TableCell>
-                                                {semester}
-                                            </TableCell>
-                                            <TableCell>
-                                                Term:
-                                            </TableCell>
-                                            <TableCell>
-                                                1st Term
-                                            </TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                </Table>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: "1rem", width: "100%", justifyContent: "end", padding: "0rem 1.5rem", marginTop: "1rem" }}>
-                                    <Button
-                                        variant="contained"
-                                        sx={{ background: mainButtonColor }}
-                                        onClick={() => {
-                                            const termData = groupedGrades[yearLevel][semester][0];
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "flex-end",
+                                    alignItems: "center",
+                                    gap: 1,
+                                    pb: 0,
+                                    pr: 1,
+                                }}
+                            >
+                                <Button
+                                    size="small"
+                                    variant="contained"
+                                    sx={{
+                                        border: "1px solid white",
+                                        background: mainButtonColor,
+                                    }}
+                                    onClick={() => {
+                                        // Fix: Corrected access to termData properties
+                                        setSelectedTermContext({
+                                            active_school_year_id: termData[0].active_school_year_id,
+                                        });
+                                        fetchCourses();
+                                        setOpenAddSubjectDialog(true);
+                                    }}
+                                >
+                                    ADD SUBJECTS
+                                </Button>
+                                <Button
+                                    size="small"
+                                    variant="contained"
+                                    sx={{
+                                        border: "1px solid white",
+                                        background: mainButtonColor,
+                                    }}
+                                    onClick={(e) =>
+                                        handleOpenYearLevelMenu(
+                                            e,
+                                            yearLevel,
+                                            semester,
+                                            schoolYearId
+                                        )
+                                    }
+                                >
+                                    Change Year Level
+                                </Button>
+                                <Button
+                                    size="small"
+                                    variant="contained"
+                                    sx={{
+                                        border: "1px solid white",
+                                        background: mainButtonColor,
+                                    }}
+                                    onClick={() =>
+                                        handleEditSubject(yearLevel, semester, schoolYearId)
+                                    }
+                                >
+                                    Save Changes
+                                </Button>
+                            </Box>
+                        </Box>
 
-                                            setSelectedTermContext({
-                                                active_school_year_id: termData.active_school_year_id
-                                            });
-
-                                            fetchCourses();
-                                            setOpenAddSubjectDialog(true);
-                                        }}
-                                    >
-                                        ADD SUBJECTS
-                                    </Button>
-                                    <Button
-                                        variant="contained"
-                                        sx={{ background: mainButtonColor }}
-                                        onClick={() => handleEditSubject(yearLevel, semester)}
-                                    >
-                                        SAVE CHANGES
-                                    </Button>
-                                </Box>
-                            </TableContainer>
-                            <Table>
+                        {/* Compact Subject Table */}
+                        <TableContainer>
+                            <Table size="small" sx={{ minWidth: 800 }}>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell sx={{ borderTop: `solid 1px ${borderColor}`, borderBottom: `solid 1px ${borderColor}`, width: "2%" }}>#</TableCell>
-                                        <TableCell sx={{ border: `solid 1px ${borderColor}`, width: "8%" }}>Course Code</TableCell>
-                                        {/* <TableCell sx={{border: `solid 1px ${borderColor}`, width: "11%", textAlign: "center"}}>Equiv. Course Code</TableCell> */}
-                                        <TableCell sx={{ border: `solid 1px ${borderColor}`, width: "9%", textAlign: "center" }}>Professor</TableCell>
-                                        <TableCell sx={{ border: `solid 1px ${borderColor}`, width: "40%" }}>Course Description</TableCell>
-                                        <TableCell sx={{ border: `solid 1px ${borderColor}`, width: "2%" }}>Units</TableCell>
-                                        <TableCell sx={{ border: `solid 1px ${borderColor}`, width: "5%", textAlign: "center" }}>Section Code</TableCell>
-                                        <TableCell sx={{ border: `solid 1px ${borderColor}`, width: "6%", textAlign: "center" }}>Final Grade</TableCell>
-                                        <TableCell sx={{ border: `solid 1px ${borderColor}`, width: "3%", textAlign: "center" }}>Re-Exam</TableCell>
-                                        <TableCell sx={{ border: `solid 1px ${borderColor}`, width: "5%", textAlign: "center" }}>Grade Status</TableCell>
-                                        <TableCell sx={{ border: `solid 1px ${borderColor}`, width: "5%", textAlign: "center" }}>Faculty Status</TableCell>
-                                        <TableCell sx={{ border: `solid 1px ${borderColor}`, width: "5%", textAlign: "center" }}>Remarks</TableCell>
-                                        <TableCell sx={{ border: `solid 1px ${borderColor}`, borderRight: "none", width: "5%", textAlign: "center" }}>
+                                        <TableCell
+                                            sx={{
+                                                width: "3%",
+                                                py: 1,
+                                                px: 1,
+                                                border: `1px solid ${borderColor}`,
+                                                textAlign: "center",
+                                                backgroundColor: "#eee",
+                                            }}
+                                        >
+                                            #
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{
+                                                width: "10%",
+                                                py: 1,
+                                                px: 1,
+                                                border: `1px solid ${borderColor}`,
+                                                backgroundColor: "#eee",
+                                            }}
+                                        >
+                                            Course Code
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{
+                                                width: "10%",
+                                                py: 1,
+                                                px: 1,
+                                                border: `1px solid ${borderColor}`,
+                                                backgroundColor: "#eee",
+                                                textAlign: "center",
+                                            }}
+                                        >
+                                            Professor
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{
+                                                width: "35%",
+                                                py: 1,
+                                                px: 1,
+                                                border: `1px solid ${borderColor}`,
+                                                backgroundColor: "#eee",
+                                            }}
+                                        >
+                                            Course Description
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{
+                                                width: "5%",
+                                                py: 1,
+                                                px: 1,
+                                                border: `1px solid ${borderColor}`,
+                                                backgroundColor: "#eee",
+                                                textAlign: "center",
+                                            }}
+                                        >
+                                            Units
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{
+                                                width: "8%",
+                                                py: 1,
+                                                px: 1,
+                                                border: `1px solid ${borderColor}`,
+                                                backgroundColor: "#eee",
+                                                textAlign: "center",
+                                            }}
+                                        >
+                                            Section
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{
+                                                width: "8%",
+                                                py: 1,
+                                                px: 1,
+                                                border: `1px solid ${borderColor}`,
+                                                backgroundColor: "#eee",
+                                                textAlign: "center",
+                                            }}
+                                        >
+                                            Midterm
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{
+                                                width: "8%",
+                                                py: 1,
+                                                px: 1,
+                                                border: `1px solid ${borderColor}`,
+                                                backgroundColor: "#eee",
+                                                textAlign: "center",
+                                            }}
+                                        >
+                                            Finals
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{
+                                                width: "8%",
+                                                py: 1,
+                                                px: 1,
+                                                border: `1px solid ${borderColor}`,
+                                                backgroundColor: "#eee",
+                                                textAlign: "center",
+                                            }}
+                                        >
+                                            Final Grade
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{
+                                                width: "5%",
+                                                py: 1,
+                                                px: 1,
+                                                border: `1px solid ${borderColor}`,
+                                                backgroundColor: "#eee",
+                                                textAlign: "center",
+                                            }}
+                                        >
+                                            Re-Exam
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{
+                                                width: "8%",
+                                                py: 1,
+                                                px: 1,
+                                                border: `1px solid ${borderColor}`,
+                                                backgroundColor: "#eee",
+                                                textAlign: "center",
+                                            }}
+                                        >
+                                            Status
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{
+                                                width: "8%",
+                                                py: 1,
+                                                px: 1,
+                                                border: `1px solid ${borderColor}`,
+                                                backgroundColor: "#eee",
+                                                textAlign: "center",
+                                            }}
+                                        >
+                                            Remarks
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{
+                                                width: "5%",
+                                                py: 1,
+                                                px: 1,
+                                                border: `1px solid ${borderColor}`,
+                                                borderRight: "none",
+                                                backgroundColor: "#eee",
+                                                textAlign: "center",
+                                            }}
+                                        >
                                             Action
                                         </TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {[...groupedGrades[yearLevel][semester]].sort((a, b) => { return a.id - b.id; }).map((course, index) => (
-                                        <TableRow key={course.course_id}>
-                                            <TableCell>{index + 1}</TableCell>
-                                            <TableCell>{course.course_code}</TableCell>
-                                            {/* <TableCell sx={{width: "11%", textAlign: "center"}}>{course.course_code}</TableCell> */}
-                                            <TableCell></TableCell>
-                                            <TableCell>{course.course_description}</TableCell>
-                                            <TableCell sx={{ width: "2%", textAlign: "center" }}>{course.course_unit || 0}</TableCell>
-                                            <TableCell></TableCell>
-                                            <TableCell>
-                                                <TextField
-                                                    value={course.final_grade ?? ""}
-                                                    onChange={(e) => handleFinalGradeChange(course.id, e.target.value)}
-                                                />
-                                            </TableCell>
-                                            <TableCell></TableCell>
-                                            <TableCell>
-                                                {course.en_remarks === 1
-                                                    ? "PASSED"
-                                                    : course.en_remarks === 2
-                                                        ? "FAILED"
-                                                        : course.en_remarks === 3
-                                                            ? "INC"
-                                                            : course.en_remarks === 4
-                                                                ? "DROP"
-                                                                : course.en_remarks === 0
-                                                                    ? "ONGOING"
-                                                                    : "-"}
-                                            </TableCell>
-                                            <TableCell></TableCell>
-                                            <TableCell>{course.remarks?.toUpperCase()}</TableCell>
-                                            <TableCell>
-                                                <Button
-                                                    color="error"
-                                                    size="small"
-                                                    variant='contained'
-                                                    sx={{ background: mainButtonColor }}
-                                                    onClick={() => confirmDelete(course.id)}
+                                    {[...termData]
+                                        .sort((a, b) => a.id - b.id)
+                                        .map((course, index) => (
+                                            <TableRow key={course.course_id} hover>
+                                                <TableCell
+                                                    sx={{
+                                                        py: 0.5,
+                                                        px: 1,
+                                                        border: `1px solid ${borderColor}`,
+                                                        textAlign: "center",
+                                                    }}
                                                 >
-                                                    DELETE
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
+                                                    {index + 1}
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        py: 0.5,
+                                                        px: 1,
+                                                        border: `1px solid ${borderColor}`,
+                                                    }}
+                                                >
+                                                    {course.course_code}
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        py: 0.5,
+                                                        px: 1,
+                                                        border: `1px solid ${borderColor}`,
+                                                        textAlign: "center",
+                                                    }}
+                                                ></TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        py: 0.5,
+                                                        px: 1,
+                                                        border: `1px solid ${borderColor}`,
+                                                    }}
+                                                >
+                                                    {course.course_description}
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        py: 0.5,
+                                                        px: 1,
+                                                        border: `1px solid ${borderColor}`,
+                                                        textAlign: "center",
+                                                    }}
+                                                >
+                                                    {course.course_unit || 0}
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        py: 0.5,
+                                                        px: 1,
+                                                        border: `1px solid ${borderColor}`,
+                                                        textAlign: "center",
+                                                    }}
+                                                ></TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        py: 0.5,
+                                                        px: 0.5,
+                                                        border: `1px solid ${borderColor}`,
+                                                    }}
+                                                >
+                                                    <GradeSelect
+                                                        value={course.midterm ?? ""}
+                                                        onChange={(value) =>
+                                                            handleGradeChange(course.id, "midterm", value)
+                                                        }
+                                                        placeholder="Enter grade"
+                                                    />
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        py: 0.5,
+                                                        px: 0.5,
+                                                        border: `1px solid ${borderColor}`,
+                                                    }}
+                                                >
+                                                    <GradeSelect
+                                                        value={course.finals ?? ""}
+                                                        onChange={(value) =>
+                                                            handleGradeChange(course.id, "finals", value)
+                                                        }
+                                                        placeholder="Enter grade"
+                                                    />
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        py: 0.5,
+                                                        px: 0.5,
+                                                        border: `1px solid ${borderColor}`,
+                                                    }}
+                                                >
+                                                    <input
+                                                        type="text"
+                                                        value={convertRawToRating(course.final_grade)}
+                                                        readOnly
+                                                        style={{
+                                                            border: "none",
+                                                            textAlign: "center",
+                                                            background: "none",
+                                                            outline: "none",
+                                                            width: "100%",
+                                                            fontWeight: "bold",
+                                                        }}
+                                                    />
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        py: 0.5,
+                                                        px: 1,
+                                                        border: `1px solid ${borderColor}`,
+                                                        textAlign: "center",
+                                                    }}
+                                                ></TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        py: 0.5,
+                                                        px: 1,
+                                                        border: `1px solid ${borderColor}`,
+                                                        textAlign: "center",
+                                                        fontSize: "12px",
+                                                    }}
+                                                >
+                                                    {remarkConversion(course.en_remarks)}
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        py: 0.5,
+                                                        px: 1,
+                                                        border: `1px solid ${borderColor}`,
+                                                        textAlign: "center",
+                                                        fontSize: "12px",
+                                                    }}
+                                                >
+                                                    {course.remarks?.toUpperCase()}
+                                                </TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        py: 0.5,
+                                                        px: 1,
+                                                        border: `1px solid ${borderColor}`,
+                                                        borderRight: "none",
+                                                        textAlign: "center",
+                                                    }}
+                                                >
+                                                    <Button
+                                                        color="error"
+                                                        size="small"
+                                                        variant="contained"
+                                                        sx={{
+                                                            background: mainButtonColor,
+                                                            minWidth: "auto",
+                                                            px: 1,
+                                                            py: 0.25,
+                                                            fontSize: "11px",
+                                                        }}
+                                                        onClick={() => confirmDelete(course.id)}
+                                                    >
+                                                        DELETE
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
                                     <TableRow>
-                                        <TableCell colSpan={4} sx={{ textAlign: "right", fontWeight: "700" }}>
+                                        <TableCell
+                                            colSpan={4}
+                                            sx={{
+                                                py: 0.5,
+                                                px: 1,
+                                                border: `1px solid ${borderColor}`,
+                                                textAlign: "right",
+                                                fontWeight: "700",
+                                                backgroundColor: "#fafafa",
+                                            }}
+                                        >
                                             TOTAL UNITS:
                                         </TableCell>
-                                        <TableCell sx={{ textAlign: "center", fontWeight: "700" }}>
-                                            {groupedGrades[yearLevel][semester].reduce(
-                                                (sum, course) => sum + (Number(course.course_unit) || 0),
+                                        <TableCell
+                                            sx={{
+                                                py: 0.5,
+                                                px: 1,
+                                                border: `1px solid ${borderColor}`,
+                                                textAlign: "center",
+                                                fontWeight: "700",
+                                                backgroundColor: "#fafafa",
+                                            }}
+                                        >
+                                            {termData.reduce(
+                                                (sum, course) =>
+                                                    sum + (Number(course.course_unit) || 0),
                                                 0
                                             )}
                                         </TableCell>
-                                        <TableCell colSpan={2}></TableCell>
+                                        <TableCell
+                                            colSpan={7}
+                                            sx={{ border: `1px solid ${borderColor}` }}
+                                        ></TableCell>
                                     </TableRow>
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                    ))}
-                </Box>
-            ))}
+                    </Paper>
+                )
+            )}
 
+            {/* Year Level Dropdown Menu */}
+            <Menu
+                anchorEl={yearLevelAnchorEl}
+                open={Boolean(yearLevelAnchorEl)}
+                onClose={handleCloseYearLevelMenu}
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                }}
+                transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                }}
+                sx={{ mt: 0.5 }}
+            >
+                {yearLevel.map((option) => (
+                    <MenuItem
+                        key={option.year_level_id}
+                        onClick={() => handleSelectYearLevel(option.year_level_id)}
+                    >
+                        {option.year_level_description}
+                    </MenuItem>
+                ))}
+            </Menu>
+
+            {/* View Options Dropdown Menu */}
+            <Menu
+                anchorEl={viewMenuAnchorEl}
+                open={Boolean(viewMenuAnchorEl)}
+                onClose={handleCloseViewMenu}
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                }}
+                transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                }}
+                PaperProps={{
+                    style: {
+                        maxHeight: 400,
+                        width: "320px",
+                        marginTop: "8px",
+                    },
+                }}
+            >
+                {viewOptions.map((option) => (
+                    <MenuItem
+                        key={option}
+                        onClick={() => handleSelectViewOption(option)}
+                        sx={{ fontSize: "14px", py: 1.5 }}
+                    >
+                        {option}
+                    </MenuItem>
+                ))}
+            </Menu>
+
+            {/* Add Subject Dialog */}
             <Dialog
                 open={openAddSubjectDialog}
                 onClose={() => setOpenAddSubjectDialog(false)}
@@ -847,40 +1516,37 @@ const StudentGradeFile = () => {
                 maxWidth="sm"
             >
                 <DialogTitle>Add Subject</DialogTitle>
-
                 <DialogContent>
                     <DialogContentText sx={{ mb: 2 }}>
                         Select a subject to add for this student.
                     </DialogContentText>
-
-                    <TextField
-                        select
-                        fullWidth
-                        label="Course"
-                        value={selectedCourse}
-                        onChange={(e) => setSelectedCourse(e.target.value)}
-                        disabled={loadingCourses}
-                    >
-                        {courseList.map((course) => (
-                            <MenuItem key={course.course_id} value={course.course_id}>
-                                {course.course_code} - {course.course_description}
-                            </MenuItem>
-                        ))}
-                    </TextField>
+                    <FormControl fullWidth>
+                        <InputLabel>Course</InputLabel>
+                        <Select
+                            value={selectedCourse}
+                            label="Course"
+                            onChange={(e) => setSelectedCourse(e.target.value)}
+                            disabled={loadingCourses}
+                        >
+                            {courseList.map((course) => (
+                                <MenuItem key={course.course_id} value={course.course_id}>
+                                    {course.course_code} - {course.course_description}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                 </DialogContent>
-
                 <DialogActions>
                     <Button
-                        variant="contained"
                         color="error"
-
-
-                        onClick={() => setOpenAddSubjectDialog(false)}>
+                        variant="outlined"
+                        onClick={() => setOpenAddSubjectDialog(false)}
+                    >
                         Cancel
                     </Button>
                     <Button
                         variant="contained"
-                        disabled={!selectedCourse}
+                        disabled={!selectedCourse || loadingCourses}
                         onClick={handleAddSubject}
                     >
                         Add
@@ -888,6 +1554,7 @@ const StudentGradeFile = () => {
                 </DialogActions>
             </Dialog>
 
+            {/* Delete Subject Dialog */}
             <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
                 <DialogTitle>Delete Subject</DialogTitle>
                 <DialogContent>
@@ -896,237 +1563,24 @@ const StudentGradeFile = () => {
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained"
-                        color="error"
-
-                        onClick={() => setOpenDialog(false)}>Cancel</Button>
+                    <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
                     <Button color="error" onClick={handleDelete}>
                         Delete
                     </Button>
                 </DialogActions>
             </Dialog>
 
-            <Dialog
-                open={openViewDialog}
-                onClose={handleCloseView}
-                fullWidth
-                maxWidth="md"
-            >
-                <DialogTitle>
-                    Student File
-                </DialogTitle>
-
-                <DialogContent>
-                    <Box
-                        sx={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(3, 1fr)",
-                            gap: 2,
-                            mt: 1,
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                border: `1px solid ${borderColor}`,
-                                borderRadius: 2,
-                                padding: 2,
-                            }}
-                        >
-                            HISTORY LOGS
-                        </Box>
-
-                        <Box
-                            sx={{
-                                border: `1px solid ${borderColor}`,
-                                borderRadius: 2,
-                                padding: 2,
-                            }}
-                        >
-                            EVALUATION
-                        </Box>
-
-                        <Box
-                            sx={{
-                                border: `1px solid ${borderColor}`,
-                                borderRadius: 2,
-                                padding: 2,
-                            }}
-                        >
-                            TRANSCRIPT OF RECORDS
-                        </Box>
-                    </Box>
-                    <Box
-                        sx={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(3, 1fr)",
-                            gap: 2,
-                            mt: 2,
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                border: `1px solid ${borderColor}`,
-                                borderRadius: 2,
-                                padding: 2,
-                            }}
-                        >
-                            PERMANENT RECORD
-                        </Box>
-
-                        <Box
-                            sx={{
-                                border: `1px solid ${borderColor}`,
-                                borderRadius: 2,
-                                padding: 2,
-                            }}
-                        >
-                            HONORABLE DISMISSAL
-                        </Box>
-
-                        <Box
-                            sx={{
-                                border: `1px solid ${borderColor}`,
-                                borderRadius: 2,
-                                padding: 2,
-                            }}
-                        >
-                            COPY OF GRADES
-                        </Box>
-                    </Box>
-                    <Box
-                        sx={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(3, 1fr)",
-                            gap: 2,
-                            mt: 2,
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                border: `1px solid ${borderColor}`,
-                                borderRadius: 2,
-                                padding: 2,
-                            }}
-                        >
-                            REPORT OF GRADES
-                        </Box>
-
-                        <Box
-                            sx={{
-                                border: `1px solid ${borderColor}`,
-                                borderRadius: 2,
-                                padding: 2,
-                            }}
-                        >
-                            GOOD MORAL
-                        </Box>
-
-                        <Box
-                            sx={{
-                                border: `1px solid ${borderColor}`,
-                                borderRadius: 2,
-                                padding: 2,
-                            }}
-                        >
-                            CERTIFICATE OF HONORS
-                        </Box>
-                    </Box>
-                    <Box
-                        sx={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(3, 1fr)",
-                            gap: 2,
-                            mt: 2,
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                border: `1px solid ${borderColor}`,
-                                borderRadius: 2,
-                                padding: 2,
-                            }}
-                        >
-                            CERTIFICATE OF GWA
-                        </Box>
-
-                        <Box
-                            sx={{
-                                border: `1px solid ${borderColor}`,
-                                borderRadius: 2,
-                                padding: 2,
-                            }}
-                        >
-                            CERTIFICATE OF HONORS AND GWA
-                        </Box>
-
-                        <Box
-                            sx={{
-                                border: `1px solid ${borderColor}`,
-                                borderRadius: 2,
-                                padding: 2,
-                            }}
-                        >
-                            APPLICATION FOR EVALUATION
-                        </Box>
-                    </Box>
-                    <Box
-                        sx={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(3, 1fr)",
-                            gap: 2,
-                            mt: 2,
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                border: `1px solid ${borderColor}`,
-                                borderRadius: 2,
-                                padding: 2,
-                            }}
-                        >
-                            APPLICATION FOR GRADUATION
-                        </Box>
-
-                        <Box
-                            sx={{
-                                border: `1px solid ${borderColor}`,
-                                borderRadius: 2,
-                                padding: 2,
-                            }}
-                        >
-                            RESULT OF EVALUATION
-                        </Box>
-
-                        <Box
-                            sx={{
-                                border: `1px solid ${borderColor}`,
-                                borderRadius: 2,
-                                padding: 2,
-                            }}
-                        >
-                            CERTIFICATE OF COMPLETE ACADEMIC REPORTS
-                        </Box>
-                    </Box>
-                </DialogContent>
-
-                <DialogActions>
-                    <Button onClick={handleCloseView}>
-                        Close
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-
+            {/* Snackbar */}
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={3000}
-                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
                 onClose={() => setSnackbar({ ...snackbar, open: false })}
             >
                 <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
             </Snackbar>
         </Box>
-    )
-}
+    );
+};
 
 export default StudentGradeFile;

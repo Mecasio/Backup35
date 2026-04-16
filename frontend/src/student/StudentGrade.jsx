@@ -50,6 +50,8 @@ const RemarkBadge = ({ value }) => {
     }}>
       {style.label}
     </span>
+
+
   );
 };
 
@@ -84,20 +86,22 @@ const computeGWA = (subjects) => {
     .map((row) => {
       const grade = parseFloat(row.final_grade);
       if (isNaN(grade)) return null;
+
       const units =
-        row.course_unit === 0 && row.lab_unit === 0 ? 0
-          : row.course_unit === 0 ? row.lab_unit
-            : row.lab_unit === 0 ? row.course_unit
-              : row.course_unit + row.lab_unit;
+        (parseFloat(row.lec_unit) || 0) +
+        (parseFloat(row.lab_unit) || 0);
+
       return { CG: grade * units, units };
     })
     .filter((item) => item && item.units > 0);
 
   const totalUnits = items.reduce((s, i) => s + i.units, 0);
   const totalCG = items.reduce((s, i) => s + i.CG, 0);
-  return totalUnits > 0 ? (totalCG / totalUnits).toFixed(2) : null;
-};
 
+  return totalUnits > 0
+    ? parseFloat((totalCG / totalUnits).toFixed(2))
+    : null;
+};
 // ─── Term Sorting ─────────────────────────────────────────────────
 // Order within a year: First Semester → Second Semester → Summer / Midyear
 const getSemesterOrder = (semDesc = "") => {
@@ -409,7 +413,7 @@ const StudentGradingPage = () => {
         sx={{
           borderRadius: "12px",
           mt: 2,
-         
+
           justifyContent: "center",
           alignItems: "center",
           textAlign: "center",
@@ -551,6 +555,29 @@ const StudentGradingPage = () => {
                               {programInfo.last_name}, {programInfo.first_name} {programInfo.middle_name}
                             </Box>
                           </Typography>
+                          {/* GWA BELOW NAME */}
+                          {gwa && (
+                            <Typography
+                              sx={{
+                                fontSize: 14,
+                                fontWeight: 700,
+                                color: titleColor,
+                              
+                              }}
+                            >
+                              GWA:
+                              <Box
+                                component="span"
+                                sx={{
+                                  fontWeight: "normal",
+                                  marginLeft: "15px",
+                                  color: headerBg,
+                                }}
+                              >
+                                {convertNumericToGrade(gwa)}
+                              </Box>
+                            </Typography>
+                          )}
 
 
                         </Box>
@@ -575,6 +602,7 @@ const StudentGradingPage = () => {
 
 
 
+
                         {/* YEAR / SEM */}
                         <Typography
                           sx={{
@@ -595,43 +623,7 @@ const StudentGradingPage = () => {
                 </Box>
 
                 {/* GWA BADGE */}
-                {gwa && (
-                  <Box
-                    sx={{
-                      ml: 2,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      px: "12px",
-                      py: "6px",
-                      borderRadius: "8px",
-                      border: `1px solid ${borderColor}`,
-                      backgroundColor: "#fafafa",
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        fontSize: 10,
-                        fontWeight: 600,
-                        color: subtitleColor,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.08em",
-                      }}
-                    >
-                      GWA
-                    </Typography>
 
-                    <Typography
-                      sx={{
-                        fontSize: 16,
-                        fontWeight: 700,
-                        color: titleColor,
-                      }}
-                    >
-                      {gwa}
-                    </Typography>
-                  </Box>
-                )}
               </Box>
 
               {/* ── Table ── */}
