@@ -1,5 +1,10 @@
+const express = require("express");
+const { db } = require("../database/database");
+
+const router = express.Router();
+
 // ================= GET =================
-app.get("/api/signature/:fullName", async (req, res) => {
+router.get("/api/signature/:fullName", async (req, res) => {
   try {
     const { fullName } = req.params;
 
@@ -23,7 +28,7 @@ app.get("/api/signature/:fullName", async (req, res) => {
 });
 
 // GET LATEST SIGNATURE
-app.get("/api/signature-latest", async (req, res) => {
+router.get("/api/signature-latest", async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT full_name, signature_image
@@ -42,3 +47,5 @@ app.get("/api/signature-latest", async (req, res) => {
     res.status(500).json({ success: false });
   }
 });
+
+module.exports = router;

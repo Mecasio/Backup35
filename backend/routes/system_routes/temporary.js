@@ -1,4 +1,4 @@
-
+// Temporary Storage of Bakcned Code
 app.get("/api/registrars", async (req, res) => {
   try {
     const sql = `
